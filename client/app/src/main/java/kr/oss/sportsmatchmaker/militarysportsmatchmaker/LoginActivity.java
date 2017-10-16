@@ -46,6 +46,11 @@ public class LoginActivity extends AppCompatActivity {
     private static final int REQUEST_READ_CONTACTS = 0;
 
     /**
+     * ID to identify SIGNUP activity result
+     */
+    private static final int SIGN_UP = 1;
+
+    /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
      */
@@ -94,6 +99,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
+                //TODO: Change to startActivityForResult
                 startActivity(intent);
             }
         });
