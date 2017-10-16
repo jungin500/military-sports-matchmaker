@@ -12,11 +12,33 @@
 
 var http = require('http'),
     express = require('express'),
+    bodyParser = require('body-parser'),
+    session = require('session'),
     expressErrorHandler = require('express-error-handler'),
     //static = require('serve-static'),
     //path = require('path'),
     
     mongoose = require('mongoose');
+
+// MongoOSE 이용 DB 초기화
+var database;
+
+var Schema = {
+    user: null,
+    matching: null
+};
+
+var Model = {
+    user: null,
+    matching: null
+};
+
+function connectDB() {
+    var userDBUrl = 'mongodb://localhost:27017/users';
+    var matchingDBUrl = 'mongodb://localhost:27017/matching';
+
+    var matching
+}
 
 // express 이용 HTTP 서버 설정
 var app = express();
@@ -29,8 +51,27 @@ http.createServer(app).listen(app.get('port'), function() {
 // express Router 이용 Request routing
 var router = express.Router();
 
-router.route('/').post(function(req, res) {
-    
+// 사용자 추가 (회원가입)
+router.route('/process/registerUser').post(function(req, res) {
+    var userInfo = {
+        username: req.body.username,
+        password: req.body.password,
+        budae: req.body.budae,
+        milId: req.body.milId,
+        favoriteEvent : req.body.favoriteEvent,
+        description: req.body.description
+    };
+
+    // 정보 중 하나라도 빠졌을 시 오류
+    for(var key in userInfo)
+        if(!userInfo[key]) {
+            res.writeHead(200, {'Content-Type':'text/html;charset=utf8'});
+            res.end('정보가 잘못되었습니다. 모든 정보를 입력해주세요.');
+            return;
+        }
+
+    // 가져온 정보를 MongoOSE 이용하여 DB에 저장
+
 });
 
 
