@@ -44,8 +44,8 @@
 			프로필로 받을 것:
 			군번 = 아이디
 			비밀번호
+			이름/계급/성별
 			소속 (매칭용이므로 매우 중요)
-			휴대전화 번호 (선택-문자알림?)
 			매치 가능 부대
 			자기소개
 		- 메인 화면
@@ -75,6 +75,45 @@
 		- SharedPreference 활용
 		https://www.androidhive.info/2012/08/android-session-management-using-shared-preferences/
 		여기서 다 해준다!
+
+- 클라이언트-서버 소통 프로토콜
+	1. 로그인
+	클라이언트 request:
+		/login으로 POST를 보낸다. 폼은 id, pw.
+	서버 response:
+		성공했으면 성공, 실패했으면 실패.
+	2. 회원가입
+	클라이언트 request:
+		/signup으로 POST를 보낸다.
+		폼:
+		id 군번
+		pw 비번
+		name 이름
+		rank 계급
+		gender 성별
+		unit 소속부대 (중대까지)
+	서버 response:
+		회원가입 성공시 성공, 실패시 실패.
+	2-1. 회원가입 중복체크
+	클라이언트 request:
+		/signup/idexists 로 POST를 보낸다. 폼은 id.
+	서버 response: boolean
+	3. 큐 신청
+	클라이언트 request: POST
+		폼:
+		id 군번
+		sport 종목
+		number 사람 숫자
+		position 희망 포지션 (??)
+		부가기능: 군번 여러개 한번에 받아서 프로필 띄워주기.
+	4. 자리 있는지 / queue 잡혔는지 확인
+	클라이언트 request: GET
+		폼:
+		id 군번
+		sport 종목
+	서버 response:
+	
+
 
 
 - 부가기능
