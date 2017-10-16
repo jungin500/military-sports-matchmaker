@@ -25,7 +25,7 @@ server/.nyc_output
 server/.grunt
 
 # Bower dependency directory (https://bower.io/)
-server/bower_components
+server/public/bower_components
 
 # node-waf configuration
 server/.lock-wscript
