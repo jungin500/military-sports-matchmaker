@@ -1,0 +1,4 @@
+잡지식
+
+Q. 액티비티 제목은 어디서 수정할 수 있을까?
+A. AndroidManifest.xml에서 activity에 android:label 옵션을 추가하면 된다.
