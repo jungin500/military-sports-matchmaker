@@ -15,8 +15,8 @@ var http = require('http'),
     session = require('express-session'),
     expressErrorHandler = require('express-error-handler'),
     bodyParser = require('body-parser'),
-    //static = require('serve-static'),
-    //path = require('path'),
+    static = require('serve-static'),
+    path = require('path'),
     
     crypto = require('crypto'),
     mongoose = require('mongoose');
@@ -132,12 +132,6 @@ function createUser(userInfo, callback) {
     });
 }
 
-// HTTP 서버 구동
-http.createServer(app).listen(app.get('port'), function() {
-    connectDB();
-    console.log('[정보] 서버 시작됨. %d에서 listen 중', app.get('port'));
-});
-
 // express Router 이용 Request routing
 var router = express.Router();
 
@@ -200,6 +194,8 @@ router.route('/process/heartbeat').get(function(req, res) {
     res.end('Success');
 });
 
+// Express에 각 미들웨어 적용 및 서버 시작
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -211,9 +207,17 @@ app.use(session({
     saveUninitialized: true
 }));
 
+app.use(static(path.join(__dirname, 'public')));
+
 app.use(expressErrorHandler.httpError(404));
 app.use(expressErrorHandler({
     static: {
         '404': './include/404.html'
     }
 }));
+
+// HTTP 서버 구동
+http.createServer(app).listen(app.get('port'), function() {
+    connectDB();
+    console.log('[정보] 서버 시작됨. %d에서 listen 중', app.get('port'));
+});
