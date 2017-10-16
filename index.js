@@ -1,3 +1,9 @@
+/**
+ * 전투체육 매칭 Backend
+ * 
+ * @author 
+ */
+
 var http = require('http'),
     express = require('express'),
     expressErrorHandler = require('express-error-handler'),
@@ -8,4 +14,3 @@ var http = require('http'),
 
 var app = express();
 app.set('port', process.env.PORT || 14402);
-
