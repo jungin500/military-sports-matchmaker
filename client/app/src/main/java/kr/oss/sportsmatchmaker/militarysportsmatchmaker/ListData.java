@@ -8,9 +8,9 @@ import android.widget.Button;
 public class ListData {
     private String face;
     private String name;
-    private Button button;
+    private String button;
 
-    public ListData(String face, String name, String textview) {
+    public ListData(String face, String name, String button) {
         this.face = face;
         this.name = name;
         this.button = button;
@@ -24,7 +24,7 @@ public class ListData {
         return name;
     }
 
-    public Button getButton() {
+    public String getButton() {
         return button;
     }
 }

@@ -8,12 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-<<<<<<< HEAD
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
-=======
 import android.widget.*;
 
 import com.loopj.android.http.AsyncHttpClient;
@@ -23,7 +17,6 @@ import com.loopj.android.http.RequestParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
->>>>>>> 59b5d425ff663d10ca5091f9bf0f1170838c2f62
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
@@ -52,60 +45,33 @@ public class MatchSettingActivity extends AppCompatActivity {
         final int playernum = intent.getIntExtra(ChooseSportActivity.EXTRA_PNUM, 0);
         final String gameType = intent.getStringExtra(ChooseSportActivity.EXTRA_SPORTTYPE);
         String[] name = null;
-
-<<<<<<< HEAD
-        for(int i =1;i<=playernum;i++){
+        listDataArray = new ArrayList<ListData>();
+        for (int i = 1; i <= playernum; i++) {
             ListData data = new ListData("01.jpg", "선수 추가", "");
-=======
-        // initialize
-        listDataArray =  new ArrayList<ListData>();
-        for(int i =0;i<playernum;i++){
-            ListData data = new ListData("0"+i+".jpg", i+"name", i+"textview");
->>>>>>> 59b5d425ff663d10ca5091f9bf0f1170838c2f62
             listDataArray.add(data);
         }
 
         ListView listview = (ListView) findViewById(R.id.listview1);
         CustomAdapter customAdapter = new CustomAdapter(this, R.layout.list_btn_sty, listDataArray);
         listview.setAdapter(customAdapter);
-<<<<<<< HEAD
-=======
 
         final EditText playerNumber = (EditText) findViewById(R.id.playerNumber);
         CheckBox sameTeam = (CheckBox) findViewById(R.id.sameTeam);
         Button enterQueue = (Button) findViewById(R.id.enterQueue);
 
 
-        enterQueue.setOnClickListener (new View.OnClickListener() {
+        enterQueue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int pNum = Integer.parseInt(playerNumber.getText().toString());
                 if (pNum > playernum) {
                     Toast.makeText(getApplicationContext(), "사람 숫자가 너무 많습니다.", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     joinQueue(smgr.getProfile().get(SessionManager.ID), gameType, pNum);
                 }
 
             }
         });
-
->>>>>>> 59b5d425ff663d10ca5091f9bf0f1170838c2f62
-    }
-}
-
-/*
-    public String[] setnum(String[] player ,int num){
-        player = new String[num];
-
-        for(int i=0;i<num;i++){
-            player[i] = "선수추가"+i;
-        }
-
-        return player;
-<<<<<<< HEAD
-    }*/
-=======
     }
 
     // player with ID id joins the queue for game gameType, with player numbers pNum.
@@ -144,4 +110,3 @@ public class MatchSettingActivity extends AppCompatActivity {
         });
     }
 }
->>>>>>> 59b5d425ff663d10ca5091f9bf0f1170838c2f62

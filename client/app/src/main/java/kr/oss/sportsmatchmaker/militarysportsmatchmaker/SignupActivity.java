@@ -117,7 +117,7 @@ public class SignupActivity extends AppCompatActivity {
                 String name = nameView.getText().toString();
                 String unit = unitView.getText().toString();
                 String fav = favView.getText().toString();
-                String desc = descView.getText().toString():
+                String desc = descView.getText().toString();
                 String rank = rankView.getSelectedItem().toString();
                 int rankid = ranks.size() - ranks.indexOf(rank) - 2; // 선택.
                 String sex = sexView.getSelectedItem().toString();
