@@ -23,7 +23,7 @@ var http = require('http'),
 
 // express 이용 HTTP 서버 설정
 var app = express();
-app.set('port', process.env.PORT || 14403);
+app.set('port', process.env.PORT || 14402);
 app.set('mongoose-reconnect-max', 5);
 
 // express Router 이용 Request routing
@@ -134,8 +134,8 @@ router.route('/process/getMatchList').get(function (req, res) {
     });
 });
 
-router.route('/process/getUserMatch').get(function(req, res) {
-    if(!req.session.userInfo) {
+router.route('/process/getUserMatch').get(function (req, res) {
+    if (!req.session.userInfo) {
         res.json({
             result: false,
             reason: 'NotLoggedInException'
@@ -144,7 +144,7 @@ router.route('/process/getUserMatch').get(function(req, res) {
         return;
     }
 
-    DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function(result) {
+    DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
         res.json(result);
         res.end();
     });
@@ -173,7 +173,7 @@ router.route('/process/requestMatch').post(function (req, res) {
 });
 
 router.route('/process/deleteMatch').post(function (req, res) {
-    if(!req.session.userInfo) {
+    if (!req.session.userInfo) {
         res.json({
             result: false,
             reason: 'NotLoggedInException'
@@ -184,10 +184,30 @@ router.route('/process/deleteMatch').post(function (req, res) {
 
     var initiatorId = req.session.userInfo.id;
     var matchId = req.body.matchId;
-    DatabaseManager.Model.matching.deleteMatch(initiatorId, matchId, function(result) {
+    DatabaseManager.Model.matching.deleteMatch(initiatorId, matchId, function (result) {
         res.json(result);
         res.end();
     });
+});
+
+router.route('/process/getStadiumList').post(function (req, res) {
+    if (!req.session.userInfo) {
+        res.json({
+            result: false,
+            reason: 'NotLoggedInException'
+        });
+        res.end();
+        return;
+    }
+
+    DatabaseManager.Model.user.findId(req.session.userInfo, function (result) {
+        if (!result.result) {
+            res.json(result);
+            res.end();
+        } else {
+            //  vi userInfo = 
+        }
+    })
 });
 
 router.route('/process/heartbeat').get(function (req, res) {
@@ -245,6 +265,13 @@ app.use(session({
     resave: true,
     saveUninitialized: true
 }));
+
+app.use(function(req, res, next) {
+    console.log('접근 받음');
+    console.dir(req);
+
+    next();
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());

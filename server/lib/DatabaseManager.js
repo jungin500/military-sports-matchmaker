@@ -101,9 +101,14 @@ var createSchema = function () {
 
     Schema.user.static('findId', function (userInfo, callback) {
         this.find({ id: userInfo.id }, function (err, result) {
-            if (err)
-                throw err;
-            else if (result.length == 0)
+            if (err) {
+                callback({
+                    result: false,
+                    reason: 'MongoError',
+                    mongoerror: err
+                });
+                return;
+            } else if (result.length == 0)
                 callback({
                     result: false,
                     reason: 'NoSuchUserException'

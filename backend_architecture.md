@@ -6,12 +6,12 @@
 - match
 	user의 requestMatch POST로 생성 √
 	stadium id를 속성으로 받음
-	회원이 삭제 가능
+	회원이 삭제 가능 √
 
 - stadium
-    stadium은 고정 (새로 생성이나 삭제 x), 속성은 변경 가능
-	고정 속성: 종목, 소속부대, 이름, 최대수용인원, 최소수용인원
-	가변 속성: 현재인원, 현재 link된 모든 match id
+    stadium은 고정 (새로 생성이나 삭제 x), 속성은 변경 가능 √
+	고정 속성: 종목, 소속부대, 이름, 최대수용인원, 최소수용인원 √
+	가변 속성: 현재인원, 현재 link된 모든 match id √
 
 백엔드에서 구현되어야 할 사항:
 - requestMatch POST의 param에 stadium id를 넣으면,
