@@ -33,8 +33,10 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         prof = smgr.getProfile();
 
         // welcome message
+        String user_name = prof.get(SessionManager.NAME);
+        String user_rank = prof.get(SessionManager.RANK);
         textWelcome = (TextView) findViewById(R.id.home_welcome);
-        textWelcome.setText("환영합니다, " + prof.get(SessionManager.NAME) + "님.\n오늘은 어떤 체육활동을 하시겠어요?");
+        textWelcome.setText("환영합니다, " + user_name + " " + user_rank + "님.\n오늘은 어떤 체육활동을 하시겠어요?");
 
         // logout button settings
         logoutButton = (Button) findViewById(R.id.logout);

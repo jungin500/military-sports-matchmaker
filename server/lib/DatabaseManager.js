@@ -26,10 +26,10 @@ var Model = {
 };
 
 /**
- * 데이터베이스에 연결합니다.
- * @param {express} app Express Application
- */
-var connectDB = function(app) {
+* 데이터베이스에 연결합니다.
+* @param {express} app Express Application
+*/
+var connectDB = function (app) {
     var databaseUrl = 'mongodb://localhost:27017/matching';
 
     mongoose.Promise = global.Promise;
@@ -46,7 +46,7 @@ var connectDB = function(app) {
             if (!(tries = app.get('mongoose-reconnect-try')))
                 app.set('mongodb-reconnect-try', 1);
             else if (tries >= app.get('mongoose-reconnect-max')) {
-                console.log('[심각] MongoDB 연결 불가능. 서버를 종료합니다.ㄴ');
+                console.log('[심각] MongoDB 연결 불가능. 서버를 종료합니다.');
                 return;
             }
             app.set('mongodb-reconnect-try', tries + 1);
@@ -58,9 +58,9 @@ var connectDB = function(app) {
 };
 
 /**
- * 스키마를 생성합니다.
- */
-var createSchema = function() {
+* 스키마를 생성합니다.
+*/
+var createSchema = function () {
 
     // 사용자 스키마
     Schema.user = mongoose.Schema({
@@ -97,11 +97,11 @@ var createSchema = function() {
         return Math.floor(Date.now() * Math.random() * Math.random());
     });
 
-    Schema.user.static('findId', function(userInfo, callback) {
-        this.find({ id: userInfo.id }, function(err, result) { 
-            if(err)
+    Schema.user.static('findId', function (userInfo, callback) {
+        this.find({ id: userInfo.id }, function (err, result) {
+            if (err)
                 throw err;
-            else if(result.length == 0)
+            else if (result.length == 0)
                 callback({
                     result: false,
                     reason: 'NoSuchUserException'
@@ -111,8 +111,8 @@ var createSchema = function() {
                     result: false,
                     reason: 'MultipleUserException'
                 });
-            else 
-                callback({ 
+            else
+                callback({
                     result: true,
                     id: userInfo.id,
                     doc: result[0]._doc
@@ -121,8 +121,8 @@ var createSchema = function() {
     });
 
     Schema.user.static('authenticate', function (userInfo, callback) {
-        this.findId(userInfo, function(result) {
-            if(!result.result)
+        this.findId(userInfo, function (result) {
+            if (!result.result)
                 callback(result);
             else {
                 var user = new Model.user({ id: userInfo.id });
@@ -130,7 +130,8 @@ var createSchema = function() {
                     callback({
                         result: true,
                         id: userInfo.id,
-                        name: result.doc.name
+                        name: result.doc.name,
+                        rank: result.doc.rank
                     });
                 else
                     callback({
@@ -144,17 +145,16 @@ var createSchema = function() {
 
     // 경기 매칭 스키마
     Schema.matching = mongoose.Schema({
+        initiatorId: { type: String, required: true, unique: false },
         activityType: { type: String, required: true, unique: false, default: ' ' },
-        participants: { type: Array, required: true, unique: false, default: [] },
+        players: { type: Array, required: true, unique: false, default: [] },
         matchId: { type: String, required: true, unique: true },
-        maxUsers: { type: Number, required: true, unique: false, default: ' ' },
-        start_at: { type: Date, required: true, index: { unique: false }, default: Date.now },
-        finish_at: { type: Date, required: false, index: { unique: false }, default: Date.now }
+        start_at: { type: Date, required: true, index: { unique: false }, default: Date.now }
     });
 
-    Schema.matching.static('getMatch', function(matchId, callback) {
-        this.find({ 'matchId': matchId }, function(err, result) {
-            if(err) {
+    Schema.matching.static('getMatch', function (matchId, callback) {
+        this.find({ 'matchId': matchId }, function (err, result) {
+            if (err) {
                 callback({
                     result: false,
                     reason: 'MongoError',
@@ -162,8 +162,8 @@ var createSchema = function() {
                 });
                 return;
             }
-            
-            if(result.length == 0)
+
+            if (result.length == 0)
                 callback({
                     result: false,
                     reason: 'NoSuchMatchException'
@@ -181,17 +181,17 @@ var createSchema = function() {
         });
     });
 
-    Schema.matching.static('findMatch', function(matchInfo, callback) {
+    Schema.matching.static('findMatch', function (matchInfo, callback) {
         console.dir(matchInfo);
-        if(matchInfo.matchId)
-            this.getMatch(matchInfo.matchId, function(result) {
-                if(!result.result)
+        if (matchInfo.matchId)
+            this.getMatch(matchInfo.matchId, function (result) {
+                if (!result.result)
                     callback(result);
                 else {
                     var maxUsers = result.doc.maxUsers;
                     var partUsers = result.doc.participants.length;
 
-                    if(partUsers >= maxUsers) {
+                    if (partUsers >= maxUsers) {
                         callback({
                             result: false,
                             reason: 'FullMatchException'
@@ -212,44 +212,19 @@ var createSchema = function() {
             })
     });
 
-    /**
-     * 여기서 사용하는 matchInfo에는 기존 participants가 들어간다.
-     */
-    Schema.matching.static('updateMatchParticipants', function(matchInfo, callback) {
-        var newParticipants = matchInfo.participants.concat(matchInfo.participantId);
-
-        Model.matching.update({ matchId: matchInfo.matchId }, {
-            participants: newParticipants
-        }, function(err) {
-            if(err) {
-                callback({
-                    result: false,
-                    reason: 'MongoError',
-                    mongoerror: err
-                });
-                return;
-            }
-
-            callback({
-                result: true,
-                participants: newParticipants   
-            })
-        });
-    });
-
-    Schema.matching.static('createMatch', function(matchInfo, callback) {
+    Schema.matching.static('createMatch', function (matchInfo, callback) {
         var matchId = generateMatchId();
         console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchId);
 
         var match = new Model.matching({
-            participants: [matchInfo.participantId],
+            initiatorId: matchInfo.initiatorId,
             activityType: matchInfo.activityType,
-            maxUsers: matchInfo.maxUsers,
+            players: matchInfo.players,
             matchId: generateMatchId()
         });
-        
-        match.save(function(err) {
-            if(err) {
+
+        match.save(function (err) {
+            if (err) {
                 callback({
                     result: false,
                     reason: 'MongoError',
@@ -259,15 +234,14 @@ var createSchema = function() {
             }
 
             callback({
-                result: true,
-                match: match
+                result: true
             });
         });
     });
 
-    Schema.matching.static('getAllMatches', function(callback) {
-        this.find({}, function(err, result) {
-            if(err)
+    Schema.matching.static('getAllMatches', function (callback) {
+        this.find({}, function (err, result) {
+            if (err)
                 callback({
                     result: false,
                     reason: 'MongoError',
@@ -287,12 +261,12 @@ var createSchema = function() {
 };
 
 /**
- * 사용자를 생성하는 함수입니다.
- * 
- * @param {Object} userInfo 사용자 정보를 담고 있는 객체
- * @param {Function} callback 콜백 함수
- */
-var createUser = function(userInfo, callback) {
+* 사용자를 생성하는 함수입니다.
+* 
+* @param {Object} userInfo 사용자 정보를 담고 있는 객체
+* @param {Function} callback 콜백 함수
+*/
+var createUser = function (userInfo, callback) {
     var User = new Model.user(userInfo);
     User.save(function (err) {
         if (err) callback(err);
@@ -300,16 +274,16 @@ var createUser = function(userInfo, callback) {
     });
 };
 
-var generateMatchId = function() {
-    return crypto.randomBytes(48).toString('hex');
+var generateMatchId = function () {
+    return crypto.randomBytes(24).toString('hex');
 }
 
 /**
- * 모듈 Export
- */
+* 모듈 Export
+*/
 module.exports = {
     // Global Variables
-    database : database,
+    database: database,
     Schema: Schema,
     Model: Model,
 
