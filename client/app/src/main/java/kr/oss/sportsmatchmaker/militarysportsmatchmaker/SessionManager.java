@@ -42,10 +42,11 @@ public class SessionManager {
     }
 
     // Create new session using id, name if valid.
-    public void createSession(String id, String name) {
+    public void createSession(String id, String name, String rank) {
         editor.putBoolean(IS_LOGGEDIN, true);
         editor.putString(ID, id);
         editor.putString(NAME, name);
+        editor.putString(RANK, rank);
         editor.apply();
     }
 
@@ -55,7 +56,7 @@ public class SessionManager {
         return pref.getBoolean(IS_LOGGEDIN, false);
     }
 
-    // get current user info: id, name.
+    // get current user info: id, name, rank.
     public HashMap<String, String> getProfile(){
         if (!isLoggedIn()){
             return null;
@@ -63,6 +64,7 @@ public class SessionManager {
         HashMap<String, String> prof = new HashMap<String, String>();
         prof.put(ID, pref.getString(ID, null));
         prof.put(NAME, pref.getString(NAME, null));
+        prof.put(RANK, pref.getString(RANK, null));
         return prof;
     }
 
@@ -96,8 +98,6 @@ public class SessionManager {
 
 
         }
-
-
 
     }
 

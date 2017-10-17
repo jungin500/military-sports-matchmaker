@@ -215,7 +215,8 @@ public class LoginActivity extends AppCompatActivity {
                     boolean success = response.getBoolean("result");
                     if (success) {
                         String name = response.getString("name");
-                        smgr.createSession(id, name);
+                        int rankId = response.getInt("rank");
+                        smgr.createSession(id, name, RankHelper.intToRank(rankId));
                         Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                         startActivity(intent);
                         finish();
@@ -235,6 +236,8 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "로그인 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                    showProgress(false);
                 }
 
             }
@@ -242,6 +245,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                 super.onFailure(statusCode, headers, responseString, throwable);
+                showProgress(false);
             }
         });
     }

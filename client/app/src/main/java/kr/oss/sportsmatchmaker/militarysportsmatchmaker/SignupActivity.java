@@ -119,7 +119,7 @@ public class SignupActivity extends AppCompatActivity {
                 String fav = favView.getText().toString();
                 String desc = descView.getText().toString();
                 String rank = rankView.getSelectedItem().toString();
-                int rankid = ranks.size() - ranks.indexOf(rank) - 2; // 선택.
+                int rankid = RankHelper.rankToInt(rank); // 선택.
                 String sex = sexView.getSelectedItem().toString();
                 int sexid = sexes.size() - sexes.indexOf(sex) - 2;
                 // 제대로 다 입력했는지 확인.
@@ -245,25 +245,10 @@ public class SignupActivity extends AppCompatActivity {
         ranks = new ArrayList<String>();
         ranks.add("계급");
         ranks.add("----");
-        ranks.add("대장");
-        ranks.add("중장");
-        ranks.add("소장");
-        ranks.add("준장");
-        ranks.add("대령");
-        ranks.add("중령");
-        ranks.add("소령");
-        ranks.add("대위");
-        ranks.add("중위");
-        ranks.add("소위");
-        ranks.add("준위");
-        ranks.add("원사");
-        ranks.add("상사");
-        ranks.add("중사");
-        ranks.add("하사");
-        ranks.add("병장");
-        ranks.add("상병");
-        ranks.add("일병");
-        ranks.add("이병");
+        // add all ranks to arraylist
+        for(int i = 0; i < RankHelper.numRanks(); i++){
+            ranks.add(RankHelper.ranks[RankHelper.numRanks() - 1 - i]);
+        }
         // spinner for sex
         sexes = new ArrayList<String>();
         sexes.add("성별");
