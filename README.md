@@ -82,15 +82,15 @@
 		`/process/loginUser`으로 POST
 		폼: id(String), password(String).
 	서버 response:
+		1. 성공 시
+			{"result":true,"id":"17-76001439","name":"안정인"}
+		2. 실패 시 (아이디가 없음)
+			{"result":false,"reason":"NoSuchUserException"}
+		3. 실패 시 (비밀번호가 다름)
+			{"result":false,"reason":"PasswordMismatch"}
 
-		{"result":false,"failed_reason":"해당하는 ID의 사용자가 없습니다."}
-
-		{"result":false,"failed_reason":"비밀번호가 틀렸습니다."}
-
-		{"result":true,"id":"17-76001439"}
-
-		로그인 정보는 서버의 Session에 저장한다.
-		Local의 쿠키가 접근 가능해야 함.
+	로그인 정보는 서버의 Session에 저장한다.
+	Local의 쿠키가 접근 가능해야 함.
 
 	2. 회원가입
 	클라이언트 request:
@@ -105,17 +105,12 @@
 		favoriteEvent 좋아하는 종목(|으로 구분 or 배열로 구분) (String or Array)
 		description 자기소개 (String)
 	서버 response:
-		회원가입 성공시
-			{ 
-				success: true,
-				id: <가입한 사용자 아이디 (String)>
-			}
-
-		회원가입 실패시
-			{
-				success: false,
-				failed_reason: <실패 사유 (String)>
-			}
+		1. 회원가입 성공시 (로그인 성공시와 동일)
+			{"result":true,"id":"17-76001439","name":"안정인"}
+		2. 실패 시 (이미 있는 아이디)
+			{"result":false,"reason":"AlreadyExistingException"}
+		3. 실패 시 (다 채워지지 않은 폼)
+			{"result":false,"reason":"MissingValuesException"}
 
 	2-1. 회원가입 중복체크
 	클라이언트 request:
@@ -150,9 +145,9 @@
 		activityId 종목 고유 ID
 	
 	서버 response:
+
 		{
 			result: true|false (boolean)
-			
 		}
 
 
