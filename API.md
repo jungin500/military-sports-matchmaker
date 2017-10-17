@@ -72,18 +72,15 @@
 - (Session) userInfo: 사용자 정보 (로그인 여부 체크)
 - (Session) userInfo.id: 사용자 ID
 - activityType: 종목 이름
-- maxUsers: 최대 사용자
-- matchId: 매치 ID (기존 Match방에 참가하는 경우)
+- players: 사용자 목록 (|로 구분)
+- matchId: 매치 ID (매치 고유 ID, 검색 용도로 사용)
 
 ### Output (JSON)
 - result: 결과(true/false)
 - participants: 성공했을 경우, 새로운 참가자 리스트 배열
 - reason: false일경우 이유
-    - NotLoggedInException (DatabaseManager.Model.matching.updateMatchParticipants)
+    - NotLoggedInException
     - MongoError (DB 오류)
-    - FullException (방이 꽉 차있는 경우) (DatabaseManager.Model.matching.findMatch의 Callback result)
-- match: 성공했을 경우, 생성된 매치 객체를 반환(DatabaseManager.Model.matching.createMatch의 Callback result)
-- participants: 새로이 만들어진 참가자 배열 (처음 만든 Match일 때)
 - mongoerror: reason = 'MongoError'인 경우 에러
 
 ---

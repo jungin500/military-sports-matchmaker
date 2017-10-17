@@ -46,7 +46,7 @@ var connectDB = function (app) {
             if (!(tries = app.get('mongoose-reconnect-try')))
                 app.set('mongodb-reconnect-try', 1);
             else if (tries >= app.get('mongoose-reconnect-max')) {
-                console.log('[심각] MongoDB 연결 불가능. 서버를 종료합니다.ㄴ');
+                console.log('[심각] MongoDB 연결 불가능. 서버를 종료합니다.');
                 return;
             }
             app.set('mongodb-reconnect-try', tries + 1);
@@ -145,12 +145,11 @@ var createSchema = function () {
 
     // 경기 매칭 스키마
     Schema.matching = mongoose.Schema({
+        initiatorId: { type: String, required: true, unique: false },
         activityType: { type: String, required: true, unique: false, default: ' ' },
-        participants: { type: Array, required: true, unique: false, default: [] },
+        players: { type: Array, required: true, unique: false, default: [] },
         matchId: { type: String, required: true, unique: true },
-        maxUsers: { type: Number, required: true, unique: false, default: ' ' },
-        start_at: { type: Date, required: true, index: { unique: false }, default: Date.now },
-        finish_at: { type: Date, required: false, index: { unique: false }, default: Date.now }
+        start_at: { type: Date, required: true, index: { unique: false }, default: Date.now }
     });
 
     Schema.matching.static('getMatch', function (matchId, callback) {
@@ -213,39 +212,14 @@ var createSchema = function () {
             })
     });
 
-    /**
-     * 여기서 사용하는 matchInfo에는 기존 participants가 들어간다.
-     */
-    Schema.matching.static('updateMatchParticipants', function (matchInfo, callback) {
-        var newParticipants = matchInfo.participants.concat(matchInfo.participantId);
-
-        Model.matching.update({ matchId: matchInfo.matchId }, {
-            participants: newParticipants
-        }, function (err) {
-            if (err) {
-                callback({
-                    result: false,
-                    reason: 'MongoError',
-                    mongoerror: err
-                });
-                return;
-            }
-
-            callback({
-                result: true,
-                participants: newParticipants
-            })
-        });
-    });
-
     Schema.matching.static('createMatch', function (matchInfo, callback) {
         var matchId = generateMatchId();
         console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchId);
 
         var match = new Model.matching({
-            participants: [matchInfo.participantId],
+            initiatorId: matchInfo.initiatorId,
             activityType: matchInfo.activityType,
-            maxUsers: matchInfo.maxUsers,
+            players: matchInfo.players,
             matchId: generateMatchId()
         });
 
@@ -301,7 +275,7 @@ var createUser = function (userInfo, callback) {
 };
 
 var generateMatchId = function () {
-    return crypto.randomBytes(48).toString('hex');
+    return crypto.randomBytes(24).toString('hex');
 }
 
 /**

@@ -99,6 +99,11 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                         startActivity(intent);
                         break;
                     //TODO: 구현
+                    case 1:
+                        Intent intent1 = new Intent(getApplicationContext(), ReservePlaceActivity.class);
+                        startActivity(intent1);
+                        break;
+                    //장소 고르기
                     default:
                         Toast.makeText(getApplicationContext(), "아직 미구현", Toast.LENGTH_SHORT).show();
                         break;
