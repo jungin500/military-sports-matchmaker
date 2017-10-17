@@ -18,8 +18,8 @@ var http = require('http'),
     bodyParser = require('body-parser'),
     static = require('serve-static'),
     path = require('path'),
-    DatabaseManager = require('./lib/DatabaseManager');
-//UserManager = require('./lib/UserManager');
+    DatabaseManager = require('./lib/DatabaseManager'),
+    UserManager = require('./lib/UserManager');
 
 // express 이용 HTTP 서버 설정
 var app = express();
@@ -32,7 +32,6 @@ var router = express.Router();
 // 라우터 설정
 // 사용자 추가 (회원가입)
 router.route('/process/registerUser').post(function (req, res) {
-
     var userInfo = {
         id: req.body.id,
         password: req.body.password,
@@ -129,23 +128,14 @@ router.route('/process/logoutUser').get(function (req, res) {
 });
 
 router.route('/process/getMatchList').get(function (req, res) {
-   /*  DatabaseManager.Model.matching.getAllMatches(function (result) {
+    DatabaseManager.Model.matching.getAllMatches(function (result) {
         res.json(result);
         res.end();
-    }); */
-});
-
-router.route('/process/getUserMatch').post(function (req, res) {
-    /* 
-   DatabaseManager.Model.matching.getUserMatch(function(result) {
-       
-   })  */
+    });
 });
 
 router.route('/process/requestMatch').post(function (req, res) {
-    /* if (!req.session.userInfo) {
-        // 로그인되지 않은 사용자의 접근을 거부한다.
-
+    if (!req.session.userInfo) {
         res.json({
             result: false,
             reason: 'NotLoggedInException'
@@ -178,24 +168,13 @@ router.route('/process/requestMatch').post(function (req, res) {
             res.json(result);
             res.end();
         }
-    }); */
+    });
 });
 
-router.route('/process/quitMatch').post(function (req, res) {
-   /*  var matchInfo = {
-        participantId: req.session.userInfo.id,
-        matchId: req.body.matchId
-    };
-
-    DatabaseManager.Model.matching.quitMatch(matchInfo, function(result) {
-
-    }); */
-})
-
 router.route('/process/heartbeat').get(function (req, res) {
-   /*  // Heartbeat
+    // Heartbeat
     res.json({ result: 'result' });
-    res.end(); */
+    res.end();
 });
 
 router.route('/process/checkExistingUser').post(function (req, res) {
@@ -219,13 +198,6 @@ router.route('/process/checkExistingUser').post(function (req, res) {
 
 // Express에 각 미들웨어 적용 및 서버 시작
 app.use(cookieParser());
-app.use(function (req, res, next) {
-    console.log('[MID] 쿠키 정보 Print');
-    console.dir(req.cookies);
-
-    next();
-});
-
 app.use(session({
     secret: 'F$GKeE%tJaf($&#(SfGISf*%#n#@!zSWh9',
     resave: true,
@@ -253,5 +225,5 @@ var server = http.createServer(app).listen(app.get('port'), function () {
 });
 
 server.on('request', function (req, res) {
-    console.log('[정보][%d] 외부 연결: %s', Date.now(), req.connection.remoteAddress);
+    console.log('[정보] 외부 연결: %s', req.connection.remoteAddress);
 });
