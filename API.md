@@ -131,4 +131,5 @@
     - matchId: 매치 고유 ID
     - initiatorId: 매치 생성자 ID
 - reason: 실패 시 사유 (result = false)
+    - NoSuchMatchException
     - NotLoggedInException
