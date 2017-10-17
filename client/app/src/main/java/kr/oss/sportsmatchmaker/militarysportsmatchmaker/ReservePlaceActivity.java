@@ -9,6 +9,7 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ReservePlaceActivity extends AppCompatActivity implements OnClickListener{
@@ -18,14 +19,16 @@ public class ReservePlaceActivity extends AppCompatActivity implements OnClickLi
     String[] BLarr = {"대대선택","1대대","2대대","3대대","4대대"};
 
     String Bl[] = {"1대대","1대대","3대대","4대대"};
-    String sports[] = {"축구","농구","족구","축구"};
-    String stadium[] = {"1대대축구경기장","1대대농구경기장","3대대족구경기장","4대대축구경기장"};
+    String sports[] = {"축구","축구","족구","축구"};
+    String stadium[] = {"1대대축구경기장","1대대2부축구경기장","3대대족구경기장","4대대축구경기장"};
+    TextView selectStadium;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reserve_place);
 
+        selectStadium = (TextView) findViewById(R.id.select);
         ImageButton scoccer = (ImageButton) findViewById(R.id.scoccer);
         /*
         ImageButton basketball = (ImageButton) findViewById(R.id.basketball);
@@ -63,14 +66,10 @@ public class ReservePlaceActivity extends AppCompatActivity implements OnClickLi
                         }
                     }
 
-                    scoccerAlert.setAdapter(scoccerAdapter,
-                            new DialogInterface.OnClickListener() {
+                    scoccerAlert.setAdapter(scoccerAdapter,new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
-                                                    int id) {
-
-                                    // AlertDialog 안에 있는 AlertDialog
-                                    String stadium = scoccerAdapter.getItem(id);
-                                }
+                                                    int id) {String aa = scoccerAdapter.getItem(id);
+                                                                selectStadium.setText(aa.toString());}
                             });
 
                     if(count==0)
@@ -79,6 +78,7 @@ public class ReservePlaceActivity extends AppCompatActivity implements OnClickLi
                         scoccerAlert.show();
                         count=0;
                     }
+                    break;
 
                 //case R.id.basketball:
                 //case R.id.footwear:
