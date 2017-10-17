@@ -29,7 +29,8 @@
         <activity android:name=".ChooseSportActivity" />
         <activity android:name=".MatchCompleteAtivity" />
         <activity android:name=".MatchCompleteActivity" />
-        <activity android:name=".MatchSettingActivity"></activity>
+        <activity android:name=".MatchSettingActivity" />
+        <activity android:name=".ReservePlaceActivity"></activity>
     </application>
 
 </manifest>
