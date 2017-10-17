@@ -380,7 +380,7 @@ var createUser = function (userInfo, callback) {
 };
 
 /**
- * 큐를 생성하는 함수입니다.
+ * 큐에 사용자를 추가하는 함수입니다.
  * 
  * @param {Object} queueInfo 큐 정보를 담고 있는 객체
  * @param {Function} callback 콜백 함수
@@ -388,7 +388,13 @@ var createUser = function (userInfo, callback) {
 var addQueue = function(queueInfo, callback) {
 
     Schema.Queue.findUserQueue(queueInfo.participantId, function(result) {
-        if(result.result)
+        if(result.result) {
+            // 큐가 존재할 때
+            
+        } else {
+            // 큐가 존재하지 않을 때
+
+        }
     });
 
     var queue = new Model.Queue(queueInfo);
