@@ -18,6 +18,8 @@ public class HomeActivity extends AppCompatActivity {
     //Widgets
     private TextView textWelcome;
     private Button logoutButton;
+    private TextView textQStatus;
+    private ListView homemenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +30,11 @@ public class HomeActivity extends AppCompatActivity {
         smgr.checkLogin();
         prof = smgr.getProfile();
 
+        // welcome message
         textWelcome = (TextView) findViewById(R.id.home_welcome);
-        textWelcome.setText("환영합니다, " + prof.get(SessionManager.NAME) + " 님.");
+        textWelcome.setText("환영합니다, " + prof.get(SessionManager.NAME) + "님.\n오늘은 어떤 체육활동을 하시겠어요?");
 
+        // logout button settings
         logoutButton = (Button) findViewById(R.id.logout);
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -38,6 +42,9 @@ public class HomeActivity extends AppCompatActivity {
                 smgr.logout();
             }
         });
+
+        // TextView setting
+
 
     }
 }

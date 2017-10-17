@@ -66,9 +66,8 @@ public class SignupActivity extends AppCompatActivity {
                 int rankid = ranks.size() - ranks.indexOf(rank) - 2; // 선택.
                 String sex = sexView.getSelectedItem().toString();
                 int sexid = sexes.size() - sexes.indexOf(sex) - 2;
-
                 // 제대로 다 입력했는지 확인.
-                if (id == ""){
+                if (id.equals("")){
                     idView.setError("군번을 입력해주십시오.");
                     idView.requestFocus();
                     return;
@@ -88,12 +87,12 @@ public class SignupActivity extends AppCompatActivity {
                     pwView.requestFocus();
                     return;
                 }
-                if (name == ""){
+                if (name.equals("")){
                     nameView.setError("이름을 입력해주십시오.");
                     nameView.requestFocus();
                     return;
                 }
-                if (unit == ""){
+                if (unit.equals("")){
                     unitView.setError("소속부대를 입력해주십시오.");
                     unitView.requestFocus();
                     return;
@@ -111,7 +110,7 @@ public class SignupActivity extends AppCompatActivity {
                     return;
                 }
 
-                //TODO: 서버로 정보 보내서 회원가입
+                // TODO: 서버로 정보 보내서 회원가입
 
 
                 // 로그인창으로 돌아가기
