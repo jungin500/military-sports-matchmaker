@@ -65,13 +65,20 @@ public class MatchSettingActivity extends AppCompatActivity {
         playerShow.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                String numstr = playerNumber.getText().toString();
+                if (numstr == ""){
+                    playerNumber.setError("숫자를 입력하세요.");
+                    return;
+                }
                 int num = Integer.parseInt(playerNumber.getText().toString());
                 if (num > maxPlayer) {
                     Toast.makeText(getApplicationContext(), "사람 숫자가 너무 많습니다.", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 else if (num < numPlayer[0]){
-                    listDataArray = new ArrayList<ListData>(listDataArray.subList(0,num));
+                    for (int i = numPlayer[0] - 1; i >= num; i--){
+                        listDataArray.remove(i);
+                    }
                 }
                 else {
                     for (int i = 0; i < num - numPlayer[0]; i++){
