@@ -23,7 +23,7 @@ var http = require('http'),
 
 // express 이용 HTTP 서버 설정
 var app = express();
-app.set('port', process.env.PORT || 14403);
+app.set('port', process.env.PORT || 14402);
 app.set('mongoose-reconnect-max', 5);
 
 // express Router 이용 Request routing
@@ -74,9 +74,7 @@ router.route('/process/registerUser').post(function (req, res) {
         } else {
             console.log('[정보] 회원가입 완료: ID [%s]', userInfo.id);
             res.json({
-                result: true,
-                id: userInfo.id,
-                name: userInfo.name
+                result: true
             });
             res.end();
             return;
@@ -130,24 +128,46 @@ router.route('/process/logoutUser').get(function (req, res) {
 });
 
 router.route('/process/getMatchList').get(function (req, res) {
-    // 현재 진행중인 Match 목록
-    res.json({ result: 'Router Works (getMatchList)' });
-    res.end();
+    DatabaseManager.Model.matching.getAllMatches(function(result) {
+        res.json(result);
+        res.end();
+    });
 });
 
 router.route('/process/requestMatch').post(function (req, res) {
+    if(!req.session.userInfo) {
+        res.json({
+            result: false,
+            reason: 'NotLoggedInException'
+        });
+        res.end();
+        return;
+    }
+    
     var matchInfo = {
-        id: req.session.userInfo? req.session.userInfo.id : req.body.id,
+        participantId: req.session.userInfo.id,
         activityType: req.body.activityType,
         maxUsers: req.body.maxUsers,
         matchId: req.body.matchId || null
-    };
+    }
 
-    DatabaseManager.Model.matching.findMatch(matchInfo, function(err, result) {
-        if(err) throw err;
-        
-        res.json(result);
-        res.end();
+    DatabaseManager.Model.matching.findMatch(matchInfo, function(result) {
+        if(result.result) {
+            matchInfo.participants = result.participants;
+            DatabaseManager.Model.matching.updateMatchParticipants(matchInfo, function(result) {
+                res.json(result);
+                res.end();
+            });
+        } else if (result.reason == 'NoSuchMatchException'
+                || result.reason == 'NoMatchIdException')
+            DatabaseManager.Model.matching.createMatch(matchInfo, function(result) {
+                res.json(result);
+                res.end();
+            });
+        else {
+            res.json(result);
+            res.end();
+        }
     });
 });
 
@@ -164,7 +184,14 @@ router.route('/process/checkExistingUser').post(function (req, res) {
     };
 
     DatabaseManager.Model.user.findId(userInfo, function(result) {
-        res.json(result);
+        if(result.result)
+            res.json({
+                result: true,
+                id: result.doc.id,
+                name: result.doc.name
+            });
+        else
+            res.json(result);
         res.end();
     });
 });
@@ -192,7 +219,11 @@ app.use(expressErrorHandler({
 }));
 
 // HTTP 서버 구동
-http.createServer(app).listen(app.get('port'), function () {
-    DatabaseManager.connectDB();
+var server = http.createServer(app).listen(app.get('port'), function () {
+    DatabaseManager.connectDB(app);
     console.log('[정보] 서버 시작됨. %d에서 listen 중', app.get('port'));
+});
+
+server.on('request', function(req, res) {
+    console.log('[정보] 외부 연결: %s', req.connection.remoteAddress);
 });
