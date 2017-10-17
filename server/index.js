@@ -158,8 +158,28 @@ function createSchema() {
         finish_at: { type: Date, required: false, index: { unique: false }, default: Date.now }
     });
 
+    Schema.matching.method('getMatch', function(matchId, callback) {
+        this.find({ 'matchId': matchId }, function(err, result) {
+            if(err) throw err;
+            
+            if(result.length > 0)
+                callback(result[0]._doc);
+            else
+                callback(null);
+        });
+    });
+
     Schema.matching.static('findMatch', function(matchInfo, callback) {
-        
+        if(matchInfo.matchId) {
+            // 만일 matchId를 가지고 있을 때
+            this.getMatch(matchInfo.matchId, function(result) {
+                if(!result)
+                    callback({
+                        result: true
+                    });
+            });
+            
+        }
     });
 
     // 모델 만들기
