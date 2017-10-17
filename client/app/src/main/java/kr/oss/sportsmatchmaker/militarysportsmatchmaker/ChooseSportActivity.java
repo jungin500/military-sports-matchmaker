@@ -13,6 +13,13 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
     //ImageButton custom = (ImageButton) findViewById(R.id.custom);
     //static String a;
 
+    public static final String EXTRA_PNUM = "EXTRA_PNUM";
+    public static final String EXTRA_SPORTTYPE = "EXTRA_SPORTTYPE";
+
+    public static final int PNUM_FOOTBALL = 11;
+    public static final int PNUM_BASKETBALL = 5;
+    public static final int PNUM_JOKGU = 5;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,7 +27,7 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
 
         ImageButton football = (ImageButton) findViewById(R.id.football);
         ImageButton basketball = (ImageButton) findViewById(R.id.basketball);
-        ImageButton footwear = (ImageButton) findViewById(R.id.footwear);
+        ImageButton footwear = (ImageButton) findViewById(R.id.jokgu);
 
         football.setOnClickListener(this);
         basketball.setOnClickListener(this);
@@ -32,19 +39,22 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.football:
-                Intent intent = new Intent(getApplicationContext(), MatchSettingActivity.class);
-                intent.putExtra("BIRTHDAY_KEY",11);
-                startActivity(intent);
-                break;
-            case R.id.basketball:
                 Intent intent1 = new Intent(getApplicationContext(), MatchSettingActivity.class);
-                intent1.putExtra("BIRTHDAY_KEY",5);
+                intent1.putExtra(EXTRA_PNUM, PNUM_FOOTBALL);
+                intent1.putExtra(EXTRA_SPORTTYPE, "football");
                 startActivity(intent1);
                 break;
-            case R.id.footwear:
+            case R.id.basketball:
                 Intent intent2 = new Intent(getApplicationContext(), MatchSettingActivity.class);
-                intent2.putExtra("BIRTHDAY_KEY",5);
+                intent2.putExtra(EXTRA_PNUM,PNUM_BASKETBALL);
+                intent2.putExtra(EXTRA_SPORTTYPE, "basketball");
                 startActivity(intent2);
+                break;
+            case R.id.jokgu:
+                Intent intent3 = new Intent(getApplicationContext(), MatchSettingActivity.class);
+                intent3.putExtra(EXTRA_PNUM,PNUM_JOKGU);
+                intent3.putExtra(EXTRA_SPORTTYPE, "football");
+                startActivity(intent3);
                 break;
         }
     }

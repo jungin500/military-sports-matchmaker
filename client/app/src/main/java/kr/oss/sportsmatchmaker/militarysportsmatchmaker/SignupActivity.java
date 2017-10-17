@@ -177,7 +177,6 @@ public class SignupActivity extends AppCompatActivity {
                 params.put("description","default");
 
                 String registerURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/registerUser";
-
                 client.post(registerURL, params, new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

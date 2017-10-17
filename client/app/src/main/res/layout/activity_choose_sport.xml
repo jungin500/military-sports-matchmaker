@@ -43,7 +43,7 @@
                 app:srcCompat="@drawable/img_basketball" />
 
             <ImageButton
-                android:id="@+id/footwear"
+                android:id="@+id/jokgu"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

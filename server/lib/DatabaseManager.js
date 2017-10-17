@@ -145,37 +145,140 @@ var createSchema = function() {
     // 경기 매칭 스키마
     Schema.matching = mongoose.Schema({
         activityType: { type: String, required: true, unique: false, default: ' ' },
-        participants: { type: Object, required: true, unique: false, default: {} },
-        matchId: { type: String, required: true, unique: true, default: ' ' },
+        participants: { type: Array, required: true, unique: false, default: [] },
+        matchId: { type: String, required: true, unique: true },
+        maxUsers: { type: Number, required: true, unique: false, default: ' ' },
         start_at: { type: Date, required: true, index: { unique: false }, default: Date.now },
         finish_at: { type: Date, required: false, index: { unique: false }, default: Date.now }
     });
 
     Schema.matching.static('getMatch', function(matchId, callback) {
         this.find({ 'matchId': matchId }, function(err, result) {
-            if(err) throw err;
+            if(err) {
+                callback({
+                    result: false,
+                    reason: 'MongoError',
+                    mongoerror: err
+                });
+                return;
+            }
             
-            if(result.length > 0)
-                callback(result[0]._doc);
+            if(result.length == 0)
+                callback({
+                    result: false,
+                    reason: 'NoSuchMatchException'
+                });
+            else if (result.length > 1)
+                callback({
+                    result: false,
+                    reason: 'MultipleMatchException'
+                })
             else
-                callback(null);
+                callback({
+                    result: true,
+                    doc: result[0]._doc
+                });
         });
     });
 
     Schema.matching.static('findMatch', function(matchInfo, callback) {
         console.dir(matchInfo);
-        if(matchInfo.matchId) {
-            // 만일 matchId를 가지고 있을 때
+        if(matchInfo.matchId)
             this.getMatch(matchInfo.matchId, function(result) {
-                if(!result)
-                    callback({
-                        result: true
-                    });
+                if(!result.result)
+                    callback(result);
+                else {
+                    var maxUsers = result.doc.maxUsers;
+                    var partUsers = result.doc.participants.length;
+
+                    if(partUsers >= maxUsers) {
+                        callback({
+                            result: false,
+                            reason: 'FullMatchException'
+                        })
+                    } else {
+                        callback({
+                            result: true,
+                            participants: result.doc.participants,
+                            description: 'MatchUpdatePending'
+                        })
+                    }
+                }
             });
-        } else {
-            // 새로운 Match를 만들 때
-            var Match = new Model.matching(matchInfo);
-        }   
+        else
+            callback({
+                result: false,
+                reason: 'NoMatchIdException'
+            })
+    });
+
+    /**
+     * 여기서 사용하는 matchInfo에는 기존 participants가 들어간다.
+     */
+    Schema.matching.static('updateMatchParticipants', function(matchInfo, callback) {
+        var newParticipants = matchInfo.participants.concat(matchInfo.participantId);
+
+        Model.matching.update({ matchId: matchInfo.matchId }, {
+            participants: newParticipants
+        }, function(err) {
+            if(err) {
+                callback({
+                    result: false,
+                    reason: 'MongoError',
+                    mongoerror: err
+                });
+                return;
+            }
+
+            callback({
+                result: true,
+                participants: newParticipants   
+            })
+        });
+    });
+
+    Schema.matching.static('createMatch', function(matchInfo, callback) {
+        var matchId = generateMatchId();
+        console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchId);
+
+        var match = new Model.matching({
+            participants: [matchInfo.participantId],
+            activityType: matchInfo.activityType,
+            maxUsers: matchInfo.maxUsers,
+            matchId: generateMatchId()
+        });
+        
+        match.save(function(err) {
+            if(err) {
+                callback({
+                    result: false,
+                    reason: 'MongoError',
+                    mongoerror: err
+                });
+                return;
+            }
+
+            callback({
+                result: true,
+                match: match
+            });
+        });
+    });
+
+    Schema.matching.static('getAllMatches', function(callback) {
+        this.find({}, function(err, result) {
+            if(err)
+                callback({
+                    result: false,
+                    reason: 'MongoError',
+                    mongoerror: err
+                });
+            else
+                callback({
+                    result: true,
+                    docs: result
+                })
+        });
     });
 
     // 모델 만들기
@@ -196,6 +299,10 @@ var createUser = function(userInfo, callback) {
         else callback(null);
     });
 };
+
+var generateMatchId = function() {
+    return crypto.randomBytes(48).toString('hex');
+}
 
 /**
  * 모듈 Export

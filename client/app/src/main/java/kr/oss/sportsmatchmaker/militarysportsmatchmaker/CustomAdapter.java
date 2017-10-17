@@ -51,8 +51,12 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
 
         ImageView face = (ImageView) row.findViewById(R.id.Profile);
         TextView name = (TextView) row.findViewById(R.id.Name);
+<<<<<<< HEAD
         Button button = (Button) row.findViewById(R.id.button);
 
+=======
+        TextView text = (TextView) row.findViewById(R.id.textView);
+>>>>>>> 59b5d425ff663d10ca5091f9bf0f1170838c2f62
         try{
             InputStream is = context.getAssets().open(listData.get(position).getFace());
             Drawable d = Drawable.createFromStream(is, null);
@@ -60,6 +64,9 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
         }   catch(IOException e){
             Log.e("ERROR", "ERROR: ", e);
         }
+        name.setText(listData.get(position).getName());
+        text.setText(listData.get(position).getText());
+
 
         name.setText(listData.get(position).getName());
         button.setOnClickListener(new View.OnClickListener() {
