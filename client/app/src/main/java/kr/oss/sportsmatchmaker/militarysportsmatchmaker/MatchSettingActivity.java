@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class MatchSettingActivity extends AppCompatActivity {
 
-    private ArrayList<ListData> listDataArray = new ArrayList<ListData>();
+    private ArrayList<ListData> listDataArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,15 +24,16 @@ public class MatchSettingActivity extends AppCompatActivity {
         int playernum = intent.getIntExtra("BIRTHDAY_KEY", 0);
         String[] name = null;
 
+        // initialize
+        listDataArray =  new ArrayList<ListData>();
         for(int i =0;i<playernum;i++){
-            ListData data = new ListData("0"+i+".jpg", i+".", i+".");
+            ListData data = new ListData("0"+i+".jpg", i+"name", i+"textview");
             listDataArray.add(data);
         }
 
         ListView listview = (ListView) findViewById(R.id.listview1);
         CustomAdapter customAdapter = new CustomAdapter(this, R.layout.list_btn_sty, listDataArray);
         listview.setAdapter(customAdapter);
-
     }
 
 

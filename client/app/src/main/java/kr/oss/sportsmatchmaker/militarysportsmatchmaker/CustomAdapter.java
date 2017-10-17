@@ -47,13 +47,17 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
 
         ImageView face = (ImageView) row.findViewById(R.id.Profile);
         TextView name = (TextView) row.findViewById(R.id.Name);
-        TextView insert = (TextView) row.findViewById(R.id.textView);
+        TextView text = (TextView) row.findViewById(R.id.textView);
         try{
             InputStream is = context.getAssets().open(listData.get(position).getFace());
             Drawable d = Drawable.createFromStream(is, null);
+            face.setImageDrawable(d);
         }   catch(IOException e){
             Log.e("ERROR", "ERROR: ", e);
         }
+        name.setText(listData.get(position).getName());
+        text.setText(listData.get(position).getText());
+
 
         return row;
     }
