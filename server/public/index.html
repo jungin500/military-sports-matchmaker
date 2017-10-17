@@ -1,75 +1,125 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+        crossorigin="anonymous">
     <title>테스트 페이지</title>
 </head>
+
 <body>
     <div class="container">
-        <div class="panel panel-primary">
-            <form action="/process/registerUser" method="post">
-                <h2>가입 (/process/registerUser)</h2>
-                <label for="id">군번</label>
-                <input class="form-control" type="text" name="id" id="">
-                <label for="password">비밀번호</label>
-                <input class="form-control" type="password" name="password">
-                <label for="name">이름</label>
-                <input class="form-control" type="text" name="name" id="">
-                <label for="rank">계급</label>
-                <input class="form-control" type="text" name="rank" id="">
-                <label for="unit">부대명</label>
-                <input class="form-control" type="text" name="unit" id="">
-                <label for="gender">성별</label>
-                <input class="form-control" type="text" name="gender" id="">
-                <label for="favoriteEvent">좋아하는 종목</label>
-                <input class="form-control" type="text" name="favoriteEvent" id="">
-                <label for="description">자기소개</label>
-                <input class="form-control" type="text" name="description" id="">
-                <button class="btn btn-primary btn-lg" type="submit">가입하기</button>
-            </form>
-        </div>
-    </div>
-    
-    <div class="container">
-        <div class="panel panel-primary">
-            <form action="/process/loginUser" method="post">
-                <h2>로그인 (/process/loginUser)</h2>
-                <label for="id">군번 (=아이디)</label>
-                <input class="form-control" type="text" name="id" id="">
-                <label for="password">비밀번호</label>
-                <input class="form-control" type="password" name="password" id="">
-                <button class="btn btn-primary btn-lg" type="submit">로그인하기</button>
-                <button class="btn btn-primary btn-lg" type="button" onclick='javascript:window.location.replace("/process/checkLoggedIn")'>로그인상태 확인하기</button>
-                <button class="btn btn-primary btn-lg" type="button" onclick='javascript:window.location.replace("/process/logoutUser")'>로그아웃하기</button>
-            </form>
-        </div>
+        <form action="/process/registerUser" method="post">
+            <div class="panel panel-primary">
+                <div class="panel-heading">가입 (/process/registerUser)</div>
+                <div class="panel-body">
+                    <label for="id">군번</label>
+                    <input class="form-control" type="text" name="id" id="">
+                    <label for="password">비밀번호</label>
+                    <input class="form-control" type="password" name="password">
+                    <label for="name">이름</label>
+                    <input class="form-control" type="text" name="name" id="">
+                    <label for="rank">계급</label>
+                    <input class="form-control" type="text" name="rank" id="">
+                    <label for="unit">부대명</label>
+                    <input class="form-control" type="text" name="unit" id="">
+                    <label for="gender">성별</label>
+                    <input class="form-control" type="text" name="gender" id="">
+                    <label for="favoriteEvent">좋아하는 종목</label>
+                    <input class="form-control" type="text" name="favoriteEvent" id="">
+                    <label for="description">자기소개</label>
+                    <input class="form-control" type="text" name="description" id="">
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-primary btn-lg" type="submit">가입하기</button>
+                </div>
+            </div>
+        </form>
     </div>
 
     <div class="container">
-        <div class="panel panel-primary">
-            <form action="/process/requestMatch" method="post">
-                <h2>큐에 넣기 (/process/requestMatch)</h2>
-                <label for="id">군번 (=아이디)</label>
-                <input class="form-control" type="text" name="id" id="">
-                <label for="activityType">종목</label>
-                <input class="form-control" type="text" name="activityType" id="">
-                <label for="maxUsers">인원수</label>
-                <input class="form-control" type="text" name="maxUsers" id="">
-                <label for="matchId">매치ID (선택)</label>
-                <input class="form-control" type="text" name="matchId" id="">
-                <button class="btn btn-primary btn-lg" type="submit">큐 신청하기</button>
-            </form>
-        </div>
+        <form action="/process/loginUser" method="post">
+            <div class="panel panel-primary">
+                <div class="panel-heading">로그인 (/process/loginUser)</div>
+                <div class="panel-body">
+                    <label for="id">군번 (=아이디)</label>
+                    <input class="form-control" type="text" name="id" id="">
+                    <label for="password">비밀번호</label>
+                    <input class="form-control" type="password" name="password" id="">
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-primary btn-lg" type="submit">로그인하기</button>
+                    <button class="btn btn-primary btn-lg" type="button" onclick='javascript:window.location.replace("/process/checkLoggedIn")'>로그인상태 확인하기</button>
+                    <button class="btn btn-primary btn-lg" type="button" onclick='javascript:window.location.replace("/process/logoutUser")'>로그아웃하기</button>
+                </div>
+            </div>
+        </form>
     </div>
 
-    <form action="/process/heartbeat" method="get">
-    
+    <div class="container">
+        <form action="/process/requestMatch" method="post">
+            <div class="panel panel-primary">
+                <div class="panel-heading">큐에 넣기 (/process/requestMatch)</div>
+                <div class="panel-body">
+                    <label for="activityType">종목</label>
+                    <input class="form-control" type="text" name="activityType" id="">
+                    <label for="maxUsers">인원수</label>
+                    <input class="form-control" type="text" name="maxUsers" id="">
+                    <label for="matchId">매치ID (선택)</label>
+                    <input class="form-control" type="text" name="matchId" id="">
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-primary btn-lg" type="submit">큐 신청하기</button>
+                    <button class="btn btn-primary btn-lg" type="button" onclick="javascript:window.location.replace('/process/getMatchList')">신청된 큐 리스트</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
+        <form action="/process/quitMatch" method="post">
+            <div class="panel panel-primary">
+                <div class="panel-heading">큐 취소하기 (/process/quitMatch)</div>
+                <div class="panel-body">
+                    <label for="matchId">매치ID</label>
+                    <input class="form-control" type="text" name="matchId" id="">
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-danger btn-lg" type="submit">큐 나가기 (or 취소하기)</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
+        <form action="/process/checkExistingUser" method="post">
+            <div class="panel panel-primary">
+                <div class="panel-heading">아이디 존재 체크 (/process/checkExistingUser)</div>
+                <div class="panel-body">
+                    <label for="id">군번 (=아이디)</label>
+                    <input class="form-control" type="text" name="id" id="">
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-primary btn-lg" type="submit">아이디 존재여부 확인하기</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
     </form>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>
