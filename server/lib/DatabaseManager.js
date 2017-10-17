@@ -114,7 +114,6 @@ var createSchema = function () {
             else
                 callback({
                     result: true,
-                    id: userInfo.id,
                     doc: result[0]._doc
                 });
         });
@@ -213,15 +212,10 @@ var createSchema = function () {
     });
 
     Schema.matching.static('createMatch', function (matchInfo, callback) {
-        var matchId = generateMatchId();
-        console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchId);
+        matchInfo.matchId = generateMatchId();
+        console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchInfo.matchId);
 
-        var match = new Model.matching({
-            initiatorId: matchInfo.initiatorId,
-            activityType: matchInfo.activityType,
-            players: matchInfo.players,
-            matchId: generateMatchId()
-        });
+        var match = new Model.matching(matchInfo);
 
         match.save(function (err) {
             if (err) {
@@ -237,6 +231,44 @@ var createSchema = function () {
                 result: true
             });
         });
+    });
+
+    Schema.matching.static('deleteMatch', function (initiatorId, matchId, callback) {
+        this.find({ matchId: matchId }, function (err, result) {
+            if (err)
+                callback({
+                    result: false,
+                    reason: 'MongoError',
+                    mongoerror: err
+                })
+            else if (result.length == 0)
+                callback({
+                    result: false,
+                    reason: 'NoSuchMatchException'
+                })
+            else if (result[0]._doc.initiatorId != initiatorId)
+                callback({
+                    result: false,
+                    reason: 'ForbiddenOperationException'
+                });
+            else
+                this.remove({ matchId: matchId }, function (err) {
+                    if (err)
+                        callback({
+                            result: false,
+                            reason: 'MongoError',
+                            mongoerror: err
+                        });
+                    else {
+                        console.log('[정보] 매치를 삭제합니다. 매치 ID [%s]', matchId);
+                        callback({
+                            result: true
+                        });
+                    }
+                });
+        });
+
+
     });
 
     Schema.matching.static('getAllMatches', function (callback) {
