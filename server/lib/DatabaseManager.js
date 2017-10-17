@@ -1,14 +1,4 @@
-/**
- * 전투체육 매칭 Backend
- * 
- * 이 App에서는 매칭 데이터를 받아 처리한 뒤,
- * Client에서 원하는 때 받아 쓸 수 있도록 처리해두고
- * 필요할 때 request하여 받아쓸 수 있게 합니다.
- * 
- * @version 1.0.0
- * @description 전투체육 매칭 Application Backend
- * @author 김범수, 안정인, 임대인
- */
+
 var mongoose = require('mongoose'),
     crypto = require('crypto');
 
@@ -16,20 +6,20 @@ var mongoose = require('mongoose'),
 var database;
 
 var Schema = {
-    user: null,
-    matching: null
+    User: null,
+    Queue: null
 };
 
 var Model = {
-    user: null,
-    matching: null
+    User: null,
+    Queue: null
 };
 
 /**
  * 데이터베이스에 연결합니다.
- * @param {express} app Express Application
+ * @param {Express} app Express Application
  */
-var connectDB = function(app) {
+var connectDB = function (app) {
     var databaseUrl = 'mongodb://localhost:27017/matching';
 
     mongoose.Promise = global.Promise;
@@ -60,10 +50,10 @@ var connectDB = function(app) {
 /**
  * 스키마를 생성합니다.
  */
-var createSchema = function() {
+var createSchema = function () {
 
     // 사용자 스키마
-    Schema.user = mongoose.Schema({
+    Schema.User = mongoose.Schema({
         id: { type: String, required: true, unique: true, default: ' ' },
         hashed_password: { type: String, required: true, unique: false, default: ' ' },
         salt: { type: String, required: true },
@@ -77,7 +67,7 @@ var createSchema = function() {
         updated_at: { type: Date, index: { unique: false }, default: Date.now }
     });
 
-    Schema.user.virtual('password').set(function (plaintext) {
+    Schema.User.virtual('password').set(function (plaintext) {
         this._plaintext = plaintext;
         this.salt = this.makeSalt();
         this.hashed_password = this.encryptSHA1(plaintext);
@@ -85,23 +75,24 @@ var createSchema = function() {
         return this._plaintext;
     });
 
-    Schema.user.method('encryptSHA1', function (plaintext, salt) {
+
+    Schema.User.method('encryptSHA1', function (plaintext, salt) {
         return crypto.createHmac('sha1', salt || this.salt).update(plaintext).digest('hex');
     });
 
-    Schema.user.method('auth', function (plaintext, salt, hashed_password) {
+    Schema.User.method('auth', function (plaintext, salt, hashed_password) {
         return this.encryptSHA1(plaintext, salt || null) == hashed_password;
     });
 
-    Schema.user.method('makeSalt', function () {
+    Schema.User.method('makeSalt', function () {
         return Math.floor(Date.now() * Math.random() * Math.random());
     });
 
-    Schema.user.static('findId', function(userInfo, callback) {
-        this.find({ id: userInfo.id }, function(err, result) { 
-            if(err)
+    Schema.User.static('findId', function (UserInfo, callback) {
+        this.find({ id: UserInfo.id }, function (err, result) {
+            if (err)
                 throw err;
-            else if(result.length == 0)
+            else if (result.length == 0)
                 callback({
                     result: false,
                     reason: 'NoSuchUserException'
@@ -111,28 +102,37 @@ var createSchema = function() {
                     result: false,
                     reason: 'MultipleUserException'
                 });
-            else 
-                callback({ 
+            else
+                callback({
                     result: true,
-                    id: userInfo.id,
+                    id: UserInfo.id,
                     doc: result[0]._doc
                 });
         });
     });
 
-    Schema.user.static('authenticate', function (userInfo, callback) {
-        this.findId(userInfo, function(result) {
-            if(!result.result)
+    Schema.User.static('authenticate', function (UserInfo, callback) {
+        this.findId(UserInfo, function (result) {
+            if (!result.result)
                 callback(result);
             else {
-                var user = new Model.user({ id: userInfo.id });
-                if (user.auth(userInfo.password, result.doc.salt, result.doc.hashed_password))
+                var User = new Model.User({ id: UserInfo.id });
+                if (User.auth(UserInfo.password, result.doc.salt, result.doc.hashed_password)) {
+                    var userInfo = {
+                        id: result.doc.id,
+                        name: result.doc.name,
+                        rank: result.doc.rank,
+                        gender: result.doc.gender,
+                        unit: result.doc.unit,
+                        favoriteEvent: result.doc.favoriteEvent,
+                        description: result.doc.description
+                    };
                     callback({
                         result: true,
-                        id: userInfo.id,
-                        name: result.doc.name
+                        doc: userInfo
+
                     });
-                else
+                } else
                     callback({
                         result: false,
                         reason: 'PasswordMismatch'
@@ -142,6 +142,7 @@ var createSchema = function() {
         });
     });
 
+    /* 
     // 경기 매칭 스키마
     Schema.matching = mongoose.Schema({
         activityType: { type: String, required: true, unique: false, default: ' ' },
@@ -152,76 +153,51 @@ var createSchema = function() {
         finish_at: { type: Date, required: false, index: { unique: false }, default: Date.now }
     });
 
-    Schema.matching.static('getMatch', function(matchId, callback) {
-        this.find({ 'matchId': matchId }, function(err, result) {
-            if(err) {
-                callback({
-                    result: false,
-                    reason: 'MongoError',
-                    mongoerror: err
-                });
-                return;
-            }
-            
-            if(result.length == 0)
-                callback({
-                    result: false,
-                    reason: 'NoSuchMatchException'
-                });
-            else if (result.length > 1)
-                callback({
-                    result: false,
-                    reason: 'MultipleMatchException'
-                })
-            else
-                callback({
-                    result: true,
-                    doc: result[0]._doc
-                });
-        });
-    });
+    Schema.matching.static('findMatch', function (matchInfo, callback) {
 
-    Schema.matching.static('findMatch', function(matchInfo, callback) {
-        console.dir(matchInfo);
-        if(matchInfo.matchId)
-            this.getMatch(matchInfo.matchId, function(result) {
-                if(!result.result)
-                    callback(result);
-                else {
-                    var maxUsers = result.doc.maxUsers;
-                    var partUsers = result.doc.participants.length;
-
-                    if(partUsers >= maxUsers) {
-                        callback({
-                            result: false,
-                            reason: 'FullMatchException'
-                        })
-                    } else {
-                        callback({
-                            result: true,
-                            participants: result.doc.participants,
-                            description: 'MatchUpdatePending'
-                        })
-                    }
+        if (matchInfo.matchId) {
+            this.find({ 'matchId': matchInfo.matchId }, function (err, result) {
+                if (err) {
+                    callback({
+                        result: false,
+                        reason: 'MongoError',
+                        mongoerror: err
+                    });
+                    return;
                 }
-            });
-        else
+
+                if (result.length == 0)
+                    callback({
+                        result: false,
+                        reason: 'NoSuchMatchException'
+                    });
+                else if (result.length > 1)
+                    callback({
+                        result: false,
+                        reason: 'MultipleMatchException'
+                    })
+                else
+                    callback({
+                        result: true,
+                        doc: result[0]._doc
+                    });
+            })
+
+        } else
             callback({
                 result: false,
                 reason: 'NoMatchIdException'
             })
     });
 
-    /**
-     * 여기서 사용하는 matchInfo에는 기존 participants가 들어간다.
-     */
-    Schema.matching.static('updateMatchParticipants', function(matchInfo, callback) {
+    // 여기서 사용하는 matchInfo에는 기존 participants가 들어간다.
+    Schema.matching.static('updateMatchParticipants', function (matchInfo, callback) {
         var newParticipants = matchInfo.participants.concat(matchInfo.participantId);
 
         Model.matching.update({ matchId: matchInfo.matchId }, {
             participants: newParticipants
-        }, function(err) {
-            if(err) {
+        }, function (err) {
+            if (err) {
                 callback({
                     result: false,
                     reason: 'MongoError',
@@ -232,12 +208,12 @@ var createSchema = function() {
 
             callback({
                 result: true,
-                participants: newParticipants   
+                participants: newParticipants
             })
         });
     });
 
-    Schema.matching.static('createMatch', function(matchInfo, callback) {
+    Schema.matching.static('createMatch', function (matchInfo, callback) {
         var matchId = generateMatchId();
         console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchId);
 
@@ -247,9 +223,9 @@ var createSchema = function() {
             maxUsers: matchInfo.maxUsers,
             matchId: generateMatchId()
         });
-        
-        match.save(function(err) {
-            if(err) {
+
+        match.save(function (err) {
+            if (err) {
                 callback({
                     result: false,
                     reason: 'MongoError',
@@ -265,9 +241,31 @@ var createSchema = function() {
         });
     });
 
-    Schema.matching.static('getAllMatches', function(callback) {
-        this.find({}, function(err, result) {
-            if(err)
+    Schema.matching.static('quitMatch', function (matchInfo, callback) {
+        this.findMatch(matchInfo, function (result) {
+            if (!result.result)
+                callback({
+                    result: false,
+                    reason: 'NoSuchMatchException'
+                });
+            else {
+                var doc = result.doc;
+                
+                if(doc.participants.indexOf(matchInfo.participantId) == -1) {
+                    callback({
+                        result: false,
+                        reason: 'NoSuchUserInMatch'
+                    });
+                    return;
+                }
+            }
+
+        });
+    });
+
+    Schema.matching.static('getAllMatches', function (callback) {
+        this.find({}, function (err, result) {
+            if (err)
                 callback({
                     result: false,
                     reason: 'MongoError',
@@ -279,11 +277,92 @@ var createSchema = function() {
                     docs: result
                 })
         });
+    }); */
+    
+    Schema.Queue = mongoose.schema({
+        activityType: { type: String, required: true, unique: false, default: ' ' },
+        participants: { type: Array, required: true, unique: false, default: [] },
+        matchId: { type: String, required: true, unique: true },
+        start_at: { type: Date, required: true, index: { unique: false }, default: Date.now },
+        finish_at: { type: Date, required: false, index: { unique: false }, default: Date.now }
     });
-
+    
+    /**
+     * findUserQueue()
+     * 
+     * 해당 사용자가 들어있는 큐를 찾아낸다.
+     * 
+     * @param {String} userId 사용자의 이름을 나타냄
+     * @param {Function} callback(result) 콜백 함수를 나타냄
+     */
+    var findUserQueue = function(userId, callback) {
+        this.find({
+            participants: {
+                $elemMatch: userId 
+            }
+        }, function(err, result) {
+            if(err) {
+                callback({
+                    result: false,
+                    reason: 'MongoError',
+                    mongoerror: err
+                });
+                return;
+            }
+    
+            if(result.length == 0)
+                callback({
+                    result: false,
+                    reason: 'NoSuchElementException'
+                });
+            else
+                callback({
+                    result: true,
+                    doc: result[0]._doc
+                });
+        });
+    };
+    
+    /**
+     * findAllQueues()
+     * 
+     * 모든 큐를 반환한다.
+     * 
+     * @param {Function} callback(results) 콜백 함수
+     */
+    var findAllQueues = function(callback) {
+        this.find({}, function(err, result) {
+            if(err) {
+                callback({
+                    result: false,
+                    reason: 'MongoError',
+                    mongoerror: err
+                });
+                return;
+            }
+    
+            if(result.length == 0)
+                callback({
+                    result: false,
+                    reason: 'NoSuchElementException'
+                });
+            else
+                callback({
+                    result: true,
+                    docs: result
+                });
+        });
+    };
+    
+    // 스태틱 함수 설정
+    Schema.Queue.static('findUserQueue', findUserQueue);
+    Schema.Queue.static('findAllQueues', findAllQueues);
+    
+    Model.Queue = mongoose.model('queue', Schema.Queue);
+    
     // 모델 만들기
-    Model.user = mongoose.model('user', Schema.user);
-    Model.matching = mongoose.model('matching', Schema.matching);
+    Model.User = mongoose.model('User', Schema.User);
+    Model.Queue = mongoose.model('Queue', Schema.Queue);
 };
 
 /**
@@ -292,28 +371,48 @@ var createSchema = function() {
  * @param {Object} userInfo 사용자 정보를 담고 있는 객체
  * @param {Function} callback 콜백 함수
  */
-var createUser = function(userInfo, callback) {
-    var User = new Model.user(userInfo);
-    User.save(function (err) {
+var createUser = function (userInfo, callback) {
+    var user = new Model.User(userInfo);
+    user.save(function (err) {
         if (err) callback(err);
         else callback(null);
     });
 };
 
-var generateMatchId = function() {
+/**
+ * 큐를 생성하는 함수입니다.
+ * 
+ * @param {Object} queueInfo 큐 정보를 담고 있는 객체
+ * @param {Function} callback 콜백 함수
+ */
+var addQueue = function(queueInfo, callback) {
+
+    Schema.Queue.findUserQueue(queueInfo.participantId, function(result) {
+        if(result.result)
+    });
+
+    var queue = new Model.Queue(queueInfo);
+    queue.save(function (err) {
+        if(err) callback(err)
+        else callback(null);
+    });
+};
+
+var generateQueueID = function () {
     return crypto.randomBytes(48).toString('hex');
-}
+};
 
 /**
  * 모듈 Export
  */
 module.exports = {
     // Global Variables
-    database : database,
+    database: database,
     Schema: Schema,
     Model: Model,
 
     // Functions
     connectDB: connectDB,
-    createUser: createUser
+    createUser: createUser,
+    addQueue: addQueue
 };

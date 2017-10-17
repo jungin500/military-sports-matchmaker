@@ -18,8 +18,8 @@ var http = require('http'),
     bodyParser = require('body-parser'),
     static = require('serve-static'),
     path = require('path'),
-    DatabaseManager = require('./lib/DatabaseManager'),
-    UserManager = require('./lib/UserManager');
+    DatabaseManager = require('./lib/DatabaseManager');
+//UserManager = require('./lib/UserManager');
 
 // express 이용 HTTP 서버 설정
 var app = express();
@@ -32,6 +32,7 @@ var router = express.Router();
 // 라우터 설정
 // 사용자 추가 (회원가입)
 router.route('/process/registerUser').post(function (req, res) {
+
     var userInfo = {
         id: req.body.id,
         password: req.body.password,
@@ -82,9 +83,9 @@ router.route('/process/registerUser').post(function (req, res) {
     });
 });
 
-router.route('/process/checkLoggedIn').get(function(req, res) {
+router.route('/process/checkLoggedIn').get(function (req, res) {
 
-    if(req.session.userInfo)
+    if (req.session.userInfo)
         res.json({
             logged_as: req.session.userInfo.id
         });
@@ -102,7 +103,7 @@ router.route('/process/loginUser').post(function (req, res) {
         password: req.body.password
     };
     DatabaseManager.Model.user.authenticate(userInfo, function (result) {
-        if(result.result) {
+        if (result.result) {
             console.log('[정보] 로그인 완료. 세션에 추가 중');
             req.session.userInfo = {
                 id: userInfo.id
@@ -116,8 +117,8 @@ router.route('/process/loginUser').post(function (req, res) {
 });
 
 router.route('/process/logoutUser').get(function (req, res) {
-    req.session.destroy(function(err) {
-        if(err) throw err;
+    req.session.destroy(function (err) {
+        if (err) throw err;
         res.json({
             result: true
         });
@@ -128,14 +129,23 @@ router.route('/process/logoutUser').get(function (req, res) {
 });
 
 router.route('/process/getMatchList').get(function (req, res) {
-    DatabaseManager.Model.matching.getAllMatches(function(result) {
+   /*  DatabaseManager.Model.matching.getAllMatches(function (result) {
         res.json(result);
         res.end();
-    });
+    }); */
+});
+
+router.route('/process/getUserMatch').post(function (req, res) {
+    /* 
+   DatabaseManager.Model.matching.getUserMatch(function(result) {
+       
+   })  */
 });
 
 router.route('/process/requestMatch').post(function (req, res) {
-    if(!req.session.userInfo) {
+    /* if (!req.session.userInfo) {
+        // 로그인되지 않은 사용자의 접근을 거부한다.
+
         res.json({
             result: false,
             reason: 'NotLoggedInException'
@@ -143,7 +153,7 @@ router.route('/process/requestMatch').post(function (req, res) {
         res.end();
         return;
     }
-    
+
     var matchInfo = {
         participantId: req.session.userInfo.id,
         activityType: req.body.activityType,
@@ -151,16 +161,16 @@ router.route('/process/requestMatch').post(function (req, res) {
         matchId: req.body.matchId || null
     }
 
-    DatabaseManager.Model.matching.findMatch(matchInfo, function(result) {
-        if(result.result) {
+    DatabaseManager.Model.matching.findMatch(matchInfo, function (result) {
+        if (result.result) {
             matchInfo.participants = result.participants;
-            DatabaseManager.Model.matching.updateMatchParticipants(matchInfo, function(result) {
+            DatabaseManager.Model.matching.updateMatchParticipants(matchInfo, function (result) {
                 res.json(result);
                 res.end();
             });
         } else if (result.reason == 'NoSuchMatchException'
-                || result.reason == 'NoMatchIdException')
-            DatabaseManager.Model.matching.createMatch(matchInfo, function(result) {
+            || result.reason == 'NoMatchIdException')
+            DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
                 res.json(result);
                 res.end();
             });
@@ -168,13 +178,24 @@ router.route('/process/requestMatch').post(function (req, res) {
             res.json(result);
             res.end();
         }
-    });
+    }); */
 });
 
+router.route('/process/quitMatch').post(function (req, res) {
+   /*  var matchInfo = {
+        participantId: req.session.userInfo.id,
+        matchId: req.body.matchId
+    };
+
+    DatabaseManager.Model.matching.quitMatch(matchInfo, function(result) {
+
+    }); */
+})
+
 router.route('/process/heartbeat').get(function (req, res) {
-    // Heartbeat
+   /*  // Heartbeat
     res.json({ result: 'result' });
-    res.end();
+    res.end(); */
 });
 
 router.route('/process/checkExistingUser').post(function (req, res) {
@@ -183,8 +204,8 @@ router.route('/process/checkExistingUser').post(function (req, res) {
         id: req.body.id
     };
 
-    DatabaseManager.Model.user.findId(userInfo, function(result) {
-        if(result.result)
+    DatabaseManager.Model.user.findId(userInfo, function (result) {
+        if (result.result)
             res.json({
                 result: true,
                 id: result.doc.id,
@@ -198,6 +219,13 @@ router.route('/process/checkExistingUser').post(function (req, res) {
 
 // Express에 각 미들웨어 적용 및 서버 시작
 app.use(cookieParser());
+app.use(function (req, res, next) {
+    console.log('[MID] 쿠키 정보 Print');
+    console.dir(req.cookies);
+
+    next();
+});
+
 app.use(session({
     secret: 'F$GKeE%tJaf($&#(SfGISf*%#n#@!zSWh9',
     resave: true,
@@ -224,6 +252,6 @@ var server = http.createServer(app).listen(app.get('port'), function () {
     console.log('[정보] 서버 시작됨. %d에서 listen 중', app.get('port'));
 });
 
-server.on('request', function(req, res) {
-    console.log('[정보] 외부 연결: %s', req.connection.remoteAddress);
+server.on('request', function (req, res) {
+    console.log('[정보][%d] 외부 연결: %s', Date.now(), req.connection.remoteAddress);
 });
