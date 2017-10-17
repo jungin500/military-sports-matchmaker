@@ -6,15 +6,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class HomeActivity extends AppCompatActivity {
+
+public class HomeActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     //Helper
     private SessionManager smgr;
     private HashMap<String, String> prof;
+    private SimpleAdapter menuAdapter;
 
     //Widgets
     private TextView textWelcome;
@@ -50,8 +51,9 @@ public class HomeActivity extends AppCompatActivity {
         textQStatus.setText("축구 매치 대기중입니다.");
 
         // add adapter to listview. Long boring stuff, so factor into separate method.
-        ListView homeMenu = (ListView) findViewById(R.id.home_menu);
+        homeMenu = (ListView) findViewById(R.id.home_menu);
         setHomeMenu(homeMenu);
+        homeMenu.setOnItemClickListener(this);
     }
 
     @Override
@@ -81,7 +83,24 @@ public class HomeActivity extends AppCompatActivity {
         hashMapMenuList.add(menu4);
         String[] from = {"line1", "line2"};
         int[] to = {android.R.id.text1, android.R.id.text2};
-        SimpleAdapter menuAdapter = new SimpleAdapter(this, hashMapMenuList, android.R.layout.simple_list_item_2, from, to);
+        menuAdapter = new SimpleAdapter(this, hashMapMenuList, android.R.layout.simple_list_item_2, from, to);
         homeMenu.setAdapter(menuAdapter);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        switch (parent.getId()){
+            case R.id.home_menu:
+                switch(position){
+                    case 0:
+                        Intent intent = new Intent(getApplicationContext(), ChooseSportActivity.class);
+                        startActivity(intent);
+                        break;
+                    //TODO: 구현
+                    default:
+                        Toast.makeText(getApplicationContext(), "아직 미구현", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
     }
 }
