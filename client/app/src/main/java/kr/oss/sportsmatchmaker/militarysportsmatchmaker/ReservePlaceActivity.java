@@ -16,6 +16,7 @@ public class ReservePlaceActivity extends AppCompatActivity implements OnClickLi
 
     Spinner BL; //대대
 
+    //TODO: Replace with DB
     String[] BLarr = {"대대선택","1대대","2대대","3대대","4대대"};
 
     String Bl[] = {"1대대","1대대","3대대","4대대"};

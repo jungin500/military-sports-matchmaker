@@ -17,16 +17,16 @@
             android:id="@+id/playerNumber"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.2"
+            android:layout_weight="0.3"
             android:ems="10"
-            android:hint="참가희망 인원"
+            android:hint="참가 인원"
             android:inputType="number" />
 
         <Button
             android:id="@+id/player_show"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.3"
+            android:layout_weight="0.2"
             android:text="새로고침" />
 
         <CheckBox
@@ -40,7 +40,7 @@
             android:id="@+id/enterQueue"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.3"
+            android:layout_weight="0.2"
             android:text="큐 진입" />
     </LinearLayout>
 
