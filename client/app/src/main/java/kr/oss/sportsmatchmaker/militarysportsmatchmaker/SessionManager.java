@@ -31,6 +31,7 @@ public class SessionManager {
     public static final String IS_LOGGEDIN = "IsLoggedIn";
     public static final String ID = "id";
     public static final String NAME = "name";
+    public static final String RANK = "rank";
 
     // Session manager constructor. get application context as input.
     public SessionManager(Context context){

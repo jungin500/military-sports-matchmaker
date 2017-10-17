@@ -99,6 +99,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                     //TODO: 구현
                     default:
                         Toast.makeText(getApplicationContext(), "아직 미구현", Toast.LENGTH_SHORT).show();
+                        break;
                 }
                 break;
         }

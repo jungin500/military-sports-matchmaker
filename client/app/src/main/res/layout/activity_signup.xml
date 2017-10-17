@@ -120,7 +120,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="좋아하는 운동 (축구, 족구 등)"/>
+        android:hint="좋아하는 운동 (축구, 족구 등)"/>
 
     <EditText
         android:id="@+id/signup_desc"
@@ -128,7 +128,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="자기소개" />
+        android:hint="자기소개" />
 
     <Button
         android:id="@+id/signup_signup"

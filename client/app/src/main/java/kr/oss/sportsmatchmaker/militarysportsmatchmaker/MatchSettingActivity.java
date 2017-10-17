@@ -47,7 +47,7 @@ public class MatchSettingActivity extends AppCompatActivity {
         String[] name = null;
         listDataArray = new ArrayList<ListData>();
         for (int i = 1; i <= playernum; i++) {
-            ListData data = new ListData("01.jpg", "선수 추가", "");
+            ListData data = new ListData("01.jpg", "선수 추가", "선수 검색");
             listDataArray.add(data);
         }
 
