@@ -8,12 +8,12 @@ import android.widget.Button;
 public class ListData {
     private String face;
     private String name;
-    private String textview;
+    private String button;
 
-    public ListData(String face, String name, String textview) {
+    public ListData(String face, String name, String button) {
         this.face = face;
         this.name = name;
-        this.textview = textview;
+        this.button = button;
     }
 
     public String getFace() {
@@ -24,8 +24,8 @@ public class ListData {
         return name;
     }
 
-    public String getText() {
-        return textview;
+    public String getButton() {
+        return button;
     }
 }
 

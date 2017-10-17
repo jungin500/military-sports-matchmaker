@@ -30,6 +30,8 @@ public class SignupActivity extends AppCompatActivity {
     private EditText pwView2;
     private EditText nameView;
     private EditText unitView;
+    private EditText favView;
+    private EditText descView;
     private Spinner rankView;
     private Spinner sexView;
     private Button signupButton;
@@ -50,6 +52,8 @@ public class SignupActivity extends AppCompatActivity {
         pwView2 = (EditText) findViewById(R.id.signup_pw2);
         nameView = (EditText) findViewById(R.id.signup_name);
         unitView = (EditText) findViewById(R.id.signup_unit);
+        favView = (EditText) findViewById(R.id.signup_favorite);
+        descView = (EditText) findViewById(R.id.signup_desc);
 
 
         // set spinner to rank
@@ -112,6 +116,8 @@ public class SignupActivity extends AppCompatActivity {
                 String pw2 = pwView2.getText().toString();
                 String name = nameView.getText().toString();
                 String unit = unitView.getText().toString();
+                String fav = favView.getText().toString();
+                String desc = descView.getText().toString();
                 String rank = rankView.getSelectedItem().toString();
                 int rankid = ranks.size() - ranks.indexOf(rank) - 2; // 선택.
                 String sex = sexView.getSelectedItem().toString();
@@ -164,6 +170,16 @@ public class SignupActivity extends AppCompatActivity {
                     errorSex.requestFocus();
                     return;
                 }
+                if (fav.equals("")){
+                    favView.setError("좋아하는 운동을 입력해주십시오.");
+                    favView.requestFocus();
+                    return;
+                }
+                if (desc.equals("")){
+                    descView.setError("자기소개를 입력해주십시오.");
+                    descView.requestFocus();
+                    return;
+                }
 
                 AsyncHttpClient client = new AsyncHttpClient();
                 RequestParams params = new RequestParams();
@@ -173,11 +189,10 @@ public class SignupActivity extends AppCompatActivity {
                 params.put("rank", rankid);
                 params.put("unit", unit);
                 params.put("gender",sexid);
-                params.put("favoriteEvent","default");
-                params.put("description","default");
+                params.put("favoriteEvent",fav);
+                params.put("description",desc);
 
                 String registerURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/registerUser";
-
                 client.post(registerURL, params, new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

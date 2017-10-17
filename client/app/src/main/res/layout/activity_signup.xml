@@ -114,6 +114,22 @@
         android:hint="소속" />
 
 
+    <EditText
+        android:id="@+id/signup_favorite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="좋아하는 운동 (축구, 족구 등)"/>
+
+    <EditText
+        android:id="@+id/signup_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="자기소개" />
+
     <Button
         android:id="@+id/signup_signup"
         android:layout_width="160dp"
