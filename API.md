@@ -114,3 +114,21 @@
 - reason: 실패 시 사유 (result = false)
     - NoSuchUserException
     - NotLoggedInException
+
+---
+
+## /process/getUserMatch (POST)
+### Input
+- (Session) userInfo: 로그인 정보 (해당 유저의 Match인지 체크)
+
+### Output
+- result: 결과 (true/false)
+- match: 성공시 Match 정보
+    - activityType: 경기 종류
+    - players: 플레이어 목록 (배열)
+    - stadium: 경기장 이름
+    - start_at: 매치 생성 시간
+    - matchId: 매치 고유 ID
+    - initiatorId: 매치 생성자 ID
+- reason: 실패 시 사유 (result = false)
+    - NotLoggedInException

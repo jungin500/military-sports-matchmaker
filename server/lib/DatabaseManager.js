@@ -17,12 +17,14 @@ var database;
 
 var Schema = {
     user: null,
-    matching: null
+    matching: null,
+    stadium: null
 };
 
 var Model = {
     user: null,
-    matching: null
+    matching: null,
+    stadium: null
 };
 
 /**
@@ -148,11 +150,12 @@ var createSchema = function () {
         activityType: { type: String, required: true, unique: false, default: ' ' },
         players: { type: Array, required: true, unique: false, default: [] },
         matchId: { type: String, required: true, unique: true },
+        stadium: { type: String, required: true, unique: false, default: 'Normal Stadium' },
         start_at: { type: Date, required: true, index: { unique: false }, default: Date.now }
     });
 
-    Schema.matching.static('getMatch', function (matchId, callback) {
-        this.find({ 'matchId': matchId }, function (err, result) {
+    Schema.matching.static('getMatch', function (initiatorId, callback) {
+        this.find({ 'initiatorId': initiatorId }, function (err, result) {
             if (err) {
                 callback({
                     result: false,
@@ -175,7 +178,7 @@ var createSchema = function () {
             else
                 callback({
                     result: true,
-                    doc: result[0]._doc
+                    match: result[0]._doc
                 });
         });
     });
@@ -287,9 +290,22 @@ var createSchema = function () {
         });
     });
 
+    // 경기장 스키마
+    Schema.stadium = mongoose.Schema({
+        name: { type: String, required: true, unique: true },
+        available_type: { type: Array, required: true, unique: false },
+        belong_at: { type: String, required: true, unique: false },
+        max_players: { type: Number, required: true, unique: false },
+        min_players: { type: Number, required: true, unique: false },
+        in_players: { type: Number, required: false, unique: false },
+        matches: { type: Array, required: false, unique: false },
+        modified_at: { type: Date, required: true, index: { unique: false }, default: Date.now }
+    });
+
     // 모델 만들기
     Model.user = mongoose.model('user', Schema.user);
     Model.matching = mongoose.model('matching', Schema.matching);
+    Model.stadium = mongoose.model('stadium', Schema.stadium);
 };
 
 /**

@@ -134,6 +134,22 @@ router.route('/process/getMatchList').get(function (req, res) {
     });
 });
 
+router.route('/process/getUserMatch').get(function(req, res) {
+    if(!req.session.userInfo) {
+        res.json({
+            result: false,
+            reason: 'NotLoggedInException'
+        });
+        res.end();
+        return;
+    }
+
+    DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function(result) {
+        res.json(result);
+        res.end();
+    });
+});
+
 router.route('/process/requestMatch').post(function (req, res) {
     if (!req.session.userInfo) {
         res.json({
