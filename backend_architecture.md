@@ -1,10 +1,10 @@
 백엔드 아키텍쳐
 데이터는 크게 3종류로 구성
 - user
-	회원가입으로 생성
+	회원가입으로 생성 √
 
 - match
-	user의 requestMatch POST로 생성
+	user의 requestMatch POST로 생성 √
 	stadium id를 속성으로 받음
 	회원이 삭제 가능
 

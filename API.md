@@ -25,7 +25,7 @@
 ### Input
 
 ### Output (JSON)
-- logged_as: 결과 (req.session.userInfo.id 또는 false)
+- result: 결과 (true/false)
 
 ---
 
@@ -77,7 +77,6 @@
 
 ### Output (JSON)
 - result: 결과(true/false)
-- participants: 성공했을 경우, 새로운 참가자 리스트 배열
 - reason: false일경우 이유
     - NotLoggedInException
     - MongoError (DB 오류)
@@ -99,6 +98,19 @@
 
 ### Output
 - result: 결과 (true/false)
-- id: true일경우, 가져온 사용자 ID
-- name: true일경우, 가져온 사용자 이름
 - DatabaseManager.Model.user.findId의 Callback result
+
+---
+
+## /process/searchUserDetails (POST)
+### Input
+- (Session) userInfo: 로그인 정보 (로그인 여부 체크)
+- id: 사용자 ID
+
+### Output
+- result: 결과 (true/false)
+- name: 성공 시 사용자 이름
+- rank: 성공 시 사용자 계급
+- reason: 실패 시 사유 (result = false)
+    - NoSuchUserException
+    - NotLoggedInException
