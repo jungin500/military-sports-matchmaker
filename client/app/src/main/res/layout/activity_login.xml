@@ -35,12 +35,13 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/goonbun"
+                    android:id="@+id/id"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_goonbun"
+                    android:inputType="numberSigned"
+                    android:digits="0123456789-"
                     android:maxLines="1"
-                    android:inputType="number"
                     android:singleLine="true" />
 
             </android.support.design.widget.TextInputLayout>
@@ -75,7 +76,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/action_sign_in"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"/>
 
                 <Button
                     android:id="@+id/signup"
@@ -83,7 +85,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="회원가입" />
+                    android:text="회원가입"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"
+                    />
             </LinearLayout>
 
         </LinearLayout>
