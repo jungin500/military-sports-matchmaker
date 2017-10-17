@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/lay_background"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
+        <TextView
+            android:id="@+id/txt_dialog_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="검색"
+            android:textStyle="bold" />
+
+
+        <EditText
+            android:id="@+id/txt_modify_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txt_dialog_title" />
+
+
+        <ImageButton
+            android:layout_below="@+id/txt_modify_edit"
+            android:id="@+id/btn_modify_done"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:scaleType="fitCenter"/>
+
+    </RelativeLayout>
+
+
+</RelativeLayout>
