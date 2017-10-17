@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class HomeActivity extends AppCompatActivity {
@@ -19,7 +20,7 @@ public class HomeActivity extends AppCompatActivity {
     private TextView textWelcome;
     private Button logoutButton;
     private TextView textQStatus;
-    private ListView homemenu;
+    private ListView homeMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +41,47 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 smgr.logout();
+                finish();
             }
         });
 
-        // TextView setting
+        // queue status message
+        textQStatus = (TextView) findViewById(R.id.home_qstatus);
+        textQStatus.setText("축구 매치 대기중입니다.");
 
+        // add adapter to listview. Long boring stuff, so factor into separate method.
+        ListView homeMenu = (ListView) findViewById(R.id.home_menu);
+        setHomeMenu(homeMenu);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        smgr.checkLogin();
+    }
+
+    private void setHomeMenu(ListView homeMenu){
+        ArrayList<HashMap<String, String>> hashMapMenuList = new ArrayList<HashMap<String,String>>();
+        HashMap<String, String> menu1 = new HashMap<String, String>();
+        menu1.put("line1", "전투체육 같이 할 사람 찾기");
+        menu1.put("line2", "종목을 고르시면 자동으로 팀원과 상대방을 찾아드립니다.");
+        hashMapMenuList.add(menu1);
+        HashMap<String, String> menu2 = new HashMap<String, String>();
+        menu2.put("line1", "전투체육 활동 등록 및 장소 예약");
+        menu2.put("line2", "이미 사람을 다 모으셨나요? 장소를 잡아드립니다.");
+        hashMapMenuList.add(menu2);
+        HashMap<String, String> menu3 = new HashMap<String, String>();
+        menu3.put("line1", "전투체육 일지");
+        menu3.put("line2", "전우님의 전투체육 참여 현황을 편리하게 볼 수 있습니다.");
+        hashMapMenuList.add(menu3);
+        HashMap<String, String> menu4 = new HashMap<String, String>();
+        menu4.put("line1", "프로필 수정");
+        menu4.put("line2", "개인 프로필 정보를 변경합니다.");
+        hashMapMenuList.add(menu4);
+        String[] from = {"line1", "line2"};
+        int[] to = {android.R.id.text1, android.R.id.text2};
+        SimpleAdapter menuAdapter = new SimpleAdapter(this, hashMapMenuList, android.R.layout.simple_list_item_2, from, to);
+        homeMenu.setAdapter(menuAdapter);
     }
 }

@@ -6,7 +6,16 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
 
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+
+import cz.msebera.android.httpclient.Header;
 
 public class SignupActivity extends AppCompatActivity {
     public static final String EXTRA_ID = "kr.oss.sportsmatchmaker.signup.id";
@@ -25,13 +34,17 @@ public class SignupActivity extends AppCompatActivity {
     private Spinner sexView;
     private Button signupButton;
 
+    // id uniqueness check flag
+    private Boolean idFlag;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
         initializeSpinner();
+        idFlag = true;
 
-        // connect EditText widgets
+        // connect widgets
         idView = (EditText) findViewById(R.id.signup_id);
         pwView = (EditText) findViewById(R.id.signup_pw);
         pwView2 = (EditText) findViewById(R.id.signup_pw2);
@@ -51,14 +64,51 @@ public class SignupActivity extends AppCompatActivity {
         sexView.setAdapter(adapterSex);
         sexView.setSelection(0);
 
-        //TODO: ID 중복체크
+        // check if id already exists in DB.
+        idCheckButton = (Button) findViewById(R.id.signup_idcheck);
+        idCheckButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String id = idView.getText().toString();
+
+                AsyncHttpClient client = new AsyncHttpClient();
+                RequestParams params = new RequestParams();
+                params.put("id",id);
+                String checkURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/checkExistingUser";
+                client.post(checkURL, params, new JsonHttpResponseHandler(){
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        try {
+                            idFlag = ! response.getBoolean("result");
+                            if (! idFlag){
+                                Toast.makeText(getApplicationContext(), "사용 가능한 군번입니다.", Toast.LENGTH_SHORT).show();
+                            }
+                            else {
+                                Toast.makeText(getApplicationContext(), "이미 사용한 군번입니다.", Toast.LENGTH_SHORT).show();
+                            }
+                            idFlag = false;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                        super.onFailure(statusCode, headers, responseString, throwable);
+                    }
+                });
+
+                Toast.makeText(getApplicationContext(), "사용 가능한 군번입니다.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         signupButton = (Button) findViewById(R.id.signup_signup);
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String id = idView.getText().toString();
-                String pw = pwView.getText().toString();
+                final String id = idView.getText().toString();
+                final String pw = pwView.getText().toString();
                 String pw2 = pwView2.getText().toString();
                 String name = nameView.getText().toString();
                 String unit = unitView.getText().toString();
@@ -69,6 +119,11 @@ public class SignupActivity extends AppCompatActivity {
                 // 제대로 다 입력했는지 확인.
                 if (id.equals("")){
                     idView.setError("군번을 입력해주십시오.");
+                    idView.requestFocus();
+                    return;
+                }
+                if (idFlag){
+                    idView.setError("중복검사를 해주십시오.");
                     idView.requestFocus();
                     return;
                 }
@@ -110,15 +165,61 @@ public class SignupActivity extends AppCompatActivity {
                     return;
                 }
 
-                // TODO: 서버로 정보 보내서 회원가입
+                AsyncHttpClient client = new AsyncHttpClient();
+                RequestParams params = new RequestParams();
+                params.put("id", id);
+                params.put("password", pw);
+                params.put("name", name);
+                params.put("rank", rankid);
+                params.put("unit", unit);
+                params.put("gender",sexid);
+                params.put("favoriteEvent","default");
+                params.put("description","default");
+
+                String registerURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/registerUser";
+
+                client.post(registerURL, params, new JsonHttpResponseHandler(){
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        try {
+                            boolean result = response.getBoolean("result");
+                            // success in signing up -> go back to signin screen.
+                            if (result){
+                                // 로그인창으로 돌아가기
+                                Intent data = new Intent();
+                                data.putExtra(EXTRA_ID, id);
+                                data.putExtra(EXTRA_PW, pw);
+                                setResult(RESULT_OK, data);
+                                finish();
+                            }
+                            else {
+                                String error = response.getString("reason");
+                                if (error.equals("MissingValuesException")) {
+                                    Toast.makeText(getApplicationContext(), "입력하지 않은 값이 있습니다.", Toast.LENGTH_SHORT).show();
+                                }
+                                else if (error.equals("AlreadyExistingException")){
+                                    idView.setError("이미 존재하는 군번입니다.");
+                                    idView.requestFocus();
+                                    idFlag = true;
+                                }
+                                else {
+                                    Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
+                                }
+
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
 
-                // 로그인창으로 돌아가기
-                Intent data = new Intent();
-                data.putExtra(EXTRA_ID, id);
-                data.putExtra(EXTRA_PW, pw);
-                setResult(RESULT_OK, data);
-                finish();
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                        super.onFailure(statusCode, headers, responseString, throwable);
+                    }
+                });
+
             }
         });
     }
@@ -152,8 +253,8 @@ public class SignupActivity extends AppCompatActivity {
         sexes = new ArrayList<String>();
         sexes.add("성별");
         sexes.add("----");
-        sexes.add("남성");
         sexes.add("여성");
+        sexes.add("남성");
     }
 
 }

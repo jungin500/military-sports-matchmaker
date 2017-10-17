@@ -29,9 +29,19 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cz.msebera.android.httpclient.Header;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -48,20 +58,9 @@ public class LoginActivity extends AppCompatActivity {
     // signup activity
     private static final int SIGNUP_ACTIVITY = 1;
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "12-1234:foobar", "12-3456:osamoss123"
-    };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-
     // Session manager
     private SessionManager smgr;
+
 
     // UI references.
     private EditText mIdView;
@@ -113,40 +112,12 @@ public class LoginActivity extends AppCompatActivity {
         mProgressView = findViewById(R.id.login_progress);
     }
 
-
-        private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mIdView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
-    }
-
-
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid id, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
         // Reset errors.
         mIdView.setError(null);
         mPasswordView.setError(null);
@@ -181,8 +152,7 @@ public class LoginActivity extends AppCompatActivity {
             // perform the user login attempt.
             // login task attempt -> UserLoginTask
             showProgress(true);
-            mAuthTask = new UserLoginTask(id, password);
-            mAuthTask.execute((Void) null);
+            loginTask(id, password);
         }
     }
 
@@ -231,61 +201,51 @@ public class LoginActivity extends AppCompatActivity {
      * the user.
      */
 
-    /* WRITE NEW */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mid;
-        private final String mPassword;
-
-        UserLoginTask(String id, String password) {
-            mid = id;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mid)) {
-                    // Account exists, return true if the password matches.
-                    if (pieces[1].equals(mPassword)){
-                        //TODO: 이름 채우기
-                        smgr.createSession(mid, "범수", "SID goes here");
-                        return true;
-                    };
+    private void loginTask(final String id, final String pw){
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("id", id);
+        params.put("password", pw);
+        String loginURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/loginUser";
+        client.post(loginURL, params, new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    boolean success = response.getBoolean("result");
+                    if (success) {
+                        String name = response.getString("name");
+                        smgr.createSession(id, name);
+                        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                    else {
+                        String reason = response.getString("reason");
+                        if (reason.equals("NoSuchUserException")) {
+                            mIdView.setError("아이디가 없습니다.");
+                            mIdView.requestFocus();
+                            showProgress(false);
+                        }
+                        else {
+                            mPasswordView.setError("비밀번호가 틀렸습니다.");
+                            mPasswordView.requestFocus();
+                            showProgress(false);
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+
             }
 
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                startActivity(intent);
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                super.onFailure(statusCode, headers, responseString, throwable);
             }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
+        });
     }
+
+
 
     // After signup
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
@@ -295,9 +255,8 @@ public class LoginActivity extends AppCompatActivity {
                 String newpw = data.getStringExtra(SignupActivity.EXTRA_PW);
                 mIdView.setText(newid);
                 mPasswordView.setText(newpw);
+            }
         }
     }
-}
-
 }
 

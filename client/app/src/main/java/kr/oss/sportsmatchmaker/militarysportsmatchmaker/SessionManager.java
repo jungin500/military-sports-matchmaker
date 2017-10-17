@@ -5,7 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
 import java.util.HashMap;
+
+import cz.msebera.android.httpclient.Header;
 
 /**
  * Session Managing methods using SharedPreferences
@@ -23,7 +29,6 @@ public class SessionManager {
     public static final String IS_LOGGEDIN = "IsLoggedIn";
     public static final String ID = "id";
     public static final String NAME = "name";
-    public static final String SID = "sid";
 
     // Session manager constructor
     public SessionManager(Context context){
@@ -32,12 +37,11 @@ public class SessionManager {
         editor = pref.edit();
     }
 
-    // Create new session using id, name, SID if valid.
-    public void createSession(String id, String name, String sid) {
+    // Create new session using id, name if valid.
+    public void createSession(String id, String name) {
         editor.putBoolean(IS_LOGGEDIN, true);
         editor.putString(ID, id);
         editor.putString(NAME, name);
-        editor.putString(SID, sid);
         editor.apply();
     }
 
@@ -47,7 +51,7 @@ public class SessionManager {
         return pref.getBoolean(IS_LOGGEDIN, false);
     }
 
-    // get current user info: id, name, sid.
+    // get current user info: id, name.
     public HashMap<String, String> getProfile(){
         if (!isLoggedIn()){
             return null;
@@ -55,7 +59,6 @@ public class SessionManager {
         HashMap<String, String> prof = new HashMap<String, String>();
         prof.put(ID, pref.getString(ID, null));
         prof.put(NAME, pref.getString(NAME, null));
-        prof.put(SID, pref.getString(SID, null));
         return prof;
     }
 
@@ -67,11 +70,30 @@ public class SessionManager {
 
     // if not logged in, close all activities and return to MainActivity.
     public void logout() {
-        clearSession();
+        if (pref.getString(ID, null) != null) {
+            AsyncHttpClient client = new AsyncHttpClient();
+            String logoutURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/logoutUser";
+            client.get(logoutURL, new AsyncHttpResponseHandler() {
+                @Override
+                public void onSuccess(int i, Header[] headers, byte[] bytes) {
+                    clearSession();
+                    Intent intent = new Intent(context, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    context.startActivity(intent);
+                }
 
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        context.startActivity(intent);
+                @Override
+                public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
+                    // LOGOUT FAILED
+
+                }
+            });
+
+
+        }
+
+
+
     }
 
     // from time to time, check login status and if not logged in, clear editor and logout.
