@@ -71,16 +71,17 @@ function createSchema() {
 
     // 사용자 스키마
     Schema.user = mongoose.Schema({
-        username: { type: String, required: true, unique: true, 'default': ' ' },
-        hashed_password: { type: String, required: true, unique: false, 'default': ' ' },
+        id: { type: String, required: true, unique: true, default: ' ' },
+        hashed_password: { type: String, required: true, unique: false, default: ' ' },
         salt: { type: String, required: true },
-        name: { type: String, index: 'hashed', 'default': ' ' },
-        budae: { type: String, index: 'hashed', 'default': ' ' },
-        milId: { type: String, required: true, unique: true, 'default': ' ' },
-        favoriteEvent: { type: Object, required: false, 'default': {} },
-        description: { type: String, required: true, unique: false, 'default': ' ' },
-        created_at: { type: Date, index: { unique: false }, 'default': Date.now },
-        updated_at: { type: Date, index: { unique: false }, 'default': Date.now }
+        name: { type: String, index: 'hashed', default: ' ' },
+        rank: { type: Number, default: 0 },
+        gender: { type: Number, default: 0 },
+        unit: { type: String, index: 'hashed', default: ' ' },
+        favoriteEvent: { type: Object, required: false, default: {} },
+        description: { type: String, required: true, unique: false, default: ' ' },
+        created_at: { type: Date, index: { unique: false }, default: Date.now },
+        updated_at: { type: Date, index: { unique: false }, default: Date.now }
     });
 
     Schema.user.virtual('password').set(function(plaintext) {
@@ -118,9 +119,9 @@ function createSchema() {
 
     // 경기 매칭 스키마
     Schema.matching = mongoose.Schema({
-        activityType: { type: String, required: true, unique: false, 'default': ' ' },
-        participants: { type: Object, required: true, unique: false, 'default': {} },
-        start_at: { type: String, required: true, unique: false, 'default': ' ' }
+        activityType: { type: String, required: true, unique: false, default: ' ' },
+        participants: { type: Object, required: true, unique: false, default: {} },
+        start_at: { type: String, required: true, unique: false, default: ' ' }
     });
 }
 
@@ -138,11 +139,12 @@ var router = express.Router();
 // 사용자 추가 (회원가입)
 router.route('/process/registerUser').post(function(req, res) {
     var userInfo = {
-        username: req.body.username,
+        id: req.body.id,
         password: req.body.password,
         name: req.body.name,
-        budae: req.body.budae,
-        milId: req.body.milId,
+        rank: req.body.rank,
+        unit: req.body.unit,
+        gender: req.body.gender,
         favoriteEvent : req.body.favoriteEvent,
         description: req.body.description
     };
@@ -170,28 +172,38 @@ router.route('/process/loginUser').post(function(req, res) {
     Model.user.authenticate(userInfo, function(result) {
         if(result) {
             console.log('[알림] 로그인 성공!');
-            res.writeHead(200, {'Content-Type': 'text/html; charset=utf8'});
-            res.end('<h1>로그인 성공</h1>');
+            res.write({ result: 'Success' });
         } else if (result == null)
-            console.log('[알림] 해당 사용자가 없습니다.');
+            res.write({ result: 'No such user.' });
         else if (result == false)
-            console.log('[알림] 사용자의 비밀번호가 틀립니다.');
+            res.write({ result: 'Password not match.' });
+        res.end();
     });
 });
 
 router.route('/process/getMatchList').get(function(req, res) {
     // 현재 진행중인 Match 목록
+    res.json({ result: 'Router Works (getMatchList)' });
+    res.end();
 });
 
-router.route('/process/addMatch').post(function(req, res) {
+router.route('/process/requestMatch').post(function(req, res) {
     // 새로 추가된 Match
     // 무결성 검증 필요
+    res.json({ result: 'Router Works (addMatch)' });
+    res.end();
 });
 
 router.route('/process/heartbeat').get(function(req, res) {
     // Heartbeat
-    res.writeHead(200, {'Content-Type':'text/html;charset=utf8'});
-    res.end('Success');
+    res.json({ result: 'Success' });
+    res.end();
+});
+
+router.route('/process/checkExistingUser').post(function (req, res) {
+    // 기존 회원 ID를 확인한다.
+
+
 });
 
 // Express에 각 미들웨어 적용 및 서버 시작
@@ -199,15 +211,15 @@ router.route('/process/heartbeat').get(function(req, res) {
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use(static(path.join(__dirname, 'public')));
+
 app.use(router);
 
 app.use(session({
-    secret: '123a',
+    secret: 'F$GKeE%tJaf($&#(SfGISf*%#n#@!zSWh9',
     resave: true,
     saveUninitialized: true
 }));
-
-app.use(static(path.join(__dirname, 'public')));
 
 app.use(expressErrorHandler.httpError(404));
 app.use(expressErrorHandler({

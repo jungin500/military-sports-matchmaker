@@ -79,41 +79,73 @@
 - 클라이언트-서버 소통 프로토콜
 	1. 로그인
 	클라이언트 request:
-		/login으로 POST를 보낸다. 폼은 id, pw.
+		`/process/loginUser`으로 POST
+		폼: id(String), password(String).
 	서버 response:
 		성공했으면 성공, 실패했으면 실패.
+		로그인 정보는 서버의 Session에 저장한다.
+		Local의 쿠키가 접근 가능해야 함.
+		
 	2. 회원가입
 	클라이언트 request:
-		/signup으로 POST를 보낸다.
+		`/process/registerUser`으로 POST를 보낸다.
 		폼:
-		id 군번
-		pw 비번
-		name 이름
-		rank 계급
-		gender 성별
-		unit 소속부대 (중대까지)
+		id 군번 (String)
+		password 비번 (String)
+		name 이름 (String)
+		rank 계급 (숫자, 0부터 n까지) (Number)
+		unit 소속부대 (중대까지) (String)
+		gender 성별 (Number, 0은 남자, 1은 여자)
+		favoriteEvent 좋아하는 종목(|으로 구분 or 배열로 구분) (String or Array)
+		description 자기소개 (String)
 	서버 response:
-		회원가입 성공시 성공, 실패시 실패.
+		회원가입 성공시
+			{ 
+				success: true,
+				id: <가입한 사용자 아이디 (String)>
+			}
+
+		회원가입 실패시
+			{
+				success: false,
+				failed_reason: <실패 사유 (String)>
+			}
+
 	2-1. 회원가입 중복체크
 	클라이언트 request:
-		/signup/idexists 로 POST를 보낸다. 폼은 id.
-	서버 response: boolean
-	3. 큐 신청
-	클라이언트 request: POST
-		폼:
-		id 군번
-		sport 종목
-		number 사람 숫자
-		position 희망 포지션 (??)
-		부가기능: 군번 여러개 한번에 받아서 프로필 띄워주기.
-	4. 자리 있는지 / queue 잡혔는지 확인
-	클라이언트 request: GET
-		폼:
-		id 군번
-		sport 종목
-	서버 response:
-	
+		`/process/checkExistingUser` 로 POST를 보낸다. 폼은 id.
+	서버 response: 
+		{
+			result: true|false (boolean)
+		}
 
+	3. 큐 신청
+	클라이언트 request: POST (`/process/requestMatch`)
+		폼:
+		id 군번 (String)
+		activityType 종목 (String)
+		number 사람 숫자 (Number)
+		// position 희망 포지션 (??)
+		부가기능: 군번 여러개 한번에 받아서 프로필 띄워주기.
+	
+	서버 response:
+		{
+			result: true|false (Boolean)
+			failed_reason: 실패시 사유 (String)
+			activityId: <해당 종목 session의 고유 ID> (String)
+		}
+
+	4. 자리 있는지 / queue 잡혔는지 확인
+	클라이언트 request: GET (`/process/getMatchList`)
+		폼:
+		id 군번
+		activityId 종목 고유 ID
+	
+	서버 response:
+		{
+			result: true|false (boolean)
+			
+		}
 
 
 - 부가기능
