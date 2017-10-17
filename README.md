@@ -82,10 +82,16 @@
 		`/process/loginUser`으로 POST
 		폼: id(String), password(String).
 	서버 response:
-		성공했으면 성공, 실패했으면 실패.
+
+		{"result":false,"failed_reason":"해당하는 ID의 사용자가 없습니다."}
+
+		{"result":false,"failed_reason":"비밀번호가 틀렸습니다."}
+
+		{"result":true,"id":"17-76001439"}
+
 		로그인 정보는 서버의 Session에 저장한다.
 		Local의 쿠키가 접근 가능해야 함.
-		
+
 	2. 회원가입
 	클라이언트 request:
 		`/process/registerUser`으로 POST를 보낸다.
@@ -124,7 +130,9 @@
 		폼:
 		id 군번 (String)
 		activityType 종목 (String)
-		number 사람 숫자 (Number)
+		maxUsers 사람 숫자 (Number)
+		matchId 매치 ID (기존 매치에 들어가기를 희망하는 경우)
+		                (새로운 매치는 해당 없음)
 		// position 희망 포지션 (??)
 		부가기능: 군번 여러개 한번에 받아서 프로필 띄워주기.
 	

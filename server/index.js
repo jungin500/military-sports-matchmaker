@@ -12,12 +12,13 @@
 
 var http = require('http'),
     express = require('express'),
+    cookieParser = require('cookie-parser'),
     session = require('express-session'),
     expressErrorHandler = require('express-error-handler'),
     bodyParser = require('body-parser'),
     static = require('serve-static'),
     path = require('path'),
-    
+
     crypto = require('crypto'),
     mongoose = require('mongoose');
 
@@ -47,13 +48,13 @@ function connectDB() {
     database = mongoose.connection;
 
     database.on('error', console.error.bind(console, '[심각] MongoDB 연결 오류'));
-    database.on('open', function() {
+    database.on('open', function () {
         console.log('[정보] MongoDB 연결 성공');
         createSchema();
 
-        database.on('disconnected', function() {
+        database.on('disconnected', function () {
             var tries;
-            if(!(tries = app.get('mongoose-reconnect-try')))
+            if (!(tries = app.get('mongoose-reconnect-try')))
                 app.set('mongodb-reconnect-try', 1);
             else if (tries >= app.get('mongoose-reconnect-max')) {
                 console.log('[심각] MongoDB 연결 불가능. 서버를 종료합니다.ㄴ');
@@ -84,36 +85,67 @@ function createSchema() {
         updated_at: { type: Date, index: { unique: false }, default: Date.now }
     });
 
-    Schema.user.virtual('password').set(function(plaintext) {
+    Schema.user.virtual('password').set(function (plaintext) {
         this._plaintext = plaintext;
         this.salt = this.makeSalt();
         this.hashed_password = this.encryptSHA1(plaintext);
-    }).get(function() {
+    }).get(function () {
         return this._plaintext;
     });
 
-    Schema.user.method('encryptSHA1', function(plaintext, salt) {
+    Schema.user.method('encryptSHA1', function (plaintext, salt) {
         return crypto.createHmac('sha1', salt || this.salt).update(plaintext).digest('hex');
     });
 
-    Schema.user.method('auth', function(plaintext, salt, hashed_password) {
+    Schema.user.method('auth', function (plaintext, salt, hashed_password) {
         return this.encryptSHA1(plaintext, salt || null) == hashed_password;
     });
 
-    Schema.user.static('authenticate', function(userInfo, callback) {
-        this.find({ username: userInfo.username }, function(err, result) {
-            if(err) throw err;
+    Schema.user.method('makeSalt', function () {
+        return Math.floor(Date.now() * Math.random() * Math.random());
+    });
 
-            var resultDoc = result._doc;
-            if(resultDoc) {
-                var user = new Model.user({ username: userInfo.username });
-                if(user.auth(userInfo.password, resultDoc[0].salt, resultDoc[0].hashed_password))
-                    callback(true);
+    Schema.user.static('findId', function(userInfo, callback) {
+        this.find({ id: userInfo.id }, function(err, result) { 
+            if(err)
+                throw err;
+            else if(result.length == 0)
+                callback({
+                    result: false,
+                    reason: 'NoSuchUserException'
+                });
+            else if (result.length > 1)
+                callback({
+                    result: false,
+                    reason: 'MultipleUserException'
+                });
+            else 
+                callback({ 
+                    result: true,
+                    id: userInfo.id,
+                    doc: result[0]._doc
+                });
+        });
+    });
+
+    Schema.user.static('authenticate', function (userInfo, callback) {
+        this.findId(userInfo, function(result) {
+            if(!result.result)
+                callback(result);
+            else {
+                var user = new Model.user({ id: userInfo.id });
+                if (user.auth(userInfo.password, result.doc.salt, result.doc.hashed_password))
+                    callback({
+                        result: true,
+                        id: userInfo.id
+                    });
                 else
-                    callback(false);
+                    callback({
+                        result: false,
+                        reason: 'PasswordMismatch'
+                    });
                 return;
-            } else
-                callback(null);
+            }
         });
     });
 
@@ -121,14 +153,24 @@ function createSchema() {
     Schema.matching = mongoose.Schema({
         activityType: { type: String, required: true, unique: false, default: ' ' },
         participants: { type: Object, required: true, unique: false, default: {} },
-        start_at: { type: String, required: true, unique: false, default: ' ' }
+        matchId: { type: String, required: true, unique: true, default: ' ' },
+        start_at: { type: Date, required: true, index: { unique: false }, default: Date.now },
+        finish_at: { type: Date, required: false, index: { unique: false }, default: Date.now }
     });
+
+    Schema.matching.static('findMatch', function(matchInfo, callback) {
+        
+    });
+
+    // 모델 만들기
+    Model.user = mongoose.model('user', Schema.user);
+    Model.matching = mongoose.model('matching', Schema.matching);
 }
 
 function createUser(userInfo, callback) {
     var User = new Model.user(userInfo);
-    User.save(function(err){
-        if(err) callback(err);
+    User.save(function (err) {
+        if (err) callback(err);
         else callback(null);
     });
 }
@@ -136,90 +178,23 @@ function createUser(userInfo, callback) {
 // express Router 이용 Request routing
 var router = express.Router();
 
-// 사용자 추가 (회원가입)
-router.route('/process/registerUser').post(function(req, res) {
-    var userInfo = {
-        id: req.body.id,
-        password: req.body.password,
-        name: req.body.name,
-        rank: req.body.rank,
-        unit: req.body.unit,
-        gender: req.body.gender,
-        favoriteEvent : req.body.favoriteEvent,
-        description: req.body.description
-    };
-
-    // 정보 중 하나라도 빠졌을 시 오류
-    for(var key in userInfo)
-        if(!userInfo[key]) {
-            res.writeHead(200, {'Content-Type':'text/html;charset=utf8'});
-            res.end('정보가 잘못되었습니다. 모든 정보를 입력해주세요.');
-            return;
-        }
-
-    // 가져온 정보를 MongoOSE 이용하여 DB에 저장
-    createUser(userInfo, function(err) {
-        if(err) throw err;
-        console.log('[정보] 회원가입 완료: ID [%s]', userInfo.username);
-    });
-});
-
-router.route('/process/loginUser').post(function(req, res) {
-    var userInfo = {
-        username: req.body.username,
-        password: req.body.password
-    };
-    Model.user.authenticate(userInfo, function(result) {
-        if(result) {
-            console.log('[알림] 로그인 성공!');
-            res.write({ result: 'Success' });
-        } else if (result == null)
-            res.write({ result: 'No such user.' });
-        else if (result == false)
-            res.write({ result: 'Password not match.' });
-        res.end();
-    });
-});
-
-router.route('/process/getMatchList').get(function(req, res) {
-    // 현재 진행중인 Match 목록
-    res.json({ result: 'Router Works (getMatchList)' });
-    res.end();
-});
-
-router.route('/process/requestMatch').post(function(req, res) {
-    // 새로 추가된 Match
-    // 무결성 검증 필요
-    res.json({ result: 'Router Works (addMatch)' });
-    res.end();
-});
-
-router.route('/process/heartbeat').get(function(req, res) {
-    // Heartbeat
-    res.json({ result: 'Success' });
-    res.end();
-});
-
-router.route('/process/checkExistingUser').post(function (req, res) {
-    // 기존 회원 ID를 확인한다.
-
-
-});
-
 // Express에 각 미들웨어 적용 및 서버 시작
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(static(path.join(__dirname, 'public')));
 
-app.use(router);
-
+app.use(cookieParser());
 app.use(session({
     secret: 'F$GKeE%tJaf($&#(SfGISf*%#n#@!zSWh9',
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 1000 * 60 * 60
+    }
 }));
+
+app.use(router);
 
 app.use(expressErrorHandler.httpError(404));
 app.use(expressErrorHandler({
@@ -229,7 +204,129 @@ app.use(expressErrorHandler({
 }));
 
 // HTTP 서버 구동
-http.createServer(app).listen(app.get('port'), function() {
+http.createServer(app).listen(app.get('port'), function () {
     connectDB();
     console.log('[정보] 서버 시작됨. %d에서 listen 중', app.get('port'));
+});
+
+// 라우터 설정
+// 사용자 추가 (회원가입)
+router.route('/process/registerUser').post(function (req, res) {
+    var userInfo = {
+        id: req.body.id,
+        password: req.body.password,
+        name: req.body.name,
+        rank: req.body.rank,
+        unit: req.body.unit,
+        gender: req.body.gender,
+        favoriteEvent: req.body.favoriteEvent,
+        description: req.body.description
+    };
+
+    // 정보 중 하나라도 빠졌을 시 오류
+    for (var key in userInfo)
+        if (!userInfo[key]) {
+            res.json({
+                result: false,
+                reason: 'MissingValuesException'
+            });
+            res.end();
+            return;
+        }
+
+    // 가져온 정보를 MongoOSE 이용하여 DB에 저장
+    createUser(userInfo, function (err) {
+        if (err) {
+            if (err.code == 11000) {
+                console.log('[오류] 이미 존재하는 사용자에 대한 회원가입');
+                res.json({
+                    success: false,
+                    reason: 'AlreadyExistingException'
+                });
+                res.end();
+                return;
+            } else {
+                console.log('에러 발생!');
+                console.dir(err);
+                console.log('에러 출력 완료');
+                throw err;
+            }
+        } else {
+            console.log('[정보] 회원가입 완료: ID [%s]', userInfo.id);
+            res.json({
+                success: true,
+                id: userInfo.id
+            });
+            res.end();
+            return;
+        }
+    });
+});
+
+router.route('/process/checkLoggedIn').get(function(req, res) {
+    console.dir(req.session);
+    res.json({
+        logged_as: req.session.username
+    });
+    res.end();
+});
+
+router.route('/process/loginUser').post(function (req, res) {
+    var userInfo = {
+        id: req.body.id,
+        password: req.body.password
+    };
+    Model.user.authenticate(userInfo, function (result) {
+        if(result.result) {
+            console.log('세션에 추가 중');
+            req.session.id = result.id;
+            req.session.save(function(err) {
+                if(err) throw err;
+                console.log('세션 저장 완료');
+                console.dir(req.session);
+            });
+        }
+        res.json(result);
+        res.end();
+    });
+});
+
+router.route('/process/getMatchList').get(function (req, res) {
+    // 현재 진행중인 Match 목록
+    res.json({ result: 'Router Works (getMatchList)' });
+    res.end();
+});
+
+router.route('/process/requestMatch').post(function (req, res) {
+    var matchInfo = {
+        id: req.session.id,
+        activityType: req.body.activityType,
+        maxUsers: req.body.maxUsers,
+        matchId: req.body.matchId || null
+    };
+
+    Model.matching.findMatch(matchInfo, function(err, result) {
+        if(err) throw err;
+        
+        res.json(result);
+        res.end();
+    });
+});
+
+router.route('/process/heartbeat').get(function (req, res) {
+    // Heartbeat
+    res.json({ result: 'Success' });
+    res.end();
+});
+
+router.route('/process/checkExistingUser').post(function (req, res) {
+    // 기존 회원 ID를 확인한다.
+    var userInfo = {
+        id: req.body.id
+    };
+
+    Model.user.findId(userInfo, function(result) {
+        res.json(result);
+        res.end();
+    });
 });
