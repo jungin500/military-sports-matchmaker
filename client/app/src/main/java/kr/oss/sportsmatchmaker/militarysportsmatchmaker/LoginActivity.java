@@ -207,6 +207,7 @@ public class LoginActivity extends AppCompatActivity {
         params.put("id", id);
         params.put("password", pw);
         String loginURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/loginUser";
+        client.setCookieStore(smgr.myCookies);
         client.post(loginURL, params, new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

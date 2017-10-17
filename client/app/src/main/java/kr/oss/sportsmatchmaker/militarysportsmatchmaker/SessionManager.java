@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.PersistentCookieStore;
 import com.loopj.android.http.RequestParams;
 
 import java.util.HashMap;
@@ -21,6 +22,7 @@ public class SessionManager {
     SharedPreferences pref;
     SharedPreferences.Editor editor;
     Context context;
+    PersistentCookieStore myCookies;
 
     // SharedPreference identifier
     private static final String PREF_NAME = "pref_session";
@@ -30,11 +32,12 @@ public class SessionManager {
     public static final String ID = "id";
     public static final String NAME = "name";
 
-    // Session manager constructor
+    // Session manager constructor. get application context as input.
     public SessionManager(Context context){
         this.context = context;
         pref = context.getSharedPreferences(PREF_NAME, Activity.MODE_PRIVATE);
         editor = pref.edit();
+        myCookies = new PersistentCookieStore(context);
     }
 
     // Create new session using id, name if valid.
@@ -73,6 +76,7 @@ public class SessionManager {
         if (pref.getString(ID, null) != null) {
             AsyncHttpClient client = new AsyncHttpClient();
             String logoutURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/logoutUser";
+            client.setCookieStore(myCookies);
             client.get(logoutURL, new AsyncHttpResponseHandler() {
                 @Override
                 public void onSuccess(int i, Header[] headers, byte[] bytes) {
