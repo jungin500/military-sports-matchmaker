@@ -130,7 +130,8 @@ var createSchema = function () {
                     callback({
                         result: true,
                         id: userInfo.id,
-                        name: result.doc.name
+                        name: result.doc.name,
+                        rank: result.doc.rank
                     });
                 else
                     callback({
