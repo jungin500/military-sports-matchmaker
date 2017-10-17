@@ -145,29 +145,15 @@ router.route('/process/requestMatch').post(function (req, res) {
     }
 
     var matchInfo = {
-        participantId: req.session.userInfo.id,
+        initiatorId: req.session.userInfo.id,
         activityType: req.body.activityType,
-        maxUsers: req.body.maxUsers,
+        players: req.body.participants.split('|'),
         matchId: req.body.matchId || null
     }
 
-    DatabaseManager.Model.matching.findMatch(matchInfo, function (result) {
-        if (result.result) {
-            matchInfo.participants = result.participants;
-            DatabaseManager.Model.matching.updateMatchParticipants(matchInfo, function (result) {
-                res.json(result);
-                res.end();
-            });
-        } else if (result.reason == 'NoSuchMatchException'
-            || result.reason == 'NoMatchIdException')
-            DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
-                res.json(result);
-                res.end();
-            });
-        else {
-            res.json(result);
-            res.end();
-        }
+    DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
+        res.json(result);
+        res.end();
     });
 });
 
