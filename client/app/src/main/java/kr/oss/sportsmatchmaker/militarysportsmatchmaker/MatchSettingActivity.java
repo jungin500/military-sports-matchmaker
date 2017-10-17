@@ -13,6 +13,8 @@ import java.util.ArrayList;
 
 public class MatchSettingActivity extends AppCompatActivity {
 
+    private ArrayList<ListData> listDataArray = new ArrayList<ListData>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,10 +24,14 @@ public class MatchSettingActivity extends AppCompatActivity {
         int playernum = intent.getIntExtra("BIRTHDAY_KEY", 0);
         String[] name = null;
 
-        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, setnum(name, playernum)) ;
+        for(int i =0;i<playernum;i++){
+            ListData data = new ListData("0"+i+".jpg", i+".", i+".");
+            listDataArray.add(data);
+        }
 
-        ListView listview = (ListView) findViewById(R.id.listview1) ;
-        listview.setAdapter(adapter) ;
+        ListView listview = (ListView) findViewById(R.id.listview1);
+        CustomAdapter customAdapter = new CustomAdapter(this, R.layout.list_btn_sty, listDataArray);
+        listview.setAdapter(customAdapter);
 
     }
 

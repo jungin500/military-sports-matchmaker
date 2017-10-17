@@ -3,15 +3,17 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 /**
  * Created by Administrator on 2017-10-17.
  */
+import android.widget.Button;
+
 public class ListData {
     private String face;
     private String name;
-    private String text;
+    private String textview;
 
-    public ListData(String face, String name, String text) {
+    public ListData(String face, String name, String textview) {
         this.face = face;
         this.name = name;
-        this.text = text;
+        this.textview = textview;
     }
 
     public String getFace() {
@@ -23,8 +25,9 @@ public class ListData {
     }
 
     public String getText() {
-        return text;
+        return textview;
     }
 }
+
 
 
