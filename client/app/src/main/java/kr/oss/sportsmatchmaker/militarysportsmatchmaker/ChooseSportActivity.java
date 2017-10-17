@@ -53,7 +53,7 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
             case R.id.jokgu:
                 Intent intent3 = new Intent(getApplicationContext(), MatchSettingActivity.class);
                 intent3.putExtra(EXTRA_PNUM,PNUM_JOKGU);
-                intent3.putExtra(EXTRA_SPORTTYPE, "football");
+                intent3.putExtra(EXTRA_SPORTTYPE, "jokgu");
                 startActivity(intent3);
                 break;
         }

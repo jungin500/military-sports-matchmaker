@@ -6,8 +6,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
+
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import cz.msebera.android.httpclient.Header;
 
 
 public class HomeActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -48,14 +59,63 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
 
+        //TODO: get queue status
         // queue status message
-        textQStatus = (TextView) findViewById(R.id.home_qstatus);
-        textQStatus.setText("축구 매치 대기중입니다.");
+        displayMatchStatus();
 
         // add adapter to listview. Long boring stuff, so factor into separate method.
         homeMenu = (ListView) findViewById(R.id.home_menu);
         setHomeMenu(homeMenu);
         homeMenu.setOnItemClickListener(this);
+    }
+
+    private void displayMatchStatus(){
+        textQStatus = (TextView) findViewById(R.id.home_qstatus);
+
+        // initialize asynchttpclient
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        String loginURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/getUserMatch";
+        client.setCookieStore(smgr.myCookies);
+        client.get(loginURL, params, new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    boolean success = response.getBoolean("result");
+                    if (success) {
+                        JSONObject match = response.getJSONObject("match");
+                        String gameTypeEng = match.getString("activityType");
+                        String gameTypeKor = "족구";
+                        if (gameTypeEng.equals("football"))
+                            gameTypeKor = "축구";
+                        else if (gameTypeEng.equals("basketball"))
+                            gameTypeKor = "농구";
+                        JSONArray players = match.getJSONArray("players");
+                        String numPlayers = String.valueOf(players.length());
+                        textQStatus.setText("현재 " + numPlayers + "명과 " + gameTypeKor + " 시합 대기중입니다.");
+                    }
+                    else {
+                        String reason = response.getString("reason");
+                        if (reason == "NoSuchMatchException") {
+                            textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
+                        }
+                        else {
+                            textQStatus.setText("코드 오류입니다.");
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "데이터 오류가 있습니다.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                textQStatus.setText("매치 정보를 가져오지 못했습니다. 다시 접속해주세요.");
+            }
+        });
+
+
     }
 
     @Override
