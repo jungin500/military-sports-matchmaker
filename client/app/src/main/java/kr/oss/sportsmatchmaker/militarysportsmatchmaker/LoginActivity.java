@@ -36,7 +36,7 @@ import java.util.List;
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
- * A login screen that offers login via goonbun/password.
+ * A login screen that offers login via id/password.
  */
 public class LoginActivity extends AppCompatActivity {
 
@@ -45,25 +45,26 @@ public class LoginActivity extends AppCompatActivity {
      */
     private static final int REQUEST_READ_CONTACTS = 0;
 
-    /**
-     * ID to identify SIGNUP activity result
-     */
-    private static final int SIGN_UP = 1;
+    // signup activity
+    private static final int SIGNUP_ACTIVITY = 1;
 
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
      */
     private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
+            "12-1234:foobar", "12-3456:osamoss123"
     };
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
 
+    // Session manager
+    private SessionManager smgr;
+
     // UI references.
-    private EditText mGoonbunView;
+    private EditText mIdView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
@@ -72,9 +73,14 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        smgr = new SessionManager(getApplicationContext());
+        smgr.clearSession();
+
         // Set up the login form.
-        mGoonbunView = (EditText) findViewById(R.id.goonbun);
+        mIdView = (EditText) findViewById(R.id.id);
         mPasswordView = (EditText) findViewById(R.id.password);
+        // Press Enter -> SignIn.
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -99,8 +105,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
-                //TODO: Change to startActivityForResult
-                startActivity(intent);
+                startActivityForResult(intent, SIGNUP_ACTIVITY);
             }
         });
 
@@ -117,7 +122,7 @@ public class LoginActivity extends AppCompatActivity {
             return true;
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mGoonbunView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+            Snackbar.make(mIdView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
                     .setAction(android.R.string.ok, new View.OnClickListener() {
                         @Override
                         @TargetApi(Build.VERSION_CODES.M)
@@ -134,7 +139,7 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid goonbun, missing fields, etc.), the
+     * If there are form errors (invalid id, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
@@ -143,11 +148,11 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         // Reset errors.
-        mGoonbunView.setError(null);
+        mIdView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String goonbun = mGoonbunView.getText().toString();
+        String id = mIdView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -160,10 +165,10 @@ public class LoginActivity extends AppCompatActivity {
             cancel = true;
         }
 
-        // Check for a valid goonbun.
-        if (TextUtils.isEmpty(goonbun)) {
-            mGoonbunView.setError(getString(R.string.error_field_required));
-            focusView = mGoonbunView;
+        // Check for a valid id.
+        if (TextUtils.isEmpty(id)) {
+            mIdView.setError(getString(R.string.error_field_required));
+            focusView = mIdView;
             cancel = true;
         }
 
@@ -176,14 +181,13 @@ public class LoginActivity extends AppCompatActivity {
             // perform the user login attempt.
             // login task attempt -> UserLoginTask
             showProgress(true);
-            mAuthTask = new UserLoginTask(goonbun, password);
+            mAuthTask = new UserLoginTask(id, password);
             mAuthTask.execute((Void) null);
         }
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() >= 6;
     }
 
     /**
@@ -230,35 +234,36 @@ public class LoginActivity extends AppCompatActivity {
     /* WRITE NEW */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mEmail;
+        private final String mid;
         private final String mPassword;
 
-        UserLoginTask(String email, String password) {
-            mEmail = email;
+        UserLoginTask(String id, String password) {
+            mid = id;
             mPassword = password;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
             try {
                 // Simulate network access.
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 return false;
             }
-
             for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
+                if (pieces[0].equals(mid)) {
                     // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+                    if (pieces[1].equals(mPassword)){
+                        //TODO: 이름 채우기
+                        smgr.createSession(mid, "범수", "SID goes here");
+                        return true;
+                    };
                 }
             }
 
-            // TODO: register the new account here.
-            return true;
+            return false;
         }
 
         @Override
@@ -267,7 +272,8 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success) {
-                finish();
+                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                startActivity(intent);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
@@ -280,5 +286,18 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
         }
     }
+
+    // After signup
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(requestCode == SIGNUP_ACTIVITY){
+            if(resultCode == RESULT_OK){
+                String newid = data.getStringExtra(SignupActivity.EXTRA_ID);
+                String newpw = data.getStringExtra(SignupActivity.EXTRA_PW);
+                mIdView.setText(newid);
+                mPasswordView.setText(newpw);
+        }
+    }
+}
+
 }
 
