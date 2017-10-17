@@ -35,7 +35,14 @@
 - password: 사용자 비밀번호
 
 ### Output
-- DatabaseManager.Model.user.authenticate의 Callback result
+- result: 결과 (true/false)
+- id: 사용자 아이디 (true일 경우)
+- name: 사용자 이름 (true일 경우)
+- rank: 사용자 계급 (true일 경우)
+- reason: 실패 이유 (false일 경우)
+    - PasswordMismatch
+    - NoSuchUserException (findId가 실패할 경우)
+    - MultipleUserException (findId가 실패할 경우)
 
 ---
 
@@ -51,7 +58,12 @@
 ### Input
 
 ### Output (JSON)
-- DatabaseManager.Model.matching.getAllMatches의 Callback result
+- result: 결과 (true/false)
+- reason: 실패 사유 (false인 경우)
+    - MongoError (DB 오류)
+- mongoerror: reason = 'MongoError'인 경우 에러
+- docs: 성공한 경우 결과 Document
+    - 배열 안의 _doc가 Document
 
 ---
 
@@ -65,11 +77,14 @@
 
 ### Output (JSON)
 - result: 결과(true/false)
+- participants: 성공했을 경우, 새로운 참가자 리스트 배열
 - reason: false일경우 이유
-    - NotLoggedInException
-    - DatabaseManager.Model.matching.updateMatchParticipants의 Callback result
-    - DatabaseManager.Model.matching.createMatch의 Callback result
-    - DatabaseManager.Model.matching.findMatch의 Callback result
+    - NotLoggedInException (DatabaseManager.Model.matching.updateMatchParticipants)
+    - MongoError (DB 오류)
+    - FullException (방이 꽉 차있는 경우) (DatabaseManager.Model.matching.findMatch의 Callback result)
+- match: 성공했을 경우, 생성된 매치 객체를 반환(DatabaseManager.Model.matching.createMatch의 Callback result)
+- participants: 새로이 만들어진 참가자 배열 (처음 만든 Match일 때)
+- mongoerror: reason = 'MongoError'인 경우 에러
 
 ---
 

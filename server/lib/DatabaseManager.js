@@ -260,8 +260,7 @@ var createSchema = function () {
             }
 
             callback({
-                result: true,
-                match: match
+                result: true
             });
         });
     });
