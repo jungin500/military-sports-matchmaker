@@ -119,7 +119,6 @@ public class SignupActivity extends AppCompatActivity {
                 String fav = favView.getText().toString();
                 String desc = descView.getText().toString();
                 String rank = rankView.getSelectedItem().toString();
-                int rankid = RankHelper.rankToInt(rank); // 선택.
                 String sex = sexView.getSelectedItem().toString();
                 int sexid = sexes.size() - sexes.indexOf(sex) - 2;
                 // 제대로 다 입력했는지 확인.
@@ -158,12 +157,13 @@ public class SignupActivity extends AppCompatActivity {
                     unitView.requestFocus();
                     return;
                 }
-                if (rankid >= ranks.size() - 2){
+                if (rank.equals("----") || rank.equals("계급") || rank.equals("")){
                     TextView errorRank = (TextView) rankView.getSelectedView();
                     errorRank.setError("계급을 선택해주십시오.");
                     errorRank.requestFocus();
                     return;
                 }
+                int rankid = RankHelper.rankToInt(rank);
                 if (sexid >= sexes.size() - 2){
                     TextView errorSex = (TextView) sexView.getSelectedView();
                     errorSex.setError("성별을 선택해주십시오.");

@@ -251,7 +251,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-
     // After signup
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         if(requestCode == SIGNUP_ACTIVITY){
@@ -264,4 +263,3 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 }
-

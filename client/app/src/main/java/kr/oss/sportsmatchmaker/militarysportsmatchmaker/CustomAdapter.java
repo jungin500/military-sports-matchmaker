@@ -68,7 +68,7 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
             public void onClick(View v) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setTitle("선수 검색");
-                alertDialogBuilder.setMessage("입력창");
+                alertDialogBuilder.setMessage("군번을 입력하세요.");
                 final EditText search = new EditText(context);
                 alertDialogBuilder.setView(search);
 
@@ -85,7 +85,7 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
                                     @Override
                                     public void onClick(
                                             DialogInterface dialog, int id) {
-                                        Toast.makeText(context, "미구현", Toast.LENGTH_SHORT).show();
+                                        
                                     }
                         });
 

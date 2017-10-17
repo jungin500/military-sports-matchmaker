@@ -17,16 +17,23 @@
             android:id="@+id/playerNumber"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.3"
+            android:layout_weight="0.2"
             android:ems="10"
             android:hint="참가희망 인원"
             android:inputType="number" />
+
+        <Button
+            android:id="@+id/player_show"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:text="새로고침" />
 
         <CheckBox
             android:id="@+id/sameTeam"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.4"
+            android:layout_weight="0.3"
             android:text="같은 팀으로" />
 
         <Button

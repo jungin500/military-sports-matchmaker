@@ -29,8 +29,8 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_home);
 
         smgr = new SessionManager(getApplicationContext());
-        smgr.checkLogin();
         prof = smgr.getProfile();
+
 
         // welcome message
         String user_name = prof.get(SessionManager.NAME);

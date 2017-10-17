@@ -34,53 +34,76 @@ public class MatchSettingActivity extends AppCompatActivity {
     private Button enterQueue;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         smgr = new SessionManager(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_match_setting);
 
-        Intent intent = getIntent();
-        final int playernum = intent.getIntExtra(ChooseSportActivity.EXTRA_PNUM, 0);
-        final String gameType = intent.getStringExtra(ChooseSportActivity.EXTRA_SPORTTYPE);
-        String[] name = null;
-        listDataArray = new ArrayList<ListData>();
-        for (int i = 1; i <= playernum; i++) {
-            ListData data = new ListData("01.jpg", "선수 추가", "선수 검색");
-            listDataArray.add(data);
-        }
+        // get client id
+        final String id = smgr.getProfile().get(SessionManager.ID);
 
-        ListView listview = (ListView) findViewById(R.id.listview1);
-        CustomAdapter customAdapter = new CustomAdapter(this, R.layout.list_btn_sty, listDataArray);
-        listview.setAdapter(customAdapter);
-
+        // initialize widgets
         final EditText playerNumber = (EditText) findViewById(R.id.playerNumber);
+        Button playerShow = (Button) findViewById(R.id.player_show);
         CheckBox sameTeam = (CheckBox) findViewById(R.id.sameTeam);
         Button enterQueue = (Button) findViewById(R.id.enterQueue);
+
+        Intent intent = getIntent();
+        final int maxPlayer = intent.getIntExtra(ChooseSportActivity.EXTRA_PNUM, 0);
+        final String gameType = intent.getStringExtra(ChooseSportActivity.EXTRA_SPORTTYPE);
+
+        final int[] numPlayer = {0};
+
+        String[] name = null;
+        listDataArray = new ArrayList<ListData>();
+
+        ListView listview = (ListView) findViewById(R.id.listview1);
+        final CustomAdapter customAdapter = new CustomAdapter(this, R.layout.list_btn_sty, listDataArray);
+        listview.setAdapter(customAdapter);
+
+        playerShow.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int num = Integer.parseInt(playerNumber.getText().toString());
+                if (num > maxPlayer) {
+                    Toast.makeText(getApplicationContext(), "사람 숫자가 너무 많습니다.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                else if (num < numPlayer[0]){
+                    listDataArray = new ArrayList<ListData>(listDataArray.subList(0,num));
+                }
+                else {
+                    for (int i = 0; i < num - numPlayer[0]; i++){
+                        ListData data = new ListData("01.jpg", id + "의 일행", "정보 입력\n(선택)");
+                        listDataArray.add(data);
+                    }
+                }
+                numPlayer[0] = num;
+                customAdapter.notifyDataSetChanged();
+            }
+        });
 
 
         enterQueue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int pNum = Integer.parseInt(playerNumber.getText().toString());
-                if (pNum > playernum) {
-                    Toast.makeText(getApplicationContext(), "사람 숫자가 너무 많습니다.", Toast.LENGTH_SHORT).show();
-                } else {
-                    joinQueue(smgr.getProfile().get(SessionManager.ID), gameType, pNum);
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(id);
+                for (int i = 1; i < numPlayer[0]; i++){
+                    stringBuilder.append("|" + id);
                 }
-
+                requestMatch(gameType, stringBuilder.toString());
             }
         });
     }
 
-    // player with ID id joins the queue for game gameType, with player numbers pNum.
-    private void joinQueue(String id, String gameType, int pNum) {
+    // current session player (checked with cookie) queue for game gameType, with participant array .
+    private void requestMatch(String gameType, String participants) {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
-        params.put("id", id);
         params.put("activityType", gameType);
-        params.put("number", pNum);
+        params.put("participants", participants);
         client.setCookieStore(smgr.myCookies);
         String queueURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/requestMatch";
         client.post(queueURL, params, new JsonHttpResponseHandler(){
