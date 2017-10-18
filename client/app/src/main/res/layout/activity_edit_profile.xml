@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textPassword"
-            android:hint="비밀번호 (6자리 이상). 빈칸으로 두시면 원래 비밀번호가 유지됩니다."
+            android:hint="비밀번호 (6자리 이상). 빈칸 -> 원래 비밀번호 유지."
             android:maxLines="1" />
     </android.support.design.widget.TextInputLayout>
 
@@ -89,17 +89,11 @@
             android:layout_weight="0.3" />
     </LinearLayout>
 
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    <EditText
+    <Spinner
         android:id="@+id/editProfile_unit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:hint="소속" /></android.support.design.widget.TextInputLayout>
-
+        android:layout_weight="0.3"/>
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"

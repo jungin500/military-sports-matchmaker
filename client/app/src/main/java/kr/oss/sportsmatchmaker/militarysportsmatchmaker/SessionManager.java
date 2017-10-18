@@ -141,7 +141,7 @@ public class SessionManager {
     // check whether session is live, kill everything if session offline.
     public void checkSession(){
         AsyncHttpClient client = new AsyncHttpClient();
-        String checkLoginURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/checkLoggedIn";
+        String checkLoginURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/getUserInfo";
         client.setCookieStore(myCookies);
         client.get(checkLoginURL, new JsonHttpResponseHandler(){
             @Override

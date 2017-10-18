@@ -2,6 +2,7 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -42,7 +43,10 @@ public class MatchSettingActivity extends AppCompatActivity {
 
         // get client id
         final String id = smgr.getProfile().get(SessionManager.ID);
+        final String name = smgr.getProfile().get(SessionManager.NAME);
+        final String rank = smgr.getProfile().get(SessionManager.RANK);
 
+        final String rankname = rank + " " + name;
         // initialize widgets
         final EditText playerNumber = (EditText) findViewById(R.id.playerNumber);
         Button playerShow = (Button) findViewById(R.id.player_show);
@@ -55,7 +59,6 @@ public class MatchSettingActivity extends AppCompatActivity {
 
         final int[] numPlayer = {0};
 
-        String[] name = null;
         listDataArray = new ArrayList<ListData>();
 
         ListView listview = (ListView) findViewById(R.id.listview1);
@@ -75,6 +78,16 @@ public class MatchSettingActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "사람 숫자가 너무 많습니다.", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                // 첫 플레이어는 항상 내 자신, 수정 불가능.
+                else if (numPlayer[0] == 0){
+                    //TODO: add client's profile image
+                    ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname, id, "정보 입력 x");
+                    listDataArray.add(data);
+                    for (int i = 1; i < num; i++){
+                        data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname + "의 동료", "anon", "선수 추가\n(선택)");
+                        listDataArray.add(data);;
+                    }
+                }
                 else if (num < numPlayer[0]){
                     for (int i = numPlayer[0] - 1; i >= num; i--){
                         listDataArray.remove(i);
@@ -82,7 +95,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                 }
                 else {
                     for (int i = 0; i < num - numPlayer[0]; i++){
-                        ListData data = new ListData("img_defaultface.png", "선수를 추가시켜주세요.", "", "정보 입력\n(선택)");
+                        ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname + "의 동료", "anon", "선수 추가\n(선택)");
                         listDataArray.add(data);
                     }
                 }
@@ -95,11 +108,15 @@ public class MatchSettingActivity extends AppCompatActivity {
         enterQueue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(id);
-                for (int i = 1; i < numPlayer[0]; i++){
-                    stringBuilder.append("|" + id);
+                if (numPlayer[0] == 0){
+                    Toast.makeText(getApplicationContext(), "사람 숫자를 지정해주세요.", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                StringBuilder stringBuilder = new StringBuilder();
+                for (int i = 0; i < numPlayer[0]; i++){
+                    stringBuilder.append(listDataArray.get(i).getId()+"|");
+                }
+                stringBuilder.setLength(stringBuilder.length() - 1);
                 requestMatch(gameType, stringBuilder.toString());
             }
         });

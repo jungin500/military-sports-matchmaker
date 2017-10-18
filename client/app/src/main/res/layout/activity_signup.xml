@@ -103,25 +103,22 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.3" />
+
+
+
     </LinearLayout>
 
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    <EditText
+    <Spinner
         android:id="@+id/signup_unit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:hint="소속" />
-    </android.support.design.widget.TextInputLayout>
-
+        android:layout_weight="0.3" />
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-    <EditText
+
+        <EditText
         android:id="@+id/signup_favorite"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

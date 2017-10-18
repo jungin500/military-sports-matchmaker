@@ -58,7 +58,6 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
 
-        //TODO: get queue status
         // queue status message
         displayMatchStatus();
 
@@ -223,6 +222,10 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             case R.id.home_menu:
                 switch(position){
                     case 0:
+                        if (smgr.getMatchStatus()){
+                            Toast.makeText(getApplicationContext(), "이미 시합 대기중이십니다.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         Intent intent = new Intent(getApplicationContext(), ChooseSportActivity.class);
                         startActivity(intent);
                         break;
@@ -238,8 +241,10 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                         break;
                     //장소 고르기
                     default:
-                        Toast.makeText(getApplicationContext(), "아직 미구현", Toast.LENGTH_SHORT).show();
+                        Intent intent4 = new Intent(getApplicationContext(), SelectProfileActivity.class);
+                        startActivity(intent4);
                         break;
+                    //임시 사진 선택
                 }
                 break;
         }

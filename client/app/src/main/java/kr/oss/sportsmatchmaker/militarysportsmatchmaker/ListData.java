@@ -3,27 +3,35 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 /**
  * Created by Administrator on 2017-10-17.
  */
+import android.graphics.Bitmap;
 import android.widget.Button;
 
 public class ListData {
-    private String face;
+    private Bitmap face;
     private String name;
-    private String armnum;
+    private String id;
     private String button;
 
-    public ListData(String face, String name, String armnum, String button) {
+    public ListData(Bitmap face, String name, String id, String button) {
         this.face = face;
         this.name = name;
-        this.armnum = armnum;
+        this.id = id;
         this.button = button;
     }
 
-    public String getFace() {
+    public void setFace(Bitmap face){ this.face = face; }
+    public void setName(String name){ this.name = name; }
+    public void setId(String id){ this.id = id; }
+    public void setButton(String button){ this.button = button; }
+
+
+
+    public Bitmap getFace() {
         return face;
     }
 
-    public String getArm_Num() {
-        return armnum;
+    public String getId() {
+        return id;
     }
 
     public String getName() {
