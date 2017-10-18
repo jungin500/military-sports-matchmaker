@@ -71,10 +71,11 @@ public class EditProfileActivity extends AppCompatActivity {
         sexView.setAdapter(adapterSex);
         sexView.setSelection(0);
 
+        smgr = new SessionManager(getApplicationContext());
         final String id = smgr.getProfile().get(smgr.ID);
         idView.setText("군번: " + id + " (수정 불가)");
 
-        //TODO: 회원정보륿 받아서 표시.
+        //TODO: 회원정보를 받아서 표시.
 
         /*
         //TODO: submitButton 수정
@@ -147,7 +148,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
                             boolean result = response.getBoolean("result");
-                            //TODO: success in editing profile - go back to HomeActivity.
+                            //TODO: success in editing profile - modify sesson manager and go to HomeActivity!!
                             if (result){
                                 // HomeActivity로 돌아가기.
                             }

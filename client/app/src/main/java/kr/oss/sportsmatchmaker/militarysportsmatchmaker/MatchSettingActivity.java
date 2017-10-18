@@ -110,7 +110,7 @@ public class MatchSettingActivity extends AppCompatActivity {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         params.put("activityType", gameType);
-        params.put("participants", participants);
+        params.put("players", participants);
         client.setCookieStore(smgr.myCookies);
         String queueURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/requestMatch";
         client.post(queueURL, params, new JsonHttpResponseHandler(){
