@@ -122,6 +122,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     // 회원정보 수정후 돌아옴.
     protected void onResume() {
         super.onResume();
+        smgr = new SessionManager(getApplicationContext());
         smgr.checkSession();
     }
 

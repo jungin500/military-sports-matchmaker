@@ -63,20 +63,49 @@ public class EditProfileActivity extends AppCompatActivity {
         rankView = (Spinner) findViewById(R.id.editProfile_rank);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, ranks);
         rankView.setAdapter(adapter);
-        rankView.setSelection(0);
 
         // set spinner to sex
         sexView = (Spinner) findViewById(R.id.editProfile_sex);
         ArrayAdapter<String> adapterSex = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, sexes);
         sexView.setAdapter(adapterSex);
-        sexView.setSelection(0);
 
         smgr = new SessionManager(getApplicationContext());
         final String id = smgr.getProfile().get(smgr.ID);
         idView.setText("군번: " + id + " (수정 불가)");
 
         //TODO: 회원정보를 받아서 표시.
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        String getInfoURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/getUserInfo";
+        client.setCookieStore(smgr.myCookies);
+        client.get(getInfoURL, params, new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    boolean success = response.getBoolean("result");
+                    if (success){
+                        nameView.setText(response.getString("name"));
+                        unitView.setText(response.getString("unit"));
+                        favView.setText(response.getString("favoriteEvent"));
+                        descView.setText(response.getString("description"));
+                        rankView.setSelection(RankHelper.numRanks() - 1 -  response.getInt("rank"));
+                        sexView.setSelection(response.getString("gender").equals("여성") ? 0 : 1);
+                    }
+                    else {
+                        Toast.makeText(getApplicationContext(), "회원정보를 가져오는데 실패했습니다.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                super.onFailure(statusCode, headers, responseString, throwable);
+            }
+        });
         /*
         //TODO: submitButton 수정
         submitButton = (Button) findViewById(R.id.editProfile_submit);

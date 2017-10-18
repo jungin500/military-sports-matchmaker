@@ -116,6 +116,7 @@ public class SessionManager {
     }
 
     // check whether session is live, kill everything if session offline.
+    //TODO: this method is fucked up, fix.
     public void checkSession(){
         AsyncHttpClient client = new AsyncHttpClient();
         String checkLoginURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/checkLoggedIn";
@@ -131,12 +132,10 @@ public class SessionManager {
                         Intent intent = new Intent(context, MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         context.startActivity(intent);
-
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
 
             @Override
