@@ -66,6 +66,7 @@
 - result: 결과 (true/false)
 - name: 성공 시 사용자 이름
 - rank: 성공 시 사용자 계급
+- profile_picture: 프로필 사진 여부 (true/false)
 - reason: 실패 시 사유 (result = false)
     - NoSuchUserException
     - NotLoggedInException
@@ -143,7 +144,7 @@
     - start_at: 매치 생성 시간
     - matchId: 매치 고유 ID
     - initiatorId: 매치 생성자 ID
-    - is_pending: 사용자가 경기에 초대되었는지 여부 *
+    - is_pending: 사용자가 경기에 초대되었는지 여부 (true/false)
 - reason: 실패 시 사유 (result = false)
     - NoSuchMatchException
     - NotLoggedInException
@@ -160,10 +161,10 @@
 - result: 결과 (true/false)
 - reason: 실패 시 사유 (result = false)
     - (동일)
-    
+
 ---
 
-## /process/requestMatch (POST) ...
+## /process/requestMatch (POST) √
 ### Input
 - (Session) userInfo: 사용자 정보 (로그인 여부 체크)
 - (Session) userInfo.id: 사용자 ID
@@ -188,7 +189,7 @@
 
 ### Output
 - result: 성공 여부(true/false)
-- reason: 실패 사유(result = fals   e)
+- reason: 실패 사유(result = false)
     - ForbiddenOperationException: 내 매치가 아닌 다른 사람의 매치를 삭제하려고 시도했을 경우
     - NoSuchMatchException
     - NotLoggedInException
