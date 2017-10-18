@@ -33,6 +33,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="#00ff0000"
                 app:srcCompat="@drawable/img_soccerball" />
 
             <ImageButton
@@ -40,6 +41,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="#00ff0000"
                 app:srcCompat="@drawable/img_basketball" />
 
             <ImageButton
@@ -47,6 +49,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="#00ff0000"
                 app:srcCompat="@drawable/img_volleyball" />
 
         </LinearLayout>

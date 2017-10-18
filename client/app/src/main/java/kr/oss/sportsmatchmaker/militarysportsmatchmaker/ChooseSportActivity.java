@@ -9,10 +9,6 @@ import android.widget.ImageButton;
 
 
 public class ChooseSportActivity extends AppCompatActivity implements OnClickListener {
-
-    //ImageButton custom = (ImageButton) findViewById(R.id.custom);
-    //static String a;
-
     public static final String EXTRA_PNUM = "EXTRA_PNUM";
     public static final String EXTRA_SPORTTYPE = "EXTRA_SPORTTYPE";
 
@@ -32,7 +28,6 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
         football.setOnClickListener(this);
         basketball.setOnClickListener(this);
         footwear.setOnClickListener(this);
-        //custom.setOnClickListener(this);
     }
 
     @Override
@@ -59,27 +54,3 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
         }
     }
 }
-    /*
-    public String[] setnum(String[] player ,int num){
-        player = new String[num];
-
-        for(int i=0;i<num;i++){
-            player[i] = "팀원" + (i+1);
-        }
-
-        return player;
-    }
-    */
-    /*
-    public void select(View name, String a){
-        name.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(
-                        getApplicationContext(),
-                        .class);
-                startActivity(intent);
-            }
-        });
-    }
-    */

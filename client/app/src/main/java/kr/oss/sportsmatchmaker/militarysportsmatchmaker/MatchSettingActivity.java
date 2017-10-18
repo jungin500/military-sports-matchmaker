@@ -79,7 +79,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                 // 첫 플레이어는 항상 내 자신, 수정 불가능.
                 else if (numPlayer[0] == 0){
                     //TODO: add client's profile image
-                    ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), name, id, "정보 입력 x");
+                    ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), name, id, "리더");
                     listDataArray.add(data);
                     for (int i = 1; i < num; i++){
                         data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), name + "의 동료", id, "선수 추가\n(선택)");
