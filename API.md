@@ -16,6 +16,7 @@
 - reason: 실패 시 사유 
     - MissingValuesException
     - AlreadyExistingException
+    - IllegalParametersException
     - (DatabaseManager.createUser에서의) MongoError
 - mongoerror: reason = 'MongoError'일때의 Error 객체
 
@@ -73,14 +74,40 @@
 - (Session) userInfo.id: 사용자 ID
 - activityType: 종목 이름
 - players: 사용자 목록 (|로 구분)
-- matchId: 매치 ID (매치 고유 ID, 검색 용도로 사용)
 
 ### Output (JSON)
 - result: 결과(true/false)
 - reason: false일경우 이유
     - NotLoggedInException
+    - MatchAlreadyExistsException (이미 매치를 가지고 있는 사용자의 경우)
     - MongoError (DB 오류)
 - mongoerror: reason = 'MongoError'인 경우 에러
+
+---
+
+## /process/deleteMatch (POST)
+### Input
+- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
+- (Session) userInfo.id: 로그인한 ID (해당 유저의 Match인지 체크) → initiatorId (매치 만든 사람)으로 저장되어 있음...
+- matchId: 매치 ID (삭제할 매치 ID. 해당 유저의 매치 목록은 /process/getUserMatch로 확인)
+
+### Output
+- result: 성공 여부(true/false)
+- reason: 실패 사유(result = false)
+    - ForbiddenOperationException: 내 매치가 아닌 다른 사람의 매치를 삭제하려고 시도했을 경우
+    - NoSuchMatchException
+    - NotLoggedInException
+    - MongoError
+- mongoerror: MongoError 객체 (오류 시)
+
+---
+
+## /process/getStadiumList (POST) [DRAFT]
+### Input
+- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
+
+### Output
+- (사용자의 위치에 해당하는 Stadium List)
 
 ---
 
@@ -119,7 +146,8 @@
 
 ## /process/getUserMatch (POST)
 ### Input
-- (Session) userInfo: 로그인 정보 (해당 유저의 Match인지 체크)
+- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
+- (Session) userInfo.id: 로그인한 ID (해당 유저의 Match 검색시 활용)
 
 ### Output
 - result: 결과 (true/false)
@@ -133,3 +161,40 @@
 - reason: 실패 시 사유 (result = false)
     - NoSuchMatchException
     - NotLoggedInException
+
+
+---
+
+## /process/getUserInfo (GET)
+### Input
+- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
+- (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
+
+### Output
+- result: 성공 여부 (true/false)
+- id: 사용자 ID
+- name: 사용자 이름
+- rank: 사용자 계급
+- gender: 사용자 성별
+- unit: 사용자 부대명
+- favoriteEvent: 사용자가 좋아하는 운동
+- description: 사용자 자기소개
+- created_at: 사용자 생성일자
+- updated_at: 사용자 마지막 수정일자 (JSON)
+- reason: 실패시 사유 (result = false)
+    - NotLoggedInException
+    - NoSuchUserException (불가능)
+    - MultipleUserException (불가능)
+    - MongoError
+- mongoerror: MongoError 객체 (오류 시)
+
+---
+
+## /process/updateUserInfo (POST)
+### Input
+- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
+- (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
+
+### Output
+- result: 성공 여부 (true/false)
+- reason: 실패시 사유 (result = false)

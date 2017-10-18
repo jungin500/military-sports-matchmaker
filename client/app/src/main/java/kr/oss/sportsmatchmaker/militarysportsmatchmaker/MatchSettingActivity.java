@@ -110,7 +110,7 @@ public class MatchSettingActivity extends AppCompatActivity {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         params.put("activityType", gameType);
-        params.put("participants", participants);
+        params.put("players", participants);
         client.setCookieStore(smgr.myCookies);
         String queueURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/requestMatch";
         client.post(queueURL, params, new JsonHttpResponseHandler(){
@@ -135,7 +135,7 @@ public class MatchSettingActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
+                Toast.makeText(getApplicationContext(), "큐 잡기를 실패했습니다. 금방 고치겠습니다..", Toast.LENGTH_SHORT).show();
             }
         });
     }

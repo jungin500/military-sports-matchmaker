@@ -11,65 +11,49 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:weightSum="1"
-    tools:context="kr.oss.sportsmatchmaker.militarysportsmatchmaker.SignupActivity">
+    tools:context="kr.oss.sportsmatchmaker.militarysportsmatchmaker.EditProfileActivity">
 
 
     <LinearLayout
-        android:id="@+id/signup_id_layout"
+        android:id="@+id/editProfile_id_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="1">
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="0dp"
+
+        <TextView
+            android:id="@+id/editProfile_id"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.6">
-            <EditText
-                android:id="@+id/signup_id"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="군번"
-                android:inputType="numberSigned"
-                android:digits="0123456789-"
-                android:maxLines="1"/>
-        </android.support.design.widget.TextInputLayout>
-
-
-        <Button
-            android:id="@+id/signup_idcheck"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.4"
-            android:hint="중복확인" />
-
+            android:layout_weight="1"
+            android:textSize="18sp" />
     </LinearLayout>
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-    <EditText
-        android:id="@+id/signup_pw"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPassword"
-        android:hint="비밀번호 (6자리 이상)"
-        android:maxLines="1" />
+        <EditText
+            android:id="@+id/editProfile_pw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPassword"
+            android:hint="비밀번호 (6자리 이상). 빈칸으로 두시면 원래 비밀번호가 유지됩니다."
+            android:maxLines="1" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-    <EditText
-        android:id="@+id/signup_pw2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="비밀번호 확인"
-        android:inputType="textPassword"
-        android:maxLines="1" />
+        <EditText
+            android:id="@+id/editProfile_pw2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="비밀번호 확인"
+            android:inputType="textPassword"
+            android:maxLines="1" />
     </android.support.design.widget.TextInputLayout>
 
     <LinearLayout
@@ -82,24 +66,24 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.4">
-        <EditText
-            android:id="@+id/signup_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPersonName"
-            android:hint="이름"
-            android:maxLines="1"/>
+            <EditText
+                android:id="@+id/editProfile_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:hint="이름"
+                android:maxLines="1"/>
         </android.support.design.widget.TextInputLayout>
 
         <Spinner
-            android:id="@+id/signup_rank"
+            android:id="@+id/editProfile_rank"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.3" />
 
         <Spinner
-            android:id="@+id/signup_sex"
+            android:id="@+id/editProfile_sex"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.3" />
@@ -109,46 +93,43 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     <EditText
-        android:id="@+id/signup_unit"
+        android:id="@+id/editProfile_unit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
-        android:hint="소속" />
-    </android.support.design.widget.TextInputLayout>
+        android:hint="소속" /></android.support.design.widget.TextInputLayout>
 
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     <EditText
-        android:id="@+id/signup_favorite"
+        android:id="@+id/editProfile_favorite"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
-        android:hint="좋아하는 운동 (축구, 족구 등)"/>
-    </android.support.design.widget.TextInputLayout>
+        android:hint="좋아하는 운동 (축구, 족구 등)"/></android.support.design.widget.TextInputLayout>
 
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     <EditText
-        android:id="@+id/signup_desc"
+        android:id="@+id/editProfile_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
-        android:hint="자기소개" />
-    </android.support.design.widget.TextInputLayout>
+        android:hint="자기소개" /></android.support.design.widget.TextInputLayout>
 
     <Button
-        android:id="@+id/signup_signup"
+        android:id="@+id/editProfile_submit"
         android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="회원가입!" />
+        android:text="회원정보 수정" />
 
 
 </LinearLayout>

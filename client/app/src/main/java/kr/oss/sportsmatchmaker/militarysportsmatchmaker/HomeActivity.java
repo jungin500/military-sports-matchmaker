@@ -44,13 +44,13 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
         // welcome message
+
+        // logout button settings
+        logoutButton = (Button) findViewById(R.id.logout);
         String user_name = prof.get(SessionManager.NAME);
         String user_rank = prof.get(SessionManager.RANK);
         textWelcome = (TextView) findViewById(R.id.home_welcome);
         textWelcome.setText("환영합니다, " + user_name + " " + user_rank + "님.\n오늘은 어떤 체육활동을 하시겠어요?");
-
-        // logout button settings
-        logoutButton = (Button) findViewById(R.id.logout);
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,16 +96,16 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                     }
                     else {
                         String reason = response.getString("reason");
-                        if (reason == "NoSuchMatchException") {
+                        if (reason.equals("NoSuchMatchException")) {
                             textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
                         }
                         else {
-                            textQStatus.setText("코드 오류입니다.");
+                            textQStatus.setText("오류: " + reason);
                         }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), "데이터 오류가 있습니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "데이터 오류입니다.", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -119,10 +119,10 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
+    // 회원정보 수정후 돌아옴.
     protected void onResume() {
         super.onResume();
-
-        smgr.checkLogin();
+        smgr.checkSession();
     }
 
     private void setHomeMenu(ListView homeMenu){
@@ -162,6 +162,11 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                     case 1:
                         Intent intent1 = new Intent(getApplicationContext(), ReservePlaceActivity.class);
                         startActivity(intent1);
+                        break;
+                    //프로필 수정
+                    case 3:
+                        Intent intent3 = new Intent(getApplicationContext(), EditProfileActivity.class);
+                        startActivity(intent3);
                         break;
                     //장소 고르기
                     default:

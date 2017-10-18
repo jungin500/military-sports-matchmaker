@@ -149,6 +149,30 @@ var createSchema = function () {
         });
     });
 
+    Schema.user.static('getUserInfo', function(userInfo, callback) {
+        this.findId(userInfo, function(result) {
+            if(!result.result)
+                callback(result);
+            else 
+                callback({
+                    result: true,
+                    id: result.doc.id,
+                    name: result.doc.name,
+                    rank: result.doc.name,
+                    gender: result.doc.gender,
+                    unit: result.doc.unit,
+                    favoriteEvent: result.doc.favoriteEvent,
+                    description: result.doc.description,
+                    created_at: result.doc.created_at,
+                    updated_at: result.doc.updated_at
+                });
+        });
+    });
+
+    Schema.user.static('updateUserInfo', function(userInfo, callback) {
+        // Model.user
+    });
+
     // 경기 매칭 스키마
     Schema.matching = mongoose.Schema({
         initiatorId: { type: String, required: true, unique: false },
@@ -260,7 +284,7 @@ var createSchema = function () {
                     reason: 'ForbiddenOperationException'
                 });
             else
-                this.remove({ matchId: matchId }, function (err) {
+                Model.matching.remove({ matchId: matchId }, function (err) {
                     if (err)
                         callback({
                             result: false,
