@@ -189,10 +189,13 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                             gameTypeKor = "농구";
                         JSONArray players = match.getJSONArray("players");
                         String numPlayers = String.valueOf(players.length());
+
+                        //TODO: is IS_PENDING added?
                         textQStatus.setText("현재 " + numPlayers + "명과 " + gameTypeKor + " 시합 대기중입니다.");
                         smgr.changeMatchStatus(true);
                         smgr.setMatchId(match.getString("matchId"));
 
+                        //TODO: GET RID OF THIS UGLY BUTTON
                         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                         params.weight = 0.25f;
                         quitMatchButton.setLayoutParams(params);
