@@ -20,6 +20,14 @@ var http = require('http'),
     session = require('express-session'),
     expressErrorHandler = require('express-error-handler'),
     bodyParser = require('body-parser'),
+    fs = require('fs'),
+
+    cors = require('cors'),
+    multer = require('multer'),
+
+    formidable = require('formidable'),
+    crypto = require('crypto'),
+
     static = require('serve-static'),
     path = require('path'),
     DatabaseManager = require('./lib/DatabaseManager'),
@@ -53,6 +61,32 @@ function sendIllegalParameters(req, res) {
     });
     res.end();
 }
+
+function generateRandomHex(size) {
+    return crypto.randomBytes(size).toString(hex);
+}
+
+// 사용자 이미지 파일 저장소 설정
+/* 
+var storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        callback(null, 'files/image');
+    },
+    filename: function (erq, file, check) {
+        var fileName = file.originalname.split('.');
+        callback(null, generateRandomHex(24) + fileName[fileName.length - 1]);
+    }
+})
+
+var upload = multer({
+    storage: storage,
+    limits: {
+        files: 1,
+        fileSize: 1024 * 1024 * 16
+    }
+});
+ */
+
 
 // 라우터 설정
 // 사용자 추가 (회원가입)
@@ -182,12 +216,11 @@ router.route('/process/requestMatch').post(function (req, res) {
                 reason: 'MatchAlreadyExistsException'
             });
             res.end();
-        } else {
+        } else
             DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
                 res.json(result);
                 res.end();
             });
-        }
     });
 });
 
@@ -286,13 +319,51 @@ router.route('/process/updateUserInfo').post(function (req, res) {
     };
 
     // 빈 값은 들어가지 않도록 한다.
-    for(var key in userInfo)
-        if(!userInfo[key])
-            delete(userInfo.key);
+    for (var key in userInfo)
+        if (!userInfo[key])
+            delete (userInfo.key);
 
     DatabaseManager.Model.user.updateUserInfo(targetId, userInfo, function (result) {
         res.json(result);
         res.end();
+    });
+});
+
+router.route('/process/writePhoto').post(function (req, res) {
+    if (!checkAndSendLoggedIn(req, res)) return;
+
+    var files = req.files;
+    if (files.length == 0)
+        callback({
+            result: false,
+            reason: 'NoAttachmentFileError'
+        });
+    else {
+        // 파일 받아서 처리!
+    }
+});
+
+router.route('/process/readProfileImage').post(function (req, res) {
+    var userId = req.body.userId;
+
+    DatabaseManagaer.Model.user.findOne({ id: userId }, function (result) {
+        var filename;
+        if (!(filename = result.profile_image)) {
+            res.json({
+                result: false,
+                reason: 'NoProfileImageException'
+            });
+            return;
+        }
+
+        fs.readFile(path.join(__dirname, 'filename'), function (err, data) {
+            var data = new Buffer(data).toString('base64');
+            res.json({
+                result: true,
+                data: data
+            });
+            res.end();
+        });
     });
 });
 
@@ -307,6 +378,8 @@ app.use(session({
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use(cors());
+
 app.use(function (req, res, next) {
     var connectionInfo = {
         timestamp: Date.now(),
@@ -316,15 +389,17 @@ app.use(function (req, res, next) {
         session: req.session
     }
 
-    if(connectionInfo.requestUrl.indexOf('favicon.ico') == -1) {
+    if (connectionInfo.requestUrl.indexOf('favicon.ico') == -1) {
         console.log('[정보] 연결 정보');
         console.dir(connectionInfo);
+        console.log('');
     }
 
     next();
 });
 
 app.use(static(path.join(__dirname, 'public')));
+app.use(static(path.join(__dirname, 'files')));
 
 app.use('/', router);
 
