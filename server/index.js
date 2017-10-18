@@ -23,11 +23,35 @@ var http = require('http'),
 
 // express 이용 HTTP 서버 설정
 var app = express();
-app.set('port', process.env.PORT || 14403);
+app.set('port', process.env.PORT || 14402);
 app.set('mongoose-reconnect-max', 5);
 
 // express Router 이용 Request routing
 var router = express.Router();
+
+function checkAndSendLoggedIn(req, res) {
+    if (!req.session.userInfo) {
+        res.json({
+            result: false,
+            reason: 'NotLoggedInException'
+        });
+        res.end();
+        return false;
+    }
+
+    return true;
+}
+
+function sendIllegalParameters(req, res) {
+    console.log('[경고] 잘못된 Paramaeters. 받은 Parameters ↓');
+    console.log(req.body);
+
+    res.json({
+        result: false,
+        reason: 'IllegalParametersException'
+    });
+    res.end();
+}
 
 // 라우터 설정
 // 사용자 추가 (회원가입)
@@ -46,11 +70,7 @@ router.route('/process/registerUser').post(function (req, res) {
     // 정보 중 하나라도 빠졌을 시 오류
     for (var key in userInfo)
         if (!userInfo[key]) {
-            res.json({
-                result: false,
-                reason: 'MissingValuesException'
-            });
-            res.end();
+            sendIllegalParameters(req, res);
             return;
         }
 
@@ -83,17 +103,7 @@ router.route('/process/registerUser').post(function (req, res) {
 });
 
 router.route('/process/checkLoggedIn').get(function (req, res) {
-
-    if (req.session.userInfo)
-        res.json({
-            result: true
-        });
-    else
-        res.json({
-            result: false
-        });
-
-    res.end();
+    checkAndSendLoggedIn(req, res);
 });
 
 router.route('/process/loginUser').post(function (req, res) {
@@ -101,6 +111,13 @@ router.route('/process/loginUser').post(function (req, res) {
         id: req.body.id,
         password: req.body.password
     };
+
+    for(var key in userInfo)
+        if(!userInfo[key]) {
+            sendIllegalParameters(req, res);
+            return;
+        }
+
     DatabaseManager.Model.user.authenticate(userInfo, function (result) {
         if (result.result) {
             console.log('[정보] 로그인 완료. 세션에 추가 중');
@@ -116,15 +133,16 @@ router.route('/process/loginUser').post(function (req, res) {
 });
 
 router.route('/process/logoutUser').get(function (req, res) {
-    req.session.destroy(function (err) {
-        if (err) throw err;
-        res.json({
-            result: true
-        });
-        res.end();
+    if(!checkAndSendLoggedIn())
+        req.session.destroy(function (err) {
+            if (err) throw err;
+            res.json({
+                result: true
+            });
+            res.end();
 
-        console.log('[정보] 로그아웃 및 세션 초기화 완료');
-    });
+            console.log('[정보] 로그아웃 및 세션 초기화 완료');
+        });
 });
 
 router.route('/process/getMatchList').get(function (req, res) {
@@ -135,14 +153,7 @@ router.route('/process/getMatchList').get(function (req, res) {
 });
 
 router.route('/process/getUserMatch').get(function (req, res) {
-    if (!req.session.userInfo) {
-        res.json({
-            result: false,
-            reason: 'NotLoggedInException'
-        });
-        res.end();
-        return;
-    }
+    if(!checkAndSendLoggedIn(req, res)) return;
 
     DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
         res.json(result);
@@ -151,13 +162,10 @@ router.route('/process/getUserMatch').get(function (req, res) {
 });
 
 router.route('/process/requestMatch').post(function (req, res) {
-    if (!req.session.userInfo) {
-        res.json({
-            result: false,
-            reason: 'NotLoggedInException'
-        });
-        res.end();
-        return;
+    if(!checkAndSendLoggedIn(req, res)) return;
+
+    if(!(req.body.activityType && req.body.players)) {
+        sendIllegalParameters(req, res); return;
     }
 
     var matchInfo = {
@@ -167,7 +175,7 @@ router.route('/process/requestMatch').post(function (req, res) {
     }
 
     DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
-        if(result.result) {
+        if (result.result) {
             res.json({
                 result: false,
                 reason: 'MatchAlreadyExistsException'
@@ -183,13 +191,10 @@ router.route('/process/requestMatch').post(function (req, res) {
 });
 
 router.route('/process/deleteMatch').post(function (req, res) {
-    if (!req.session.userInfo) {
-        res.json({
-            result: false,
-            reason: 'NotLoggedInException'
-        });
-        res.end();
-        return;
+    if(!checkAndSendLoggedIn(req, res)) return;
+
+    if(!req.body.matchId) {
+        sendIllegalParameters(req, res); return;
     }
 
     var initiatorId = req.session.userInfo.id;
@@ -201,14 +206,7 @@ router.route('/process/deleteMatch').post(function (req, res) {
 });
 
 router.route('/process/getStadiumList').post(function (req, res) {
-    if (!req.session.userInfo) {
-        res.json({
-            result: false,
-            reason: 'NotLoggedInException'
-        });
-        res.end();
-        return;
-    }
+    if(!checkAndSendLoggedIn(req, res)) return;
 
     DatabaseManager.Model.user.findId(req.session.userInfo, function (result) {
         if (!result.result) {
@@ -244,28 +242,43 @@ router.route('/process/checkExistingUser').post(function (req, res) {
 });
 
 router.route('/process/searchUserDetails').post(function (req, res) {
-    if (req.session.userInfo)
-        DatabaseManager.Model.user.findId({ id: req.body.id }, function (result) {
-            if (result.result)
-                res.json({
-                    result: true,
-                    name: result.doc.name,
-                    rank: result.doc.rank
-                });
-            else
-                res.json({
-                    result: false,
-                    reason: 'NoSuchUserException'
-                });
-            res.end();
-        });
-    else {
-        res.json({
-            result: false,
-            reason: 'NotLoggedInException'
-        });
+    if(!checkAndSendLoggedIn(req, res)) return;
+    
+    DatabaseManager.Model.user.findId({ id: req.body.id }, function (result) {
+        if (result.result)
+            res.json({
+                result: true,
+                name: result.doc.name,
+                rank: result.doc.rank
+            });
+        else
+            res.json({
+                result: false,
+                reason: 'NoSuchUserException'
+            });
         res.end();
-    }
+    });
+});
+
+router.route('/process/getUserInfo').get(function (req, res) {
+    if(!checkAndSendLoggedIn(req, res)) return;
+
+    Database.Model.user.getUserInfo(req.session.userInfo, function(result) {
+        res.json(result);
+        res.end();
+    });
+});
+
+router.route('/process/updateUserInfo').post(function (req, res) {
+    if(!checkAndSendLoggedIn(req, res)) return;
+
+    var userInfo = {
+
+    };
+
+    DatabaseManager.user.updateUserInfo(userInfo, function(result) {
+
+    });
 });
 
 // Express에 각 미들웨어 적용 및 서버 시작
@@ -276,12 +289,12 @@ app.use(session({
     saveUninitialized: true
 }));
 
-/* app.use(function(req, res, next) {
-    console.log('접근 받음');
-    console.dir(req);
+app.use(function(req, res, next) {
+    console.log('접근 받음: %s로의 Request. POST Request 목록 ↓', req.url);
+    console.dir(req.body);
 
     next();
-}); */
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
