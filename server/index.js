@@ -108,8 +108,7 @@ router.route('/process/registerUser').post(upload.single('profPic'), function (r
         unit: req.body.unit,
         gender: req.body.gender,
         favoriteEvent: req.body.favoriteEvent,
-        description: req.body.description,
-        profile_image: req.file ? req.file.path : null
+        description: req.body.description
     };
 
     // 정보 중 하나라도 빠졌을 시 오류
@@ -118,6 +117,9 @@ router.route('/process/registerUser').post(upload.single('profPic'), function (r
             sendIllegalParameters(req, res);
             return;
         }
+
+    // 사용자 프로필 이미지 파일 처리
+    userInfo.profile_image = (req.file) ? req.file.path : null;
 
     // 가져온 정보를 MongoOSE 이용하여 DB에 저장
     DatabaseManager.createUser(userInfo, function (err) {
@@ -216,7 +218,7 @@ router.route('/process/searchUserDetails').post(function (req, res) {
                 result: true,
                 name: result.doc.name,
                 rank: result.doc.rank,
-                profile_image: result.doc.profile_image? true : false
+                profile_image: result.doc.profile_image ? true : false
             });
         else
             res.json({
@@ -268,6 +270,7 @@ router.route('/process/updateUserInfo').post(upload.single('profPic'), function 
 });
 
 router.route('/process/getProfileImage').get(function (req, res) {
+    if (!checkAndSendLoggedIn(req, res)) return;
     var userId = req.query.userid;
 
     DatabaseManager.Model.user.getProfileImagePath({ id: userId }, function (result) {
@@ -294,10 +297,23 @@ router.route('/process/getMatchList').get(function (req, res) {
 router.route('/process/getUserMatch').get(function (req, res) {
     if (!checkAndSendLoggedIn(req, res)) return;
 
-    DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
-        res.json(result);
-        res.end();
+    DatabaseManager.Model.user.getUserInfo(req.session.userInfo, function (result) {
+        var matchId = result.match_ongoing;
+
+        DatabaseManager.Model.matching.getUserMatch(matchId, function (result) {
+            // 현재 사용자가 초대사용자인지 확인
+            // 초대를 수락한 뒤에는 False.
+            var pendingPlayers = result.pendingPlayers;
+            if (pendingPlayers && pendingPlayers.indexOf(req.session.userInfo.id) != -1)
+                result.is_pending = true;
+            else
+                result.is_pending = false;
+
+            res.json(result);
+            res.end();
+        });
     });
+
 });
 
 router.route('/process/requestMatch').post(function (req, res) {
@@ -307,13 +323,37 @@ router.route('/process/requestMatch').post(function (req, res) {
         sendIllegalParameters(req, res); return;
     }
 
-    var matchInfo = {
-        initiatorId: req.session.userInfo.id,
-        activityType: req.body.activityType,
-        players: req.body.players.split('|')
+    var pendingPlayers = req.body.players.split('|');
+    var players = [pendingPlayers.shift()];
+
+    if (players[0] != req.session.userInfo.id) {
+        res.json({
+            result: false,
+            reason: 'InternalError',
+            description: 'session상의 User와 request의 User가 다릅니다.'
+        });
+        res.end();
+        return;
     }
 
-    DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
+    // anon의 경우 항상 players에 간다.
+    // request에서 항상 뒤쪽을 차지하므로 그 앞쪽까지만 처리.
+    var firstAnonIdx = pendingPlayers.indexOf('anon');
+    var totalSize = pendingPlayers.length;
+    var pendingPlayers = pendingPlayers.slice(0, firstAnonIdx);
+    var anonCount = totalSize - pendingPlayers.length;
+
+    for (var i = 0; i < anonCount; i++)
+        players.push('anon');
+
+    var matchInfo = {
+        initiatorId: players[0],
+        activityType: req.body.activityType,
+        players: players,
+        pendingPlayers: pendingPlayers
+    };
+
+    DatabaseManager.Model.matching.getUserMatch(req.session.userInfo.id, function (result) {
         if (result.result) {
             // 사용자가 이미 매치를 가지고 있는 경우
             res.json({
@@ -344,6 +384,28 @@ router.route('/process/deleteMatch').post(function (req, res) {
     });
 });
 
+// 매치를 참가할 것인가 결정한다.
+router.route('/process/decideMatch').post(function (req, res) {
+    if (!checkAndSendLoggedIn(req, res)) return;
+
+    var isParticipating = req.body.isParticipating;
+    var userInfo = req.session.userInfo;
+
+    DatabaseManager.Model.user.getUserInfo(userInfo, function (result) {
+        if (result.match_status == 'ready')
+            callback({
+                result: false,
+                reason: 'NotInMatchException'
+            });
+        else
+            DatabaseManager.Model.matching.decideMatch(userInfo, isParticipating, function (result) {
+                res.json(result);
+                res.end();
+            });
+
+    });
+});
+
 router.route('/process/getStadiumList').post(function (req, res) {
     DatabaseManager.Model.stadium.find({}, function (err, result) {
         if (err)
@@ -358,10 +420,10 @@ router.route('/process/getStadiumList').post(function (req, res) {
     })
 });
 
-router.route('/process/getUserStadium').post(function(req, res) {
+router.route('/process/getUserStadium').post(function (req, res) {
     if (!checkAndSendLoggedIn(req, res)) return;
 
-    
+
 });
 
 /**

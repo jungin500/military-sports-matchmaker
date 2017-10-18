@@ -111,6 +111,7 @@ var createSchema = function () {
         profile_image: { type: String, required: false, unique: false },
         match_history: { type: Array, required: false, unique: false, default: [] },
         match_ongoing: { type: String, required: false, unique: false, default: ' ' },
+        match_status: { type: String, required: true, unique: false, default: 'ready' }, // ready, pending, matching
         created_at: { type: Date, index: { unique: false }, default: Date.now },
         updated_at: { type: Date, index: { unique: false }, default: Date.now }
     });
@@ -137,7 +138,9 @@ var createSchema = function () {
 
     var findId = function (userInfo, callback) {
         this.find({ id: userInfo.id }, function (err, result) {
-            if (mongoErrorCallbackCheck(err, callback) && result.length == 0)
+            if (!mongoErrorCallbackCheck(err, callback)) return;
+
+            if (result.length == 0)
                 callback({
                     result: false,
                     reason: 'NoSuchUserException'
@@ -192,17 +195,18 @@ var createSchema = function () {
                     unit: result.doc.unit,
                     favoriteEvent: result.doc.favoriteEvent,
                     description: result.doc.description,
+                    match_status: result.doc.match_status,
                     match_history: result.doc.match_history,
                     match_ongoing: result.doc.match_ongoing,
                     created_at: result.doc.created_at,
                     updated_at: result.doc.updated_at,
-                    profile_image: result.doc.profile_image? true : false
+                    profile_image: result.doc.profile_image ? true : false
                 });
         });
     };
 
     var getProfileImagePath = function (userInfo, callback) {
-        this.findId(userInfo, function(result) {
+        this.findId(userInfo, function (result) {
             if (!result.result)
                 callback(result);
             else if (!result.doc.profile_image)
@@ -220,24 +224,24 @@ var createSchema = function () {
 
     var updateUserInfo = function (targetId, query, callback) {
         this.update({ id: targetId }, query, function (err) {
-            if (mongoErrorCallbackCheck(err, callback)) {
-                if (query.password) {
-                    Model.user.findOne({ id: targetId }, function (err, result) {
-                        if (mongoErrorCallbackCheck(err, callback)) {
-                            result.set('password', query.password);
-                            result.save(function (err) {
-                                if (mongoErrorCallbackCheck(err, callback))
-                                    callback({
-                                        result: true
-                                    });
-                            });
-                        }
-                    });
-                } else
-                    callback({
-                        result: true
-                    });
-            }
+            if (!mongoErrorCallbackCheck(err, callback)) return;
+
+            if (query.password) {
+                Model.user.findOne({ id: targetId }, function (err, result) {
+                    if (mongoErrorCallbackCheck(err, callback)) {
+                        result.set('password', query.password);
+                        result.save(function (err) {
+                            if (mongoErrorCallbackCheck(err, callback))
+                                callback({
+                                    result: true
+                                });
+                        });
+                    }
+                });
+            } else
+                callback({
+                    result: true
+                });
         });
     };
 
@@ -254,14 +258,18 @@ var createSchema = function () {
         initiatorId: { type: String, required: true, unique: false },
         activityType: { type: String, required: true, unique: false, default: ' ' },
         players: { type: Array, required: true, unique: false, default: [] },
+        pendingPlayers: { type: Array, required: false, unique: false, default: [] },
+        rejectedPlayers: { type: Array, required: false, unique: false, default: [] },
         matchId: { type: String, required: true, unique: true },
         stadium: { type: String, required: true, unique: false },
         start_at: { type: Date, required: true, index: { unique: false }, default: Date.now }
     });
 
-    var getMatch = function (initiatorId, callback) {
-        this.find({ 'initiatorId': initiatorId }, function (err, result) {
-            if (mongoErrorCallbackCheck(err, callback) && result.length == 0)
+    var getUserMatch = function (matchId, callback) {
+        this.find({ 'matchId': matchId }, function (err, result) {
+            if (!mongoErrorCallbackCheck(err, callback)) return;
+
+            if (result.length == 0)
                 callback({
                     result: false,
                     reason: 'NoSuchMatchException'
@@ -290,90 +298,106 @@ var createSchema = function () {
 
         // 적절한 위치를 찾아서 매치를 생성한다.
         Model.user.findOne({ id: matchInfo.initiatorId }, function (err, result) {
-            if (mongoErrorCallbackCheck(err, callback)) {
+            if (!mongoErrorCallbackCheck(err, callback)) return;
 
-                var query = {
-                    available_type: matchInfo.activityType,
-                    belong_at: result._doc.unit
-                };
+            var query = {
+                available_type: matchInfo.activityType,
+                belong_at: result._doc.unit
+            };
 
-                Model.stadium.find(query, function (err, result) {
-                    if (mongoErrorCallbackCheck(err, callback)) {
-                        if (result.length == 0) {
-                            callback({
-                                result: false,
-                                reason: 'NoMatchingStadiumException'
-                            });
-                            return;
-                        } else {
-                            // 오름차순 Sorting
-                            result.sort(function (a, b) {
-                                var leftStadiumLeft = a._doc.max_players - a._doc.in_players;
-                                var rightStadiumLeft = b._doc.max_players - b._doc.in_players;
-                                return leftStadiumLeft == rightStadiumLeft ? 0 :
-                                    leftStadiumLeft < rightStadiumLeft ? -1 : 1;
-                            });
+            Model.stadium.find(query, function (err, result) {
+                if (!mongoErrorCallbackCheck(err, callback)) return;
+                if (result.length == 0) {
+                    callback({
+                        result: false,
+                        reason: 'NoMatchingStadiumException'
+                    });
+                    return;
+                } else {
+                    // 오름차순 Sorting
+                    result.sort(function (a, b) {
+                        var leftStadiumLeft = a._doc.max_players - a._doc.in_players;
+                        var rightStadiumLeft = b._doc.max_players - b._doc.in_players;
+                        return leftStadiumLeft == rightStadiumLeft ? 0 :
+                            leftStadiumLeft < rightStadiumLeft ? -1 : 1;
+                    });
 
-                            // 있는 것들중에서 가장 낮은수의 남은 Player부터 Assign.
-                            for (var i = 0; i < result.length; i++) {
-                                var doc = result[i]._doc;
+                    // 있는 것들중에서 가장 낮은수의 남은 Player부터 Assign.
+                    for (var i = 0; i < result.length; i++) {
+                        var doc = result[i]._doc;
 
-                                if (doc.max_players - doc.in_players >= matchInfo.players.length) {
-                                    Model.stadium.update({ _id: doc._id }, {
-                                        in_players: doc.in_players + matchInfo.players.length,
-                                        $push: {
-                                            matchings: matchInfo.matchId
-                                        }
-                                    }, function (err) {
-                                        if (mongoErrorCallbackCheck(err, callback)) {
-                                            // 완료되면 사용자에게 매치 데이터를 저장한다.
-                                            // 저장할 때 Stadium 정보가 필요하므로 기록했던 데이터로부터 가져온다.
-                                            matchInfo.stadium = doc.name;
-                                            var match = new Model.matching(matchInfo);
-
-                                            match.save(function (err) {
-                                                console.log('문제 없음');
-                                                if (mongoErrorCallbackCheck(err, callback))
-                                                    // 사용자에게 해당 Match를 저장합니다.
-                                                    Model.user.update({ id: matchInfo.initiatorId }, {
-                                                        match_ongoing: matchInfo.matchId,
-                                                        $push: {
-                                                            match_history: matchInfo.matchId
-                                                        }
-                                                    }, function (err) {
-                                                        if (mongoErrorCallbackCheck(err, callback)) {
-                                                            console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchInfo.matchId);
-                                                            console.log('[정보] 유저 %s에게 매치 데이터를 저장했습니다.', matchInfo.initiatorId);
-                                                            callback({
-                                                                result: true,
-                                                                stadium: doc.name
-                                                            });
-                                                        }
-                                                    });
-                                            });
-                                        }
-                                    });
-                                    return;
+                        if (doc.max_players - doc.in_players >= matchInfo.players.length) {
+                            Model.stadium.update({ _id: doc._id }, {
+                                in_players: doc.in_players + matchInfo.players.length,
+                                $push: {
+                                    matchings: matchInfo.matchId
                                 }
-                            }
+                            }, function (err) {
+                                if (!mongoErrorCallbackCheck(err, callback)) return;
 
-                            // Assign 불가능할 경우 Fail.
-                            callback({
-                                result: false,
-                                reason: 'FailedAssigningStadiumException'
+                                // 완료되면 사용자에게 매치 데이터를 저장한다.
+                                // 저장할 때 Stadium 정보가 필요하므로 기록했던 데이터로부터 가져온다.
+                                matchInfo.stadium = doc.name;
+                                var match = new Model.matching(matchInfo);
+
+                                match.save(function (err) {
+                                    if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                                    // 사용자들에게 해당 Match를 저장한다.
+                                    // 필터 기준은 id가 각각 players와 pendingPlayers에 속하는 경우.
+                                    var findQuery = {
+                                        $or: [{ id: { $in: matchInfo.pendingPlayers } }, { id: { $in: matchInfo.players } }]
+                                    };
+
+                                    var updateQuery = {
+                                        match_ongoing: matchInfo.matchId,
+                                        $push: {
+                                            match_history: matchInfo.matchId
+                                        },
+                                        match_status: 'pending'
+                                    };
+
+                                    Model.user.updateMany(findQuery, updateQuery, function (err) {
+                                        if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                                        Model.user.updateMany({ id: { $in: matchInfo.players } }, {
+                                            match_status: 'matching'
+                                        }, function (err) {
+                                            if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                                            console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchInfo.matchId);
+                                            console.log('[정보] 유저 [%s, %s](들)에게 매치 데이터를 저장했습니다.', JSON.stringify(matchInfo.players), JSON.stringify(matchInfo.pendingPlayers));
+                                            callback({
+                                                result: true,
+                                                stadium: doc.name
+                                            });
+                                        });
+                                    });
+                                });
+
                             });
                             return;
                         }
                     }
-                });
-            }
+
+                    // Assign 불가능할 경우 Fail.
+                    callback({
+                        result: false,
+                        reason: 'FailedAssigningStadiumException'
+                    });
+                    return;
+                }
+
+            });
 
         });
     };
 
     var deleteMatch = function (initiatorId, matchId, callback) {
         this.find({ matchId: matchId }, function (err, result) {
-            if (mongoErrorCallbackCheck(err, callback) && result.length == 0)
+            if (!mongoErrorCallbackCheck(err, callback)) return;
+
+            if (result.length == 0)
                 callback({
                     result: false,
                     reason: 'NoSuchMatchException'
@@ -383,60 +407,109 @@ var createSchema = function () {
                     result: false,
                     reason: 'ForbiddenOperationException'
                 });
-            else {
+            else
                 Model.matching.findOne({ matchId: matchId }, function (err, result) {
                     var players = result._doc.players.length;
                     var stadiumName = result._doc.stadium;
 
-                    Model.matching.remove({ matchId: matchId }, function (err) {
-                        if (mongoErrorCallbackCheck(err, callback)) {
-                            console.log('[정보] 매치를 삭제합니다. 매치 ID [%s]', matchId);
+                    var doc = result._doc;
 
-                            Model.user.update({ id: initiatorId }, {
-                                match_ongoing: ' '
+                    Model.matching.remove({ matchId: matchId }, function (err) {
+                        if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                        console.log('[정보] 매치를 삭제합니다. 매치 ID [%s]', matchId);
+
+                        Model.user.updateMany({
+                            $or: [{ id: { $in: doc.pendingPlayers } }, { id: { $in: doc.players } }]
+                        }, {
+                                match_ongoing: '',
+                                match_status: 'ready'
                             }, function (err) {
-                                if (mongoErrorCallbackCheck(err, callback)) {
-                                    Model.stadium.update({ name: stadiumName }, {
-                                        $pull: {
-                                            matchings: matchId
-                                        },
-                                        $inc: {
-                                            in_players: -players
-                                        }
-                                    }, function (err) {
-                                        if (mongoErrorCallbackCheck(err, callback))
-                                            callback({
-                                                result: true
-                                            });
+                                if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                                Model.stadium.update({ name: stadiumName }, {
+                                    $pull: {
+                                        matchings: matchId
+                                    },
+                                    $inc: {
+                                        in_players: -players
+                                    }
+                                }, function (err) {
+                                    if (!mongoErrorCallbackCheck(err, callback)) return;
+                                    callback({
+                                        result: true
                                     });
-                                }
+                                });
                             })
-                        }
                     });
                 });
-
-            }
-
         });
-
-
     };
 
     // 호출은 getAll
     var getAllMatchings = function (callback) {
         this.find({}, function (err, result) {
-            if (mongoErrorCallbackCheck(err, callback))
-                callback({
-                    result: true,
-                    docs: result
-                })
+            if (!mongoErrorCallbackCheck(err, callback)) return;
+            callback({
+                result: true,
+                docs: result
+            });
         });
     };
 
-    Schema.matching.static('getMatch', getMatch);
+    var decideMatch = function (userInfo, isParticipating, callback) {
+        this.findOne({ pendingPlayers: userInfo.id }, function (err, result) {
+            if (!mongoErrorCallbackCheck(err, callback)) return;
+            else if (!result) {
+                callback({
+                    result: false,
+                    reason: 'NoSuchUserException'
+                });
+                return;
+            }
+
+            var matchId = result._doc.matchId;
+
+            Model.matching.update({ matchId: matchId }, {
+                $pull: { pendingPlayers: userInfo.id }
+            }, function (err) {
+                if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                // 해당 사용자의 상태를 ready로 변경한다.
+                Model.user.update({ id: userInfo.id }, {
+                    match_status: 'ready'
+                }, function (err) {
+                    if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                    if (isParticipating) // 참가하는 경우, 사용자를 또 추가한다.
+                        Model.matching.update({ matchId: matchId }, {
+                            $push: { players: userInfo.id }
+                        }, function (err) {
+                            if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                            Model.user.update({ id: userInfo.id }, {
+                                match_status: 'matching'
+                            }, function (err) {
+                                if (!mongoErrorCallbackCheck(err, callback)) return;
+                                callback({
+                                    result: true
+                                });
+                            });
+                        });
+                    else
+                        callback({
+                            result: true
+                        });
+                });
+            });
+        });
+    };
+
+    Schema.matching.static('getUserMatch', getUserMatch);
     Schema.matching.static('createMatch', createMatch);
     Schema.matching.static('deleteMatch', deleteMatch);
     Schema.matching.static('getAll', getAllMatchings);
+    Schema.matching.static('decideMatch', decideMatch);
 
     // 경기장 스키마
     Schema.stadium = mongoose.Schema({
@@ -452,11 +525,11 @@ var createSchema = function () {
     // 호출은 getAll
     var getAllStadiums = function (callback) {
         this.find({}, function (err, result) {
-            if (mongoErrorCallbackCheck(err, callback))
-                callback({
-                    result: true,
-                    docs: result
-                })
+            if (!mongoErrorCallbackCheck(err, callback)) return;
+            callback({
+                result: true,
+                docs: result
+            })
         });
     };
 
@@ -464,10 +537,10 @@ var createSchema = function () {
         var stadium = Model.stadium(stadiumInfo);
 
         stadium.save(function (err) {
-            if (mongoErrorCallbackCheck(err, callback))
-                callback({
-                    result: true
-                });
+            if (!mongoErrorCallbackCheck(err, callback)) return;
+            callback({
+                result: true
+            });
         });
     };
 

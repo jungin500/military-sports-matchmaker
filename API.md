@@ -144,7 +144,7 @@
     - start_at: 매치 생성 시간
     - matchId: 매치 고유 ID
     - initiatorId: 매치 생성자 ID
-    - is_pending: 사용자가 경기에 초대되었는지 여부 (true/false)
+    - is_pending: 사용자가 경기에 초대되었는지 여부 
 - reason: 실패 시 사유 (result = false)
     - NoSuchMatchException
     - NotLoggedInException
