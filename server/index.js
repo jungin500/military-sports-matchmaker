@@ -288,7 +288,7 @@ router.route('/process/updateUserInfo').post(function (req, res) {
         name: req.body.name,
         rank: req.body.rank,
         gender: req.body.gender,
-        password = req.body.password,
+        password: req.body.password,
         unit: req.body.unit,
         favoriteEvent: req.body.favoriteEvent,
         description: req.body.description
@@ -298,8 +298,6 @@ router.route('/process/updateUserInfo').post(function (req, res) {
     for(var key in userInfo)
         if(!userInfo[key])
             delete(userInfo.key);
-
-    if(req.body.password)
 
     DatabaseManager.Model.user.updateUserInfo(targetId, userInfo, function (result) {
         res.json(result);
