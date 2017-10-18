@@ -220,3 +220,7 @@
 			if success nothing
 			if fail
 				reason: string
+
+포트 번호
+- 50+자기번호
+- 팀 대표 번호 1명
