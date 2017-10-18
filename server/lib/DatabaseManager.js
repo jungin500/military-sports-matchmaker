@@ -260,7 +260,7 @@ var createSchema = function () {
                     reason: 'ForbiddenOperationException'
                 });
             else
-                this.remove({ matchId: matchId }, function (err) {
+                Model.matching.remove({ matchId: matchId }, function (err) {
                     if (err)
                         callback({
                             result: false,
