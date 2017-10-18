@@ -19,7 +19,7 @@ public class ReservePlaceActivity extends AppCompatActivity implements OnClickLi
     //TODO: Replace with DB
     String[] BLarr = {"대대선택","1대대","2대대","3대대","4대대"};
 
-    String Bl[] = {"1대대","2대대","3대대","4대대"};
+    String Bl[] = {"1대대","1대대","3대대","4대대"};
     String sports[] = {"축구","축구","족구","축구"};
     String stadium[] = {"1대대축구경기장","1대대2부축구경기장","3대대족구경기장","4대대축구경기장"};
     TextView selectStadium;

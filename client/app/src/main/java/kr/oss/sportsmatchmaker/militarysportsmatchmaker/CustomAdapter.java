@@ -26,6 +26,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.zip.Inflater;
 
 public class CustomAdapter extends ArrayAdapter<ListData>{
     private Context context;
@@ -72,9 +73,9 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setTitle("선수 검색");
                 alertDialogBuilder.setMessage("군번을 입력하세요.");
+
                 final EditText search = new EditText(context);
                 alertDialogBuilder.setView(search);
-
                 alertDialogBuilder.setPositiveButton("닫기", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(
@@ -88,19 +89,19 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
                                     @Override
                                     public void onClick(
                                             DialogInterface dialog, int id) {
+                                            armnum.setText(search.getText().toString());
 
                                             if(SearchPlayer(search.getText().toString()) < 0)
                                                 Toast.makeText(context,"해당 선수가 없습니다.",Toast.LENGTH_SHORT).show();
                                             else {
                                                 armnum.setText(search.getText().toString());
-                                                name.setText(Information[1][SearchPlayer(armnum.getText().toString())]);
+                                                name.setText(Information[1][SearchPlayer(search.getText().toString())]);
                                                 face.setImageResource(R.drawable.img_basketball);
                                             }
 
                                     }
                         });
 
-                AlertDialog alertDialog = alertDialogBuilder.create();
                 alertDialogBuilder.show();
             }
         });
@@ -108,12 +109,14 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
         return row;
     }
 
-    public int SearchPlayer(String armnum){
+    public int SearchPlayer(CharSequence armnum){
         int num = -1;
 
         for(int i=0;i<3;i++) {
-            if (Information[0][i] == armnum)
+            if (Information[0][i].equals(armnum)) {
                 num = i;
+                break;
+            }
         }
 
         return num;
