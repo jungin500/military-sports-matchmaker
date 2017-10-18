@@ -3,12 +3,11 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,10 +39,15 @@ public class SignupActivity extends AppCompatActivity {
     // id uniqueness check flag
     private Boolean idFlag;
 
+    // Proxy
+    public Proxy proxy;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+        proxy = new Proxy(getApplicationContext());
+
         initializeSpinner();
         idFlag = true;
 
@@ -80,12 +84,7 @@ public class SignupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String id = idView.getText().toString();
-
-                AsyncHttpClient client = new AsyncHttpClient();
-                RequestParams params = new RequestParams();
-                params.put("id",id);
-                String checkURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/checkExistingUser";
-                client.post(checkURL, params, new JsonHttpResponseHandler(){
+                proxy.idCheck(id, new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
@@ -101,13 +100,12 @@ public class SignupActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
-
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                        super.onFailure(statusCode, headers, responseString, throwable);
+                        Toast.makeText(getApplicationContext(), "서버 접속 실패", Toast.LENGTH_SHORT).show();
+                        Log.e("TAG", "idCheckFail");
                     }
                 });
-
                 Toast.makeText(getApplicationContext(), "사용 가능한 군번입니다.", Toast.LENGTH_SHORT).show();
             }
         });
@@ -188,19 +186,7 @@ public class SignupActivity extends AppCompatActivity {
                     return;
                 }
 
-                AsyncHttpClient client = new AsyncHttpClient();
-                RequestParams params = new RequestParams();
-                params.put("id", id);
-                params.put("password", pw);
-                params.put("name", name);
-                params.put("rank", rankid);
-                params.put("unit", unit);
-                params.put("gender",sexid);
-                params.put("favoriteEvent",fav);
-                params.put("description",desc);
-
-                String registerURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/registerUser";
-                client.post(registerURL, params, new JsonHttpResponseHandler(){
+                proxy.signup(id, pw, name, rankid, unit, sexid, fav, desc, new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
@@ -227,18 +213,11 @@ public class SignupActivity extends AppCompatActivity {
                                 else {
                                     Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
                                 }
-
+                                Log.e("TAG", error);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-
-
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                        super.onFailure(statusCode, headers, responseString, throwable);
                     }
                 });
 

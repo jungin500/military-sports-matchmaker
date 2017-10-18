@@ -11,9 +11,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,11 +41,17 @@ public class EditProfileActivity extends AppCompatActivity {
     private Boolean idFlag;
 
     private SessionManager smgr;
+    private Proxy proxy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
+
+        proxy = new Proxy(getApplicationContext());
+        smgr = new SessionManager(getApplicationContext());
+
+
         initializeSpinner();
         idFlag = true;
 
@@ -74,15 +78,10 @@ public class EditProfileActivity extends AppCompatActivity {
         ArrayAdapter<String> adapterUnits = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, units);
         unitView.setAdapter(adapterUnits);
 
-        smgr = new SessionManager(getApplicationContext());
         final String id = smgr.getProfile().get(smgr.ID);
         idView.setText("군번: " + id + " (수정 불가)");
 
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        String getInfoURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/getUserInfo";
-        client.setCookieStore(smgr.myCookies);
-        client.get(getInfoURL, params, new JsonHttpResponseHandler(){
+        proxy.getUserInfo(new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
@@ -105,12 +104,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
             }
         });
         submitButton = (Button) findViewById(R.id.editProfile_submit);
@@ -158,20 +151,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 int rankid = RankHelper.rankToInt(rank);
                 int sexid = (sex.equals("여성") ? 0 : 1);
 
-                AsyncHttpClient client = new AsyncHttpClient();
-                RequestParams params = new RequestParams();
-                params.put("id", id);
-                params.put("password", pw);
-                params.put("name", name);
-                params.put("rank", rankid);
-                params.put("unit", unit);
-                params.put("gender",sexid);
-                params.put("favoriteEvent",fav);
-                params.put("description",desc);
-
-                client.setCookieStore(smgr.myCookies);
-                String registerURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/updateUserInfo";
-                client.post(registerURL, params, new JsonHttpResponseHandler(){
+                proxy.updateUserInfo(id, pw, name, rankid, unit, sexid, fav, desc, new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
@@ -193,11 +173,6 @@ public class EditProfileActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                        super.onFailure(statusCode, headers, responseString, throwable);
                     }
                 });
 

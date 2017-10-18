@@ -25,9 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +42,7 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
     private int layoutResource;
     private ArrayList<ListData> listData;
     private SessionManager smgr;
+    private Proxy proxy;
 
     public CustomAdapter(Context context, int layoutResource, ArrayList<ListData> listData) {
         super(context, layoutResource, listData);
@@ -55,6 +54,9 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent){
+        smgr = new SessionManager(context);
+        proxy = new Proxy(context);
+
         View row = convertView;
 
         if(row == null){
@@ -96,19 +98,13 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
                 alertDialogBuilder.setNegativeButton("검색", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id){
-                        smgr = new SessionManager(context);
-
                         final String queryid = search.getText().toString();
                         if (queryid.equals(smgr.getProfile().get(smgr.ID))) {
                             Toast.makeText(context, "자기 자신을 검색할 수 없습니다.", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        AsyncHttpClient client = new AsyncHttpClient();
-                        RequestParams params = new RequestParams();
-                        params.put("id", queryid);
-                        client.setCookieStore(smgr.myCookies);
-                        String queueURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/searchUserDetails";
-                        client.post(queueURL, params, new JsonHttpResponseHandler() {
+
+                        proxy.searchUser(queryid, new JsonHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                                 try {
@@ -131,20 +127,15 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
                                             Toast.makeText(context, "세션이 만료되었습니다. 다시 로그인해주십시오.", Toast.LENGTH_SHORT).show();
                                             smgr.logout();
                                         }
+                                        Log.e("CustomAdapter", errorName);
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
                             }
-                            @Override
-                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                                super.onFailure(statusCode, headers, responseString, throwable);
-                            }
                         });
-
                     }
                 });
-
                 alertDialogBuilder.show();
             }
         });
