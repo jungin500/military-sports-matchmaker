@@ -194,11 +194,12 @@ public class SignupActivity extends AppCompatActivity {
                     pwView2.requestFocus();
                     return;
                 }
+                /*TODO: 이거 다시 만들기
                 if (pw.length() < 6){
                     pwView.setError("비밀번호가 너무 짧습니다.");
                     pwView.requestFocus();
                     return;
-                }
+                }*/
                 if (name.equals("")){
                     nameView.setError("이름을 입력해주십시오.");
                     nameView.requestFocus();

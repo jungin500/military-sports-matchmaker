@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.*;
 
 import com.loopj.android.http.FileAsyncHttpResponseHandler;
@@ -50,6 +51,8 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_home);
 
         // initialize session on create
@@ -164,8 +167,8 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                 break;
             //장소 고르기
             default:
-                Toast.makeText(getApplicationContext(), "전우님의 전투체육 참여 현황을\n편리하게 볼 수 있습니다.", Toast.LENGTH_SHORT).show();
-                Intent intent4 = new Intent(getApplicationContext(), SelectProfileActivity.class);
+                Toast.makeText(getApplicationContext(), "현재 큐의 승낙상태를 확인합니다.", Toast.LENGTH_SHORT).show();
+                Intent intent4 = new Intent(getApplicationContext(), QueListActivity.class);
                 startActivity(intent4);
                 break;
             //임시 사진 선택
@@ -189,10 +192,13 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                             gameTypeKor = "농구";
                         JSONArray players = match.getJSONArray("players");
                         String numPlayers = String.valueOf(players.length());
+
+                        //TODO: is IS_PENDING added?
                         textQStatus.setText("현재 " + numPlayers + "명과 " + gameTypeKor + " 시합 대기중입니다.");
                         smgr.changeMatchStatus(true);
                         smgr.setMatchId(match.getString("matchId"));
 
+                        //TODO: GET RID OF THIS UGLY BUTTON
                         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                         params.weight = 0.25f;
                         quitMatchButton.setLayoutParams(params);

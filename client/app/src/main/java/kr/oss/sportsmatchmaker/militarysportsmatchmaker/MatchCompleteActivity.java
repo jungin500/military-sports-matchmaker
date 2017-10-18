@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 
 public class MatchCompleteActivity extends AppCompatActivity implements OnClickListener{
@@ -12,6 +13,8 @@ public class MatchCompleteActivity extends AppCompatActivity implements OnClickL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_match_complete);
 
         ImageButton team1 = (ImageButton) findViewById(R.id.team1);

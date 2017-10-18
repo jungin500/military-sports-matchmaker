@@ -2,20 +2,26 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.*;
 
+import com.loopj.android.http.FileAsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
@@ -37,6 +43,8 @@ public class MatchSettingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_match_setting);
 
         smgr = new SessionManager(getApplicationContext());
@@ -74,18 +82,21 @@ public class MatchSettingActivity extends AppCompatActivity {
                     return;
                 }
                 int num = Integer.parseInt(playerNumber.getText().toString());
-                if (num > maxPlayer) {
-                    Toast.makeText(getApplicationContext(), "사람 숫자가 너무 많습니다.", Toast.LENGTH_SHORT).show();
+                if (num <= 0){
+                    playerNumber.setError("양수를 입력하세요.");
+                    return;
+                }
+                else if (num > maxPlayer) {
+                    playerNumber.setError("사람 숫자가 너무 많습니다.");
                     return;
                 }
                 // 첫 플레이어는 항상 내 자신, 수정 불가능.
                 else if (numPlayer[0] == 0){
-                    //TODO: add client's profile image
                     ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname, id, "리더");
                     listDataArray.add(data);
                     for (int i = 1; i < num; i++){
                         data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname + "의 동료", "anon", "선수 추가\n(선택)");
-                        listDataArray.add(data);;
+                        listDataArray.add(data);
                     }
                 }
                 else if (num < numPlayer[0]){
@@ -112,8 +123,19 @@ public class MatchSettingActivity extends AppCompatActivity {
                     return;
                 }
                 StringBuilder stringBuilder = new StringBuilder();
+
+                int anoncount = 0;
                 for (int i = 0; i < numPlayer[0]; i++){
-                    stringBuilder.append(listDataArray.get(i).getId()+"|");
+                    String currid = listDataArray.get(i).getId();
+                    if (currid.equals("anon")){
+                        anoncount++;
+                    }
+                    else {
+                        stringBuilder.append(listDataArray.get(i).getId()+"|");
+                    }
+                }
+                for (int i = 0; i < anoncount; i++){
+                    stringBuilder.append("anon|");
                 }
                 stringBuilder.setLength(stringBuilder.length() - 1);
                 requestMatch(gameType, stringBuilder.toString());

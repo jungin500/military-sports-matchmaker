@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 public class Proxy {
-    public static final String SERVER_URL = "http://10.53.128.122:14402";
+    public static final String SERVER_URL = "http://10.53.128.122:14403";
 
     private static AsyncHttpClient client = new AsyncHttpClient();
     private Context context;
@@ -50,7 +50,9 @@ public class Proxy {
         params.put("gender",sexid);
         params.put("favoriteEvent",fav);
         params.put("description",desc);
-        params.put("profPic", new ByteArrayInputStream(byteImage), "profPic.PNG");
+        if (byteImage != null) {
+            params.put("profPic", new ByteArrayInputStream(byteImage), "profPic.PNG");
+        }
         /*
         try {
             params.put("profPic", new File(filePath));
@@ -79,25 +81,8 @@ public class Proxy {
         client.post(searchURL, params, handler);
     }
 
-    //POST updateUserInfo
-    public void updateUserInfo(String id, String pw, String name, int rankid, String unit,
-                               int sexid, String fav, String desc, JsonHttpResponseHandler handler){
-        RequestParams params = new RequestParams();
-        params.put("id", id);
-        params.put("password", pw);
-        params.put("name", name);
-        params.put("rank", rankid);
-        params.put("unit", unit);
-        params.put("gender",sexid);
-        params.put("favoriteEvent",fav);
-        params.put("description",desc);
-        client.setCookieStore(smgr.myCookies);
-        String registerURL = SERVER_URL + "/process/updateUserInfo";
-        client.post(registerURL, params, handler);
-    }
 
     //POST updateUserInfo with Profile Picture
-
     public void updateUserInfo(String id, String pw, String name, int rankid, String unit,
                                int sexid, String fav, String desc, byte[] byteImage,
                                        JsonHttpResponseHandler handler){
@@ -110,7 +95,9 @@ public class Proxy {
         params.put("gender",sexid);
         params.put("favoriteEvent",fav);
         params.put("description",desc);
-        params.put("profPic", new ByteArrayInputStream(byteImage), "profPic.PNG");
+        if (byteImage != null) {
+            params.put("profPic", new ByteArrayInputStream(byteImage), "profPic.PNG");
+        }
         client.setCookieStore(smgr.myCookies);
         String registerURL = SERVER_URL + "/process/updateUserInfo";
         client.post(registerURL, params, handler);
@@ -147,8 +134,17 @@ public class Proxy {
         client.post(quitMatchURL, params, handler);
     }
 
+    // POST decide whether to match or not
+    public void decideMatch(boolean isParticipating, JsonHttpResponseHandler handler){
+        RequestParams params = new RequestParams();
+        params.put("isParticipating", isParticipating);
+        String decideMatchURL = SERVER_URL + "/process/decideMatch";
+        client.setCookieStore(smgr.myCookies);
+        client.post(decideMatchURL, params, handler);
+    }
+
     /*
-     * Profile picture upload and download functions
+     * Profile picture related functions
      */
 
     //GET
@@ -161,5 +157,7 @@ public class Proxy {
         client.setCookieStore(smgr.myCookies);
         client.get(getProfPicURL, params, handler);
     }
+
+
 
 }
