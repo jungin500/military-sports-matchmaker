@@ -9,29 +9,47 @@
     android:weightSum="1">
 
 
+    <TextView
+        android:id="@+id/blank10"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
         <android.support.design.widget.TextInputLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.75">
+            android:layout_gravity="center"
+            android:layout_weight="0.75"
+            android:gravity="center">
 
             <TextView
                 android:id="@+id/home_welcome"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_margin="4dp"
-                android:textSize="16sp" />
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="24sp" />
 
         </android.support.design.widget.TextInputLayout>
         <Button
             android:id="@+id/logout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:background="@drawable/border"
             android:layout_weight="0.25"
             android:text="로그아웃" />
+
+        <TextView
+            android:id="@+id/blank9"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.05" />
 
     </LinearLayout>
 
@@ -44,8 +62,10 @@
             android:id="@+id/home_qstatus"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_margin="4dp"
             android:layout_weight="0.75"
+            android:gravity="center"
             android:textSize="18sp" />
 
         <Button
@@ -57,10 +77,111 @@
 
 
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/blank7"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.8"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/blank11"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.5" />
+
+            <Button
+                android:id="@+id/searchmatching"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.8"
+                android:background="@android:color/holo_blue_light"
+                android:text="전투체육 같이 할 사람 찾기"
+                android:textColor="#FFFFFF"
+                android:textSize="23sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/blank"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.2" />
+
+            <Button
+                android:id="@+id/reserveplace"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.8"
+                android:background="@android:color/holo_blue_light"
+                android:text="전투체육 활동 등록 및 장소 예약"
+                android:textColor="#FFFFFF"
+                android:textSize="23sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/blank1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.2" />
+
+            <Button
+                android:id="@+id/notepad"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.8"
+                android:background="@android:color/holo_blue_light"
+                android:text="전투체육 일지"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/blank2"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.2" />
+
+            <Button
+                android:id="@+id/profileedit"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.8"
+                android:background="@android:color/holo_blue_light"
+                android:text="프로필 수정"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/blank6"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.2" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/blank8"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1" />
+
+    </LinearLayout>
+
     <ListView
         android:id="@+id/home_menu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_margin="6dp" />
 
 
