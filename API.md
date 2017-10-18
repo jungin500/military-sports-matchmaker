@@ -174,7 +174,7 @@
 
 ### Output
 - result: 성공 여부(true/false)
-- reason: 실패 사유(result = false)
+- reason: 실패 사유(result = fals   e)
     - ForbiddenOperationException: 내 매치가 아닌 다른 사람의 매치를 삭제하려고 시도했을 경우
     - NoSuchMatchException
     - NotLoggedInException
