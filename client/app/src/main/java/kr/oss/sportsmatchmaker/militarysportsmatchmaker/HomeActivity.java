@@ -2,6 +2,10 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,12 +13,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
 
+import com.loopj.android.http.FileAsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -69,10 +75,13 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
 
         final String id = smgr.getProfile().get(SessionManager.ID);
         homepro = (ImageView) findViewById(R.id.homeprofile);
-        int temp = getResources().getIdentifier("@drawable/img_"+ id, "drawable", "kr.oss.sportsmatchmaker.militarysportsmatchmaker");
-        homepro.setImageResource(temp);
+        homepro.setImageResource(R.drawable.img_defaultface);
 
+        // get image and set it. if no image, set default image.
         updateTextWelcome();
+        updateProfileImage();
+
+
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -222,6 +231,7 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         super.onResume();
         smgr.checkSession();
         updateTextWelcome();
+        updateProfileImage();
     }
 
     private void updateTextWelcome(){
@@ -229,6 +239,41 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         String user_name = prof.get(SessionManager.NAME);
         String user_rank = prof.get(SessionManager.RANK);
         textWelcome.setText("환영합니다, " + user_name + " " + user_rank + "님");
+    }
+
+    private void updateProfileImage(){
+        // get image and set it. if no image, set default image.
+        proxy.getUserInfo(new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    boolean success = response.getBoolean("result");
+                    if (success){
+                        if (response.getBoolean("profile_image")){
+                            proxy.getProfPic(response.getString("id"), new FileAsyncHttpResponseHandler(getApplicationContext()) {
+                                public void onSuccess(int i, Header[] headers, File file){
+                                    Log.e("TAG", String.valueOf(file.length()));
+                                    String filePath = file.getAbsolutePath();
+                                    Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+                                    RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
+                                    rbd.setCornerRadius(bitmap.getHeight()/8.0f);
+                                    homepro.setImageDrawable(rbd);
+                                }
+                                @Override
+                                public void onFailure(int i, Header[] headers, Throwable throwable, File file) {
+                                    Log.e("TAG", "Error: file open failed");
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        Toast.makeText(getApplicationContext(), "회원정보를 가져오는데 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 /*
     private void setHomeMenu(ListView homeMenu){

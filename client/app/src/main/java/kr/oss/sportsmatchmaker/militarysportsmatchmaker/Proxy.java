@@ -1,21 +1,9 @@
 package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
-/**
- * Created by Administrator on 2017-10-17.
- */
-
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
-
 import com.loopj.android.http.*;
-
 import java.io.File;
 import java.io.FileNotFoundException;
-
-import static android.support.v4.app.ShareCompat.getCallingActivity;
 
 public class Proxy {
     public static final String SERVER_URL = "http://10.53.128.122:14402";
@@ -23,7 +11,6 @@ public class Proxy {
     private static AsyncHttpClient client = new AsyncHttpClient();
     private Context context;
     private SessionManager smgr;
-
 
     public Proxy(Context context){
         this.context = context;

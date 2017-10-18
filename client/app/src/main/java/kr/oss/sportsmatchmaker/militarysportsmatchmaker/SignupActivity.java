@@ -306,7 +306,7 @@ public class SignupActivity extends AppCompatActivity {
             if (resultCode == Activity.RESULT_OK) {
                 try {
                     profPicUri = data.getData();
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), profPicUri);
+                    Bitmap bitmap = cropToSquare(MediaStore.Images.Media.getBitmap(getContentResolver(), profPicUri));
                     RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
                     rbd.setCornerRadius(bitmap.getHeight()/8.0f);
                     profPic.setImageDrawable(rbd);
@@ -327,5 +327,20 @@ public class SignupActivity extends AppCompatActivity {
         String s=cursor.getString(column_index);
         cursor.close();
         return s;
+    }
+
+    // crop bitmap to square.
+    // Source: https://stackoverflow.com/questions/26263660/crop-image-to-square-android
+    public static Bitmap cropToSquare(Bitmap bitmap){
+        int width  = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int newWidth = (height > width) ? width : height;
+        int newHeight = (height > width)? height - ( height - width) : height;
+        int cropW = (width - height) / 2;
+        cropW = (cropW < 0)? 0: cropW;
+        int cropH = (height - width) / 2;
+        cropH = (cropH < 0)? 0: cropH;
+        Bitmap cropImg = Bitmap.createBitmap(bitmap, cropW, cropH, newWidth, newHeight);
+        return cropImg;
     }
 }
