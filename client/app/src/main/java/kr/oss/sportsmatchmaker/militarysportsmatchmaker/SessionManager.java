@@ -4,11 +4,16 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.PersistentCookieStore;
 import com.loopj.android.http.RequestParams;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 
@@ -72,6 +77,7 @@ public class SessionManager {
     public void clearSession(){
         editor.clear();
         editor.apply();
+        myCookies.clear();
     }
 
     // if not logged in, close all activities and return to MainActivity.
@@ -91,20 +97,52 @@ public class SessionManager {
 
                 @Override
                 public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
-                    // LOGOUT FAILED
-
+                    clearSession();
+                    Intent intent = new Intent(context, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    context.startActivity(intent);
                 }
             });
-
-
         }
 
     }
 
     // from time to time, check login status and if not logged in, clear editor and logout.
     public void checkLogin(){
+        checkSession();
         if (!isLoggedIn()){
             logout();
         }
+    }
+
+    // check whether session is live, kill everything if session offline.
+    public void checkSession(){
+        AsyncHttpClient client = new AsyncHttpClient();
+        String checkLoginURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/checkLoggedIn";
+        client.setCookieStore(myCookies);
+        client.get(checkLoginURL, new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    boolean result = response.getBoolean("result");
+                    if (!result){
+                        Toast.makeText(context.getApplicationContext(), "세션 만료로 로그인 창으로 돌아갑니다.", Toast.LENGTH_SHORT).show();
+                        clearSession();
+                        Intent intent = new Intent(context, MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        context.startActivity(intent);
+
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                super.onFailure(statusCode, headers, responseString, throwable);
+            }
+        });
     }
 }

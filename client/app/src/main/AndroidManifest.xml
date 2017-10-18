@@ -30,7 +30,8 @@
         <activity android:name=".MatchCompleteAtivity" />
         <activity android:name=".MatchCompleteActivity" />
         <activity android:name=".MatchSettingActivity" />
-        <activity android:name=".ReservePlaceActivity"></activity>
+        <activity android:name=".ReservePlaceActivity" />
+        <activity android:name=".EditProfileActivity"></activity>
     </application>
 
 </manifest>
