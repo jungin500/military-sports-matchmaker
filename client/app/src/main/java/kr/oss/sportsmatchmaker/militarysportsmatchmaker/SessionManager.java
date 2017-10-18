@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
@@ -37,6 +38,8 @@ public class SessionManager {
     public static final String ID = "id";
     public static final String NAME = "name";
     public static final String RANK = "rank";
+    public static final String IN_MATCH = "inMatch";
+    public static final String MATCH_ID = "matchId";
 
     // Session manager constructor. get application context as input.
     public SessionManager(Context context){
@@ -104,7 +107,25 @@ public class SessionManager {
                 }
             });
         }
+    }
 
+    public void changeMatchStatus(boolean inMatch){
+        editor.putBoolean(IN_MATCH, inMatch);
+        editor.apply();
+    }
+
+    public void setMatchId(String id){
+        editor.putString(MATCH_ID, id);
+        editor.apply();
+    }
+
+    public boolean getMatchStatus(){
+        return (pref != null) && pref.getBoolean(IN_MATCH, false);
+    }
+
+
+    public String getMatchId(){
+        return pref.getString(MATCH_ID, null);
     }
 
     // from time to time, check login status and if not logged in, clear editor and logout.
@@ -116,7 +137,6 @@ public class SessionManager {
     }
 
     // check whether session is live, kill everything if session offline.
-    //TODO: this method is fucked up, fix.
     public void checkSession(){
         AsyncHttpClient client = new AsyncHttpClient();
         String checkLoginURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/checkLoggedIn";
