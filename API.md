@@ -194,6 +194,14 @@
 ### Input
 - (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
 - (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
+- 아래는 있는 값들만 변경을 한다. (보내지 않거나 데이터가 없으면, eg, "", 수정 X)
+    - name: 변경된 사용자 이름
+    - rank: 변경된 사용자 계급
+    - gender: 변경된 사용자 성별
+    - password: 변경할 사용자 비밀번호
+    - unit: 변경된 사용자 부대명
+    - favoriteEvent: 변경된 사용자가 좋아하는 운동
+    - description: 변경된 사용자 자기소개
 
 ### Output
 - result: 성공 여부 (true/false)

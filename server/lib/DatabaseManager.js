@@ -60,6 +60,26 @@ var connectDB = function (app) {
 };
 
 /**
+ * Mongoose (MongoDB)에서 발생한 Error가 있을 경우 처리하는 함수입니다.
+ * 
+ * 처리한 뒤, 에러가 발생시 False, 아닐 경우 true를 반환해 Synchronous Operation에서
+ * 해당 Flag로 Continuous 여부를 판단할 수 있습니다.
+ * @param {Error} err MongoError 
+ * @param {Function} callback 콜백 함수
+ */
+var mongoErrorCallbackCheck = function (err, callback) {
+    if (err) {
+        callback({
+            result: false,
+            reason: 'MongoError',
+            mongoerror: err
+        });
+        return false;
+    }
+    return true;
+}
+
+/**
 * 스키마를 생성합니다.
 */
 var createSchema = function () {
@@ -75,6 +95,8 @@ var createSchema = function () {
         unit: { type: String, index: 'hashed', default: ' ' },
         favoriteEvent: { type: Object, required: false, default: {} },
         description: { type: String, required: true, unique: false, default: ' ' },
+        match_history: { type: Array, required: false, unique: false, default: [] },
+        match_ongoing: { type: String, required: false, unique: false, default: ' ' },
         created_at: { type: Date, index: { unique: false }, default: Date.now },
         updated_at: { type: Date, index: { unique: false }, default: Date.now }
     });
@@ -99,16 +121,9 @@ var createSchema = function () {
         return Math.floor(Date.now() * Math.random() * Math.random());
     });
 
-    Schema.user.static('findId', function (userInfo, callback) {
+    var findId = function (userInfo, callback) {
         this.find({ id: userInfo.id }, function (err, result) {
-            if (err) {
-                callback({
-                    result: false,
-                    reason: 'MongoError',
-                    mongoerror: err
-                });
-                return;
-            } else if (result.length == 0)
+            if (mongoErrorCallbackCheck(err, callback) && result.length == 0)
                 callback({
                     result: false,
                     reason: 'NoSuchUserException'
@@ -124,9 +139,9 @@ var createSchema = function () {
                     doc: result[0]._doc
                 });
         });
-    });
+    };
 
-    Schema.user.static('authenticate', function (userInfo, callback) {
+    var authenticate = function (userInfo, callback) {
         this.findId(userInfo, function (result) {
             if (!result.result)
                 callback(result);
@@ -147,54 +162,42 @@ var createSchema = function () {
                 return;
             }
         });
-    });
+    };
 
-    Schema.user.static('getUserInfo', function(userInfo, callback) {
-        this.findId(userInfo, function(result) {
-            if(!result.result)
+    var getUserInfo = function (userInfo, callback) {
+        this.findId(userInfo, function (result) {
+            if (!result.result)
                 callback(result);
-            else 
+            else
                 callback({
                     result: true,
                     id: result.doc.id,
                     name: result.doc.name,
-                    rank: result.doc.name,
+                    rank: result.doc.rank,
                     gender: result.doc.gender,
                     unit: result.doc.unit,
                     favoriteEvent: result.doc.favoriteEvent,
                     description: result.doc.description,
+                    match_history: result.doc.match_history,
+                    match_ongoing: result.doc.match_ongoing,
                     created_at: result.doc.created_at,
                     updated_at: result.doc.updated_at
                 });
         });
-    });
+    };
 
-    Schema.user.static('updateUserInfo', function(userInfo, callback) {
-        // Model.user
-    });
-
-    // 경기 매칭 스키마
-    Schema.matching = mongoose.Schema({
-        initiatorId: { type: String, required: true, unique: false },
-        activityType: { type: String, required: true, unique: false, default: ' ' },
-        players: { type: Array, required: true, unique: false, default: [] },
-        matchId: { type: String, required: true, unique: true },
-        stadium: { type: String, required: true, unique: false, default: 'Normal Stadium' },
-        start_at: { type: Date, required: true, index: { unique: false }, default: Date.now }
-    });
-
-    Schema.matching.static('getMatch', function (initiatorId, callback) {
-        this.find({ 'initiatorId': initiatorId }, function (err, result) {
-            if (err) {
+    var updateUserInfo = function (targetId, query, callback) {
+        this.update({ id: targetId }, query, function (err) {
+            if(mongoErrorCallbackCheck(err, callback))
                 callback({
-                    result: false,
-                    reason: 'MongoError',
-                    mongoerror: err
+                    result: true
                 });
-                return;
-            }
+        });
+    };
 
-            if (result.length == 0)
+    var getMatch = function (initiatorId, callback) {
+        this.find({ 'initiatorId': initiatorId }, function (err, result) {
+            if (mongoErrorCallbackCheck(err, callback) && result.length == 0)
                 callback({
                     result: false,
                     reason: 'NoSuchMatchException'
@@ -210,9 +213,9 @@ var createSchema = function () {
                     match: result[0]._doc
                 });
         });
-    });
+    };
 
-    Schema.matching.static('findMatch', function (matchInfo, callback) {
+    var findMatch = function (matchInfo, callback) {
         console.dir(matchInfo);
         if (matchInfo.matchId)
             this.getMatch(matchInfo.matchId, function (result) {
@@ -241,39 +244,42 @@ var createSchema = function () {
                 result: false,
                 reason: 'NoMatchIdException'
             })
-    });
+    };
 
-    Schema.matching.static('createMatch', function (matchInfo, callback) {
+    var createMatch = function (matchInfo, callback) {
         matchInfo.matchId = generateMatchId();
         console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchInfo.matchId);
 
         var match = new Model.matching(matchInfo);
 
         match.save(function (err) {
-            if (err) {
-                callback({
-                    result: false,
-                    reason: 'MongoError',
-                    mongoerror: err
+            if (mongoErrorCallbackCheck(err, callback))
+                // 사용자에게 해당 Match를 저장합니다.
+                Model.user.update({ id: matchInfo.initiatorId }, {
+                    match_ongoing: matchInfo.matchId,
+                    $push: {
+                        match_history: matchInfo.matchId
+                    }
+                }, function (err) {
+                    if (err) {
+                        callback({
+                            result: false,
+                            reason: 'MongoError',
+                            mongoerror: err
+                        });
+                        return;
+                    }
+                    console.log('[알림] 유저 %s에게 매치 데이터를 저장했습니다.', matchInfo.initiatorId);
+                    callback({
+                        result: true
+                    });
                 });
-                return;
-            }
-
-            callback({
-                result: true
-            });
         });
-    });
+    };
 
-    Schema.matching.static('deleteMatch', function (initiatorId, matchId, callback) {
+    var deleteMatch = function (initiatorId, matchId, callback) {
         this.find({ matchId: matchId }, function (err, result) {
-            if (err)
-                callback({
-                    result: false,
-                    reason: 'MongoError',
-                    mongoerror: err
-                })
-            else if (result.length == 0)
+            if (mongoErrorCallbackCheck(err, callback) && result.length == 0)
                 callback({
                     result: false,
                     reason: 'NoSuchMatchException'
@@ -285,39 +291,54 @@ var createSchema = function () {
                 });
             else
                 Model.matching.remove({ matchId: matchId }, function (err) {
-                    if (err)
-                        callback({
-                            result: false,
-                            reason: 'MongoError',
-                            mongoerror: err
-                        });
-                    else {
+                    if (mongoErrorCallbackCheck(err, callback)) {
                         console.log('[정보] 매치를 삭제합니다. 매치 ID [%s]', matchId);
-                        callback({
-                            result: true
-                        });
+
+                        Model.user.update({ id: initiatorId }, {
+                            match_ongoing: ' '
+                        }, function (err) {
+                            if (mongoErrorCallbackCheck(err, callback))
+                                callback({
+                                    result: true
+                                });
+                        })
                     }
                 });
         });
 
 
-    });
+    };
 
-    Schema.matching.static('getAllMatches', function (callback) {
+    var getAllMatches = function (callback) {
         this.find({}, function (err, result) {
-            if (err)
-                callback({
-                    result: false,
-                    reason: 'MongoError',
-                    mongoerror: err
-                });
-            else
+            if (mongoErrorCallbackCheck(err, callback))
                 callback({
                     result: true,
                     docs: result
                 })
         });
+    };
+
+    Schema.user.static('findId', findId);
+    Schema.user.static('authenticate', authenticate);
+    Schema.user.static('getUserInfo', getUserInfo);
+    Schema.user.static('updateUserInfo', updateUserInfo);
+
+    // 경기 매칭 스키마
+    Schema.matching = mongoose.Schema({
+        initiatorId: { type: String, required: true, unique: false },
+        activityType: { type: String, required: true, unique: false, default: ' ' },
+        players: { type: Array, required: true, unique: false, default: [] },
+        matchId: { type: String, required: true, unique: true },
+        stadium: { type: String, required: true, unique: false, default: 'Normal Stadium' },
+        start_at: { type: Date, required: true, index: { unique: false }, default: Date.now }
     });
+
+    Schema.matching.static('getMatch', getMatch);
+    Schema.matching.static('findMatch', findMatch);
+    Schema.matching.static('createMatch', createMatch);
+    Schema.matching.static('deleteMatch', deleteMatch);
+    Schema.matching.static('getAllMatches', getAllMatches);
 
     // 경기장 스키마
     Schema.stadium = mongoose.Schema({
