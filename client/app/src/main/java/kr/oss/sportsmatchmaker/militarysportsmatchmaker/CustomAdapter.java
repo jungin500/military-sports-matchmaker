@@ -100,7 +100,7 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
                                                 name.setText(Information[1][SearchPlayer(search.getText().toString())]);
                                                 String temp = armnum.getText().toString();
                                                 if(SearchPlayer(search.getText().toString())<0){
-                                                    int temp2 = context.getResources().getIdentifier("img_defaultface.png","drawable","kr.oss.sportsmatchmaker.militarysportsmatchmaker");
+                                                    int temp2 = context.getResources().getIdentifier("img_defaultface","drawable","kr.oss.sportsmatchmaker.militarysportsmatchmaker");
                                                     face.setImageResource(temp2);
                                                 }
 
