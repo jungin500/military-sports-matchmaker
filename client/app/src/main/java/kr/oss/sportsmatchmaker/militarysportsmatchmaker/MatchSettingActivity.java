@@ -120,8 +120,19 @@ public class MatchSettingActivity extends AppCompatActivity {
                     return;
                 }
                 StringBuilder stringBuilder = new StringBuilder();
+
+                int anoncount = 0;
                 for (int i = 0; i < numPlayer[0]; i++){
-                    stringBuilder.append(listDataArray.get(i).getId()+"|");
+                    String currid = listDataArray.get(i).getId();
+                    if (currid.equals("anon")){
+                        anoncount++;
+                    }
+                    else {
+                        stringBuilder.append(listDataArray.get(i).getId()+"|");
+                    }
+                }
+                for (int i = 0; i < anoncount; i++){
+                    stringBuilder.append("anon|");
                 }
                 stringBuilder.setLength(stringBuilder.length() - 1);
                 requestMatch(gameType, stringBuilder.toString());

@@ -56,18 +56,6 @@ public class CustomAdapter2 extends ArrayAdapter<ListData>{
             idView.setText("");
         }
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (position == 0)
-                    return;
-                if(button.getText().toString() == "승낙")
-                    Toast.makeText(context,"이미 승낙한 상태입니다.", Toast.LENGTH_SHORT).show();
-                else
-                    button.setText("승낙");
-            }
-        });
-
         return row;
     }
 }

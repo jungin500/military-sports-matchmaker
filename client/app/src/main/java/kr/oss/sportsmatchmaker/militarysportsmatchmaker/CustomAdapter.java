@@ -148,12 +148,12 @@ import cz.msebera.android.httpclient.Header;
                     @Override
                     public void onClick(DialogInterface dialog, int id){
                         final String queryid = search.getText().toString();
-                        if (queryid.equals(smgr.getProfile().get(smgr.ID))) {
-                            Toast.makeText(context, "자기 자신을 검색할 수 없습니다.", Toast.LENGTH_SHORT).show();
+                        // 검색어와 중복된 아이디가 있으면
+                        for (ListData i : listData){
+                            Toast.makeText(context, "이미 등록된 사람을 검색할 수 없습니다.", Toast.LENGTH_SHORT).show();
                             return;
                         }
-
-                        //TODO: 프로필 사진 기능 만들면 프사 받아와서 구현.
+                        //프사 받아와서 보여준다.
                         proxy.searchUser(queryid, new JsonHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

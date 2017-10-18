@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 public class Proxy {
-    public static final String SERVER_URL = "http://10.53.128.122:14402";
+    public static final String SERVER_URL = "http://10.53.128.122:14403";
 
     private static AsyncHttpClient client = new AsyncHttpClient();
     private Context context;
@@ -132,6 +132,15 @@ public class Proxy {
         String quitMatchURL = SERVER_URL + "/process/deleteMatch";
         client.setCookieStore(smgr.myCookies);
         client.post(quitMatchURL, params, handler);
+    }
+
+    // POST decide whether to match or not
+    public void decideMatch(boolean isParticipating, JsonHttpResponseHandler handler){
+        RequestParams params = new RequestParams();
+        params.put("isParticipating", isParticipating);
+        String decideMatchURL = SERVER_URL + "/process/decideMatch";
+        client.setCookieStore(smgr.myCookies);
+        client.post(decideMatchURL, params, handler);
     }
 
     /*
