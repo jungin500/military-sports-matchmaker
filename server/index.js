@@ -166,9 +166,19 @@ router.route('/process/requestMatch').post(function (req, res) {
         players: req.body.players.split('|')
     }
 
-    DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
-        res.json(result);
-        res.end();
+    DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
+        if(result.result) {
+            res.json({
+                result: false,
+                reason: 'MatchAlreadyExistsException'
+            });
+            res.end();
+        } else {
+            DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
+                res.json(result);
+                res.end();
+            });
+        }
     });
 });
 

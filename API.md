@@ -79,6 +79,7 @@
 - result: 결과(true/false)
 - reason: false일경우 이유
     - NotLoggedInException
+    - MatchAlreadyExistsException (이미 매치를 가지고 있는 사용자의 경우)
     - MongoError (DB 오류)
 - mongoerror: reason = 'MongoError'인 경우 에러
 
