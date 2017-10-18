@@ -26,16 +26,17 @@ public class EditProfileActivity extends AppCompatActivity {
 
     public ArrayList<String> ranks;
     public ArrayList<String> sexes;
+    public ArrayList<String> units;
     // widgets
     private TextView idView;
     private EditText pwView;
     private EditText pwView2;
     private EditText nameView;
-    private EditText unitView;
     private EditText favView;
     private EditText descView;
     private Spinner rankView;
     private Spinner sexView;
+    private Spinner unitView;
     private Button submitButton;
 
     // id uniqueness check flag
@@ -55,7 +56,7 @@ public class EditProfileActivity extends AppCompatActivity {
         pwView = (EditText) findViewById(R.id.editProfile_pw);
         pwView2 = (EditText) findViewById(R.id.editProfile_pw2);
         nameView = (EditText) findViewById(R.id.editProfile_name);
-        unitView = (EditText) findViewById(R.id.editProfile_unit);
+
         favView = (EditText) findViewById(R.id.editProfile_favorite);
         descView = (EditText) findViewById(R.id.editProfile_desc);
 
@@ -68,6 +69,10 @@ public class EditProfileActivity extends AppCompatActivity {
         sexView = (Spinner) findViewById(R.id.editProfile_sex);
         ArrayAdapter<String> adapterSex = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, sexes);
         sexView.setAdapter(adapterSex);
+
+        unitView = (Spinner) findViewById(R.id.editProfile_unit);
+        ArrayAdapter<String> adapterUnits = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, units);
+        unitView.setAdapter(adapterUnits);
 
         smgr = new SessionManager(getApplicationContext());
         final String id = smgr.getProfile().get(smgr.ID);
@@ -84,7 +89,11 @@ public class EditProfileActivity extends AppCompatActivity {
                     boolean success = response.getBoolean("result");
                     if (success){
                         nameView.setText(response.getString("name"));
-                        unitView.setText(response.getString("unit"));
+                        int tempunit = (int) (response.getString("unit").charAt(0))-'1';
+                        if (tempunit < 0 || tempunit > 3){
+                            tempunit = 0;
+                        }
+                        unitView.setSelection(tempunit);
                         favView.setText(response.getString("favoriteEvent"));
                         descView.setText(response.getString("description"));
                         rankView.setSelection(RankHelper.numRanks() - 1 -  response.getInt("rank"));
@@ -104,7 +113,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 super.onFailure(statusCode, headers, responseString, throwable);
             }
         });
-        //TODO: submitButton 수정
         submitButton = (Button) findViewById(R.id.editProfile_submit);
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,7 +120,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 final String pw = pwView.getText().toString();
                 String pw2 = pwView2.getText().toString();
                 final String name = nameView.getText().toString();
-                String unit = unitView.getText().toString();
+                String unit = unitView.getSelectedItem().toString();
                 String fav = favView.getText().toString();
                 String desc = descView.getText().toString();
                 final String rank = rankView.getSelectedItem().toString();
@@ -134,11 +142,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 if (name.equals("")){
                     nameView.setError("이름을 입력해주십시오.");
                     nameView.requestFocus();
-                    return;
-                }
-                if (unit.equals("")){
-                    unitView.setError("소속부대를 입력해주십시오.");
-                    unitView.requestFocus();
                     return;
                 }
                 if (fav.equals("")){
@@ -214,6 +217,13 @@ public class EditProfileActivity extends AppCompatActivity {
         sexes = new ArrayList<String>();
         sexes.add("여성");
         sexes.add("남성");
+
+        // spinner for unit
+        units = new ArrayList<String>();
+        units.add("1대대");
+        units.add("2대대");
+        units.add("3대대");
+        units.add("4대대");
     }
 
 }

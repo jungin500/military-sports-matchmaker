@@ -23,17 +23,18 @@ public class SignupActivity extends AppCompatActivity {
 
     public ArrayList<String> ranks;
     public ArrayList<String> sexes;
+    public ArrayList<String> units;
     // widgets
     private EditText idView;
     private Button idCheckButton;
     private EditText pwView;
     private EditText pwView2;
     private EditText nameView;
-    private EditText unitView;
     private EditText favView;
     private EditText descView;
     private Spinner rankView;
     private Spinner sexView;
+    private Spinner unitView;
     private Button signupButton;
 
     // id uniqueness check flag
@@ -51,7 +52,6 @@ public class SignupActivity extends AppCompatActivity {
         pwView = (EditText) findViewById(R.id.signup_pw);
         pwView2 = (EditText) findViewById(R.id.signup_pw2);
         nameView = (EditText) findViewById(R.id.signup_name);
-        unitView = (EditText) findViewById(R.id.signup_unit);
         favView = (EditText) findViewById(R.id.signup_favorite);
         descView = (EditText) findViewById(R.id.signup_desc);
 
@@ -67,6 +67,12 @@ public class SignupActivity extends AppCompatActivity {
         ArrayAdapter<String> adapterSex = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, sexes);
         sexView.setAdapter(adapterSex);
         sexView.setSelection(0);
+
+        unitView = (Spinner) findViewById(R.id.signup_unit);
+        ArrayAdapter<String> adapterUnit = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, units);
+        unitView.setAdapter(adapterUnit);
+        unitView.setSelection(0);
+
 
         // check if id already exists in DB.
         idCheckButton = (Button) findViewById(R.id.signup_idcheck);
@@ -115,9 +121,9 @@ public class SignupActivity extends AppCompatActivity {
                 final String pw = pwView.getText().toString();
                 String pw2 = pwView2.getText().toString();
                 String name = nameView.getText().toString();
-                String unit = unitView.getText().toString();
                 String fav = favView.getText().toString();
                 String desc = descView.getText().toString();
+                String unit = unitView.getSelectedItem().toString();
                 String rank = rankView.getSelectedItem().toString();
                 String sex = sexView.getSelectedItem().toString();
                 int sexid = sexes.size() - sexes.indexOf(sex) - 2;
@@ -152,9 +158,10 @@ public class SignupActivity extends AppCompatActivity {
                     nameView.requestFocus();
                     return;
                 }
-                if (unit.equals("")){
-                    unitView.setError("소속부대를 입력해주십시오.");
-                    unitView.requestFocus();
+                if (unit.equals("소속")  || unit.equals("----")){
+                    TextView errorUnit = (TextView) unitView.getSelectedView();
+                    errorUnit.setError("소속부대를 입력해주십시오.");
+                    errorUnit.requestFocus();
                     return;
                 }
                 if (rank.equals("----") || rank.equals("계급") || rank.equals("")){
@@ -255,6 +262,15 @@ public class SignupActivity extends AppCompatActivity {
         sexes.add("----");
         sexes.add("여성");
         sexes.add("남성");
+
+        // spinner for unit
+        units = new ArrayList<String>();
+        units.add("소속");
+        units.add("----");
+        units.add("1대대");
+        units.add("2대대");
+        units.add("3대대");
+        units.add("4대대");
     }
 
 }

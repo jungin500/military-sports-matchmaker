@@ -7,6 +7,7 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
@@ -20,6 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +34,7 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
     private Context context;
     private int layoutResource;
     private ArrayList<ListData> listData;
+    private SessionManager smgr;
 
     public CustomAdapter(Context context, int layoutResource, ArrayList<ListData> listData) {
         super(context, layoutResource, listData);
@@ -43,7 +46,7 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
     String Information[][] = {{"00", "01", "02"}, {"소령 이무기", "대장 강정호", "소위 김찬양"}};
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent){
+    public View getView(final int position, View convertView, ViewGroup parent){
         View row = convertView;
 
         if(row == null){
@@ -51,25 +54,22 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
             row = inflater.inflate(layoutResource, parent, false);
         }
 
-        final ImageView face = (ImageView) row.findViewById(R.id.Profile);
-        final TextView name = (TextView) row.findViewById(R.id.Name);
-        final TextView armnum = (TextView) row.findViewById(R.id.Arm_Num);
+        final ImageView faceView = (ImageView) row.findViewById(R.id.Profile);
+        final TextView nameView = (TextView) row.findViewById(R.id.Name);
+        final TextView idView = (TextView) row.findViewById(R.id.Id);
         Button button = (Button) row.findViewById(R.id.button);
 
-        try{
-            InputStream is = context.getAssets().open(listData.get(position).getFace());
-            Drawable d = Drawable.createFromStream(is, null);
-            face.setImageDrawable(d);
-        }   catch(IOException e){
-            Log.e("ERROR", "ERROR: ", e);
-        }
-        name.setText(listData.get(position).getName());
+        faceView.setImageBitmap(listData.get(position).getFace());
+        nameView.setText(listData.get(position).getName());
         button.setText(listData.get(position).getButton());
-        armnum.setText(listData.get(position).getArm_Num());
+        idView.setText(listData.get(position).getId());
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // button does nothing for position 0
+                if (position == 0)
+                    return;
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setTitle("선수 검색");
                 alertDialogBuilder.setMessage("군번을 입력하세요.");
@@ -77,40 +77,32 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
                 final EditText search = new EditText(context);
                 alertDialogBuilder.setView(search);
                 alertDialogBuilder.setPositiveButton("닫기", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(
-                                            DialogInterface dialog, int id) {
-                                        // 다이얼로그 취소
-                                        dialog.cancel();
-                                    }
-                                });
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // 다이얼로그 취소
+                        dialog.cancel();
+                    }
+                });
                 alertDialogBuilder.setNegativeButton("검색",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(
-                                            DialogInterface dialog, int id) {
-
-                                            if(SearchPlayer(search.getText().toString()) < 0) {
-                                                Toast.makeText(context, "해당 선수가 없습니다.", Toast.LENGTH_SHORT).show();
-                                                armnum.setText("");
-                                                name.setText("선수를 추가시켜주세요.");
-                                            }
-                                            else {
-                                                armnum.setText(search.getText().toString());
-                                                name.setText(Information[1][SearchPlayer(search.getText().toString())]);
-                                                String temp = armnum.getText().toString();
-                                                if(SearchPlayer(search.getText().toString())<0){
-                                                    int temp2 = context.getResources().getIdentifier("img_defaultface","drawable","kr.oss.sportsmatchmaker.militarysportsmatchmaker");
-                                                    face.setImageResource(temp2);
-                                                }
-
-                                                else {
-                                                    int temp3 = context.getResources().getIdentifier("img_" + armnum.getText().toString(), "drawable", "kr.oss.sportsmatchmaker.militarysportsmatchmaker");
-                                                    face.setImageResource(temp3);
-                                                }
-                                            }
-
-                                    }
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                String queryid = search.getText().toString();
+                                if(SearchPlayer(queryid) < 0) {
+                                    Toast.makeText(context, "해당 선수가 없습니다.", Toast.LENGTH_SHORT).show();
+                                    idView.setText("");
+                                    idView.setText("선수를 추가해주세요.");
+                                }
+                                else {
+                                    listData.get(position).setId(queryid);
+                                    listData.get(position).setName(Information[1][SearchPlayer(queryid)]);
+                                    nameView.setText(Information[1][SearchPlayer(queryid)]);
+                                    idView.setText(queryid);
+                                    int temp3 = context.getResources().getIdentifier("img_" + idView.getText().toString(), "drawable", "kr.oss.sportsmatchmaker.militarysportsmatchmaker");
+                                    listData.get(position).setFace(BitmapFactory.decodeResource(context.getResources(), temp3));
+                                    notifyDataSetChanged();
+                                }
+                            }
                         });
 
                 alertDialogBuilder.show();
