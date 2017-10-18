@@ -107,15 +107,6 @@ router.route('/process/registerUser').post(function (req, res) {
     });
 });
 
-router.route('/process/checkLoggedIn').get(function (req, res) {
-    if (checkAndSendLoggedIn(req, res)) {
-        res.json({
-            result: true
-        });
-        res.end();
-    }
-});
-
 router.route('/process/loginUser').post(function (req, res) {
     var userInfo = {
         id: req.body.id,
