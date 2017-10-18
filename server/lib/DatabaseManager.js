@@ -196,6 +196,23 @@ var createSchema = function () {
                     match_ongoing: result.doc.match_ongoing,
                     created_at: result.doc.created_at,
                     updated_at: result.doc.updated_at,
+                    profile_image: result.doc.profile_image? true : false
+                });
+        });
+    };
+
+    var getProfileImagePath = function (userInfo, callback) {
+        this.findId(userInfo, function(result) {
+            if (!result.result)
+                callback(result);
+            else if (!result.doc.profile_image)
+                callback({
+                    result: false,
+                    reason: 'NoProfileImageException'
+                });
+            else
+                callback({
+                    result: true,
                     profile_image: result.doc.profile_image
                 });
         });
@@ -228,6 +245,7 @@ var createSchema = function () {
     Schema.user.static('authenticate', authenticate);
     Schema.user.static('getUserInfo', getUserInfo);
     Schema.user.static('updateUserInfo', updateUserInfo);
+    Schema.user.static('getProfileImagePath', getProfileImagePath);
 
     /**
      * 경기 매칭 스키마 및 메소드 정의

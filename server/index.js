@@ -215,7 +215,8 @@ router.route('/process/searchUserDetails').post(function (req, res) {
             res.json({
                 result: true,
                 name: result.doc.name,
-                rank: result.doc.rank
+                rank: result.doc.rank,
+                profile_image: result.doc.profile_image? true : false
             });
         else
             res.json({
@@ -269,25 +270,17 @@ router.route('/process/updateUserInfo').post(upload.single('profPic'), function 
 router.route('/process/getProfileImage').get(function (req, res) {
     var userId = req.query.userid;
 
-    DatabaseManager.Model.user.getUserInfo({ id: userId }, function (result) {
-        var filepath;
-        if (!result) {
-            res.json({
-                result: false,
-                reason: 'NoSuchUserException'
-            });
+    DatabaseManager.Model.user.getProfileImagePath({ id: userId }, function (result) {
+        if (!result.result) {
+            res.json(result);
             res.end();
-        } else if (!(filepath = result.profile_image)) {
-            res.json({
-                result: false,
-                reason: 'NoProfileImageException'
-            });
-            return;
-        } else
-            fs.readFile(path.join(__dirname, filepath), function (err, data) {
-                res.pipe(data);
-                res.end();
-            });
+            console.log('오류로 데이터가 아닌 JSON 보냄');
+            console.dir(result);
+        } else {
+            console.log('데이터 보내는 중');
+            fs.createReadStream(path.join(__dirname, result.profile_image)).pipe(res);
+            console.log('데이터 보내짐');
+        }
     });
 });
 
@@ -351,7 +344,7 @@ router.route('/process/deleteMatch').post(function (req, res) {
     });
 });
 
-router.route('/process/getStadiumList').get(function (req, res) {
+router.route('/process/getStadiumList').post(function (req, res) {
     DatabaseManager.Model.stadium.find({}, function (err, result) {
         if (err)
             res.json({
@@ -363,6 +356,12 @@ router.route('/process/getStadiumList').get(function (req, res) {
             res.json(result);
         res.end();
     })
+});
+
+router.route('/process/getUserStadium').post(function(req, res) {
+    if (!checkAndSendLoggedIn(req, res)) return;
+
+    
 });
 
 /**
@@ -412,7 +411,7 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-/* app.use(function (req, res, next) {
+app.use(function (req, res, next) {
     var connectionInfo = {
         timestamp: Date.now(),
         location: (req.connection.remoteAddress == '::1') ? '로컬' : req.connection.remoteAddress.toString().split('::ffff:')[1],
@@ -428,7 +427,7 @@ app.use(cors());
     }
 
     next();
-}); */
+});
 
 app.use(static(path.join(__dirname, 'public')));
 app.use(static(path.join(__dirname, 'files')));
