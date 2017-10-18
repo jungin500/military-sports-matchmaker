@@ -62,6 +62,7 @@
                     android:id="@+id/editProfile_pw"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColorHint="@android:color/holo_blue_light"
                     android:ems="10"
                     android:hint="비밀번호 (6자리 이상). 빈칸 -> 원래 비밀번호 유지."
                     android:inputType="textPassword"
