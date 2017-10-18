@@ -38,6 +38,7 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
     private Button reserve;
     private Button note;
     private Button edit;
+    private ImageView homepro;
     private ListView homeMenu;
 
     @Override
@@ -66,6 +67,10 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         edit = (Button) findViewById(R.id.profileedit);
         edit.setOnClickListener(this);
 
+        final String id = smgr.getProfile().get(SessionManager.ID);
+        homepro = (ImageView) findViewById(R.id.homeprofile);
+        int temp = getResources().getIdentifier("@drawable/img_"+ id, "drawable", "kr.oss.sportsmatchmaker.militarysportsmatchmaker");
+        homepro.setImageResource(temp);
 
         updateTextWelcome();
         logoutButton.setOnClickListener(new View.OnClickListener() {

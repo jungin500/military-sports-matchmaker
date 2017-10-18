@@ -19,11 +19,24 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
+        <TextView
+            android:id="@+id/blank12"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.05" />
+
+        <ImageView
+            android:id="@+id/homeprofile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1"
+            app:srcCompat="@drawable/img_defaultface" />
+
         <android.support.design.widget.TextInputLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_weight="0.75"
+            android:layout_weight="0.5"
             android:gravity="center">
 
             <TextView
@@ -33,8 +46,8 @@
                 android:layout_gravity="center"
                 android:layout_margin="4dp"
                 android:gravity="center"
-                android:textStyle="bold"
-                android:textSize="24sp" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
         </android.support.design.widget.TextInputLayout>
         <Button
