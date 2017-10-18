@@ -66,7 +66,7 @@ public class MatchSettingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String numstr = playerNumber.getText().toString();
-                if (numstr == ""){
+                if (numstr.equals("")){
                     playerNumber.setError("숫자를 입력하세요.");
                     return;
                 }
@@ -82,7 +82,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                 }
                 else {
                     for (int i = 0; i < num - numPlayer[0]; i++){
-                        ListData data = new ListData("01.jpg", id + "의 일행", "정보 입력\n(선택)");
+                        ListData data = new ListData("01.jpg", id + "의 일행", "", "정보 입력\n(선택)");
                         listDataArray.add(data);
                     }
                 }
@@ -120,6 +120,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                     boolean success = response.getBoolean("result");
                     if (success) {
                         Toast.makeText(getApplicationContext(), "큐 진입 성공!", Toast.LENGTH_SHORT).show();
+                        smgr.changeMatchStatus(true);
                         Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                         startActivity(intent);
                         finish();

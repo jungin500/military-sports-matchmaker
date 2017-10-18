@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.PackageInstaller;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
@@ -32,6 +33,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     private TextView textWelcome;
     private Button logoutButton;
     private TextView textQStatus;
+    private Button quitMatchButton;
     private ListView homeMenu;
 
     @Override
@@ -39,17 +41,19 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+
+        // session data
         smgr = new SessionManager(getApplicationContext());
         prof = smgr.getProfile();
 
-
-        // welcome message
-
-        // logout button settings
+        // define widgets
         logoutButton = (Button) findViewById(R.id.logout);
+        textWelcome = (TextView) findViewById(R.id.home_welcome);
+        quitMatchButton = (Button) findViewById(R.id.home_quitMatch);
+
+        //
         String user_name = prof.get(SessionManager.NAME);
         String user_rank = prof.get(SessionManager.RANK);
-        textWelcome = (TextView) findViewById(R.id.home_welcome);
         textWelcome.setText("환영합니다, " + user_name + " " + user_rank + "님.\n오늘은 어떤 체육활동을 하시겠어요?");
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,6 +66,56 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         //TODO: get queue status
         // queue status message
         displayMatchStatus();
+
+        quitMatchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // do nothing if not in match
+                if (!smgr.getMatchStatus()){
+                    return;
+                }
+                String matchId = smgr.getMatchId();
+                AsyncHttpClient client = new AsyncHttpClient();
+                RequestParams params = new RequestParams();
+                params.put("matchId", matchId);
+                String quitMatchURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/deleteMatch";
+                client.setCookieStore(smgr.myCookies);
+                client.post(quitMatchURL, params, new JsonHttpResponseHandler(){
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        try {
+                            if(response.getBoolean("result")){
+                                displayMatchStatus();
+                            }
+                            else{
+                                String reason = response.getString("reason");
+                                if (reason.equals("ForbiddenOperationException")){
+                                    Toast.makeText(getApplicationContext(), "삭제 권한이 없습니다.", Toast.LENGTH_SHORT).show();
+                                }
+                                else if (reason.equals("NoSuchMatchException")){
+                                    Toast.makeText(getApplicationContext(), "진행중인 큐가 없습니다..", Toast.LENGTH_SHORT).show();
+                                }
+                                else if (reason.equals("NotLoggedInException")){
+                                    Toast.makeText(getApplicationContext(), "로그인되어있지 않습니다.", Toast.LENGTH_SHORT).show();
+                                    smgr.checkSession();
+                                }
+                                else {
+                                    Toast.makeText(getApplicationContext(), "실패했습니다. 오류 종류: " + reason, Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                        super.onFailure(statusCode, headers, responseString, throwable);
+                    }
+                });
+
+            }
+        });
 
         // add adapter to listview. Long boring stuff, so factor into separate method.
         homeMenu = (ListView) findViewById(R.id.home_menu);
@@ -93,11 +147,22 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                         JSONArray players = match.getJSONArray("players");
                         String numPlayers = String.valueOf(players.length());
                         textQStatus.setText("현재 " + numPlayers + "명과 " + gameTypeKor + " 시합 대기중입니다.");
+                        smgr.changeMatchStatus(true);
+                        smgr.setMatchId(match.getString("matchId"));
+
+                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
+                        params.weight = 0.25f;
+                        quitMatchButton.setLayoutParams(params);
                     }
                     else {
                         String reason = response.getString("reason");
                         if (reason.equals("NoSuchMatchException")) {
                             textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
+                            smgr.changeMatchStatus(false);
+                            smgr.setMatchId("null");
+                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
+                            params.weight = 0f;
+                            quitMatchButton.setLayoutParams(params);
                         }
                         else {
                             textQStatus.setText("오류: " + reason);
