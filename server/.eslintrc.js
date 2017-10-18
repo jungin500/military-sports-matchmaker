@@ -9,10 +9,7 @@ module.exports = {
     },
     "rules": {
         "no-console": 0,
-        "indent": [
-            "error",
-            4
-        ],
+        "indent": 0,
         "linebreak-style": [
             "error",
             "windows"

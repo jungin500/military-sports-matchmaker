@@ -1,6 +1,6 @@
 # API
 
-## /process/registerUser (POST)
+## /process/registerUser (POST) √
 ### Input
 - id: 사용자 군번 (=아이디)
 - password: 사용자 비밀번호
@@ -11,7 +11,7 @@
 - favoriteEvent: 좋아하는 종목 (이름들, 현재 사용 X)
 - description: 자기소개 (현재 사용 X)
 
-### Output (JSON)
+### Output (JSON) 
 - result: 결과 (true/false)
 - reason: 실패 시 사유 
     - MissingValuesException
@@ -22,7 +22,7 @@
 
 ---
 
-## /process/loginUser (POST)
+## /process/loginUser (POST) √
 ### Input
 - id: 사용자 군번 (=아이디)
 - password: 사용자 비밀번호
@@ -39,7 +39,7 @@
 
 ---
 
-## /process/logoutUser (GET)
+## /process/logoutUser (GET) √
 ### Input
 
 ### Output (JSON)
@@ -47,7 +47,7 @@
 
 ---
 
-## /process/checkExistingUser (POST)
+## /process/checkExistingUser (POST) √
 ### Input
 - id: 사용자 ID
 
@@ -57,7 +57,7 @@
 
 ---
 
-## /process/searchUserDetails (POST)
+## /process/searchUserDetails (POST) √
 ### Input
 - (Session) userInfo: 로그인 정보 (로그인 여부 체크)
 - id: 사용자 ID
@@ -72,7 +72,7 @@
 
 ---
 
-## /process/getUserInfo (GET)
+## /process/getUserInfo (GET) √
 ### Input
 - (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
 - (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
@@ -97,8 +97,8 @@
 
 ---
 
-## /process/updateUserInfo (POST)
-### Input
+## /process/updateUserInfo (POST) √
+### Input 
 - (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
 - (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
 - 아래는 있는 값들만 변경을 한다. (보내지 않거나 데이터가 없으면, eg, "", 수정 X)
@@ -116,7 +116,7 @@
 
 ---
 
-## /process/getMatchList (GET)
+## /process/getMatchList (GET) √
 ### Input
 
 ### Output (JSON)
@@ -129,7 +129,7 @@
 
 ---
 
-## /process/getUserMatch (POST)
+## /process/getUserMatch (POST) √
 ### Input
 - (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
 - (Session) userInfo.id: 로그인한 ID (해당 유저의 Match 검색시 활용)
@@ -149,7 +149,7 @@
 
 ---
 
-## /process/requestMatch (POST)
+## /process/requestMatch (POST) ...
 ### Input
 - (Session) userInfo: 사용자 정보 (로그인 여부 체크)
 - (Session) userInfo.id: 사용자 ID
@@ -166,7 +166,7 @@
 
 ---
 
-## /process/deleteMatch (POST)
+## /process/deleteMatch (POST) √
 ### Input
 - (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
 - (Session) userInfo.id: 로그인한 ID (해당 유저의 Match인지 체크) → initiatorId (매치 만든 사람)으로 저장되어 있음...
@@ -183,12 +183,26 @@
 
 ---
 
-## /process/getStadiumList (POST) [DRAFT]
+## /process/getStadiumList (GET)
 ### Input
-- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
 
 ### Output
-- (사용자의 위치에 해당하는 Stadium List)
+- 모든 Stadium List
+
+---
+
+## /process/createStadium (POST)
+### Input
+- name: 경기장 이름
+- available_type: 가능한 타입 (|로 구분)
+- belong_at: 위치
+- max_players: 최대 수용 인원수
+
+### Output
+- result: 성공 여부(true/false)
+- reason: 실패시 이유 (result = false일 때)
+    - MongoError
+- mongoerror: reason = 'MongoError'일 때 MongoError
 
 ---
 

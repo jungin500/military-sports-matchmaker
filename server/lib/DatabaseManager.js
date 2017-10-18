@@ -69,11 +69,22 @@ var connectDB = function (app) {
  */
 var mongoErrorCallbackCheck = function (err, callback) {
     if (err) {
-        callback({
-            result: false,
-            reason: 'MongoError',
-            mongoerror: err
-        });
+        switch (err.code) {
+            case 11000:
+                callback({
+                    result: false,
+                    reason: 'DuplicatedEntityException',
+                    mongoerror: err
+                });
+                break;
+            default:
+                callback({
+                    result: false,
+                    reason: 'MongoError',
+                    mongoerror: err
+                });
+        }
+
         return false;
     }
     return true;
@@ -184,7 +195,8 @@ var createSchema = function () {
                     match_history: result.doc.match_history,
                     match_ongoing: result.doc.match_ongoing,
                     created_at: result.doc.created_at,
-                    updated_at: result.doc.updated_at
+                    updated_at: result.doc.updated_at,
+                    profile_image: result.doc.profile_image
                 });
         });
     };
@@ -249,84 +261,95 @@ var createSchema = function () {
         });
     };
 
+    /**
+     * 새로운 매치를 생성한다.
+     * 
+     * @param {Object} matchInfo 매치에 대한 정보(initiatorId, activityType, {Array} players)
+     * @param {Function} callback 콜백 함수 ({Object} result)
+     */
     var createMatch = function (matchInfo, callback) {
         matchInfo.matchId = generateMatchId();
 
         // 적절한 위치를 찾아서 매치를 생성한다.
         Model.user.findOne({ id: matchInfo.initiatorId }, function (err, result) {
-            var unit = result._doc.unit;
+            if (mongoErrorCallbackCheck(err, callback)) {
 
-            Model.stadium.find({
-                available_type: matchInfo.activityType,
-                location: unit
-            }, function (err, result) {
-                if (mongoErrorCallbackCheck(err, callback)) {
-                    if (result.length == 0)
-                        callback({
-                            result: false,
-                            reason: 'NoMatchingStadiumException'
-                        });
-                    else {
+                var query = {
+                    available_type: matchInfo.activityType,
+                    belong_at: result._doc.unit
+                };
 
-                        // 오름차순 Sorting
-                        result.sort(function (a, b) {
-                            var leftStadiumLeft = a._doc.maxPlayers - a._doc.players.length;
-                            var rightStadiumLeft = b._doc.maxPlayers - b._doc.players.length;
-                            return leftStadiumLeft == rightStadiumLeft ? 0 :
-                                leftStadiumLeft < rightStadiumLeft ? -1 : 1;
-                        });
+                Model.stadium.find(query, function (err, result) {
+                    if (mongoErrorCallbackCheck(err, callback)) {
+                        if (result.length == 0) {
+                            callback({
+                                result: false,
+                                reason: 'NoMatchingStadiumException'
+                            });
+                            return;
+                        } else {
+                            // 오름차순 Sorting
+                            result.sort(function (a, b) {
+                                var leftStadiumLeft = a._doc.max_players - a._doc.in_players;
+                                var rightStadiumLeft = b._doc.max_players - b._doc.in_players;
+                                return leftStadiumLeft == rightStadiumLeft ? 0 :
+                                    leftStadiumLeft < rightStadiumLeft ? -1 : 1;
+                            });
 
-                        // 있는 것들중에서 가장 낮은수의 남은 Player부터 Assign.
-                        for (var i = 0; i < result.length; i++) {
-                            if (result[i]._doc.maxPlayers - result[i]._doc.players.length >= matchInfo.players.length) {
+                            // 있는 것들중에서 가장 낮은수의 남은 Player부터 Assign.
+                            for (var i = 0; i < result.length; i++) {
                                 var doc = result[i]._doc;
-                                if (doc.players.length == 0)
-                                    doc.players = matchInfo.players;
-                                else if (doc.players.length + matchInfo.players <= doc.max_players)
-                                    doc.players = doc.players.concat(matchInfo.players);
 
-                                // 완료되면 사용자에게 매치 데이터를 저장한다.
+                                if (doc.max_players - doc.in_players >= matchInfo.players.length) {
+                                    Model.stadium.update({ _id: doc._id }, {
+                                        in_players: doc.in_players + matchInfo.players.length,
+                                        $push: {
+                                            matchings: matchInfo.matchId
+                                        }
+                                    }, function (err) {
+                                        if (mongoErrorCallbackCheck(err, callback)) {
+                                            // 완료되면 사용자에게 매치 데이터를 저장한다.
+                                            // 저장할 때 Stadium 정보가 필요하므로 기록했던 데이터로부터 가져온다.
+                                            matchInfo.stadium = doc.name;
+                                            var match = new Model.matching(matchInfo);
 
-                                var match = new Model.matching(matchInfo);
-
-                                match.save(function (err) {
-                                    if (mongoErrorCallbackCheck(err, callback))
-                                        // 사용자에게 해당 Match를 저장합니다.
-                                        Model.user.update({ id: matchInfo.initiatorId }, {
-                                            match_ongoing: matchInfo.matchId,
-                                            $push: {
-                                                match_history: matchInfo.matchId
-                                            }
-                                        }, function (err) {
-                                            if (err) {
-                                                callback({
-                                                    result: false,
-                                                    reason: 'MongoError',
-                                                    mongoerror: err
-                                                });
-                                                return;
-                                            }
-                                            console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchInfo.matchId);
-                                            console.log('[정보] 유저 %s에게 매치 데이터를 저장했습니다.', matchInfo.initiatorId);
-                                            callback({
-                                                result: true,
-                                                stadium: doc.name
+                                            match.save(function (err) {
+                                                console.log('문제 없음');
+                                                if (mongoErrorCallbackCheck(err, callback))
+                                                    // 사용자에게 해당 Match를 저장합니다.
+                                                    Model.user.update({ id: matchInfo.initiatorId }, {
+                                                        match_ongoing: matchInfo.matchId,
+                                                        $push: {
+                                                            match_history: matchInfo.matchId
+                                                        }
+                                                    }, function (err) {
+                                                        if (mongoErrorCallbackCheck(err, callback)) {
+                                                            console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchInfo.matchId);
+                                                            console.log('[정보] 유저 %s에게 매치 데이터를 저장했습니다.', matchInfo.initiatorId);
+                                                            callback({
+                                                                result: true,
+                                                                stadium: doc.name
+                                                            });
+                                                        }
+                                                    });
                                             });
-                                        });
-                                });
-                                return; 
+                                        }
+                                    });
+                                    return;
+                                }
                             }
-                        }
 
-                        // Assign 불가능할 경우 Fail.
-                        callback({
-                            result: false,
-                            reason: 'FailedAssigningStadiumException'
-                        });
-                        return;
+                            // Assign 불가능할 경우 Fail.
+                            callback({
+                                result: false,
+                                reason: 'FailedAssigningStadiumException'
+                            });
+                            return;
+                        }
                     }
-                }
-            });
+                });
+            }
+
         });
     };
 
@@ -342,27 +365,47 @@ var createSchema = function () {
                     result: false,
                     reason: 'ForbiddenOperationException'
                 });
-            else
-                Model.matching.remove({ matchId: matchId }, function (err) {
-                    if (mongoErrorCallbackCheck(err, callback)) {
-                        console.log('[정보] 매치를 삭제합니다. 매치 ID [%s]', matchId);
+            else {
+                Model.matching.findOne({ matchId: matchId }, function (err, result) {
+                    var players = result._doc.players.length;
+                    var stadiumName = result._doc.stadium;
 
-                        Model.user.update({ id: initiatorId }, {
-                            match_ongoing: ' '
-                        }, function (err) {
-                            if (mongoErrorCallbackCheck(err, callback))
-                                callback({
-                                    result: true
-                                });
-                        })
-                    }
+                    Model.matching.remove({ matchId: matchId }, function (err) {
+                        if (mongoErrorCallbackCheck(err, callback)) {
+                            console.log('[정보] 매치를 삭제합니다. 매치 ID [%s]', matchId);
+
+                            Model.user.update({ id: initiatorId }, {
+                                match_ongoing: ' '
+                            }, function (err) {
+                                if (mongoErrorCallbackCheck(err, callback)) {
+                                    Model.stadium.update({ name: stadiumName }, {
+                                        $pull: {
+                                            matchings: matchId
+                                        },
+                                        $inc: {
+                                            in_players: -players
+                                        }
+                                    }, function (err) {
+                                        if (mongoErrorCallbackCheck(err, callback))
+                                            callback({
+                                                result: true
+                                            });
+                                    });
+                                }
+                            })
+                        }
+                    });
                 });
+
+            }
+
         });
 
 
     };
 
-    var getAllMatches = function (callback) {
+    // 호출은 getAll
+    var getAllMatchings = function (callback) {
         this.find({}, function (err, result) {
             if (mongoErrorCallbackCheck(err, callback))
                 callback({
@@ -375,7 +418,7 @@ var createSchema = function () {
     Schema.matching.static('getMatch', getMatch);
     Schema.matching.static('createMatch', createMatch);
     Schema.matching.static('deleteMatch', deleteMatch);
-    Schema.matching.static('getAllMatches', getAllMatches);
+    Schema.matching.static('getAll', getAllMatchings);
 
     // 경기장 스키마
     Schema.stadium = mongoose.Schema({
@@ -383,11 +426,35 @@ var createSchema = function () {
         available_type: { type: Array, required: true, unique: false },
         belong_at: { type: String, required: true, unique: false },
         max_players: { type: Number, required: true, unique: false },
-        min_players: { type: Number, required: true, unique: false },
-        in_players: { type: Number, required: false, unique: false },
-        matches: { type: Array, required: false, unique: false },
+        in_players: { type: Number, required: false, unique: false, default: 0 },
+        matchings: { type: Array, required: false, unique: false, default: [] },
         modified_at: { type: Date, required: true, index: { unique: false }, default: Date.now }
     });
+
+    // 호출은 getAll
+    var getAllStadiums = function (callback) {
+        this.find({}, function (err, result) {
+            if (mongoErrorCallbackCheck(err, callback))
+                callback({
+                    result: true,
+                    docs: result
+                })
+        });
+    };
+
+    var createStadium = function (stadiumInfo, callback) {
+        var stadium = Model.stadium(stadiumInfo);
+
+        stadium.save(function (err) {
+            if (mongoErrorCallbackCheck(err, callback))
+                callback({
+                    result: true
+                });
+        });
+    };
+
+    Schema.stadium.static('getAll', getAllStadiums);
+    Schema.stadium.static('createStadium', createStadium);
 
     // 모델 만들기
     Model.user = mongoose.model('user', Schema.user);
