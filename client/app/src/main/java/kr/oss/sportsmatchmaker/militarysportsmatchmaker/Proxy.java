@@ -1,11 +1,9 @@
 package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
-/**
- * Created by Administrator on 2017-10-17.
- */
-
 import android.content.Context;
 import com.loopj.android.http.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 public class Proxy {
     public static final String SERVER_URL = "http://10.53.128.122:14402";
@@ -54,6 +52,29 @@ public class Proxy {
         client.post(registerURL, params, handler);
     }
 
+    public void signup(String id, String pw, String name, int rankid, String unit,
+                       int sexid, String fav, String desc, String filePath,
+                       JsonHttpResponseHandler handler){
+        RequestParams params = new RequestParams();
+        params.put("id", id);
+        params.put("password", pw);
+        params.put("name", name);
+        params.put("rank", rankid);
+        params.put("unit", unit);
+        params.put("gender",sexid);
+        params.put("favoriteEvent",fav);
+        params.put("description",desc);
+
+        try {
+            params.put("profPic", new File(filePath));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        String registerURL = SERVER_URL + "/process/registerUser";
+        client.post(registerURL, params, handler);
+    }
+
     //GET getUserInfo, using only cookies
     public void getUserInfo(JsonHttpResponseHandler handler){
         String getInfoURL = SERVER_URL + "/process/getUserInfo";
@@ -87,9 +108,32 @@ public class Proxy {
         client.post(registerURL, params, handler);
     }
 
+    //POST updateUserInfo with Profile Picture
+
+    public void updateUserInfo(String id, String pw, String name, int rankid, String unit,
+                               int sexid, String fav, String desc, String filePath,
+                                       JsonHttpResponseHandler handler){
+        RequestParams params = new RequestParams();
+        params.put("id", id);
+        params.put("password", pw);
+        params.put("name", name);
+        params.put("rank", rankid);
+        params.put("unit", unit);
+        params.put("gender",sexid);
+        params.put("favoriteEvent",fav);
+        params.put("description",desc);
+        try {
+            params.put("profPic", new File(filePath));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        client.setCookieStore(smgr.myCookies);
+        String registerURL = SERVER_URL + "/process/updateUserInfo";
+        client.post(registerURL, params, handler);
+    }
 
     /*
-    * Match related proxy functions
+     * Match related proxy functions
      */
 
     //POST requestMatch
@@ -118,4 +162,20 @@ public class Proxy {
         client.setCookieStore(smgr.myCookies);
         client.post(quitMatchURL, params, handler);
     }
+
+    /*
+     * Profile picture upload and download functions
+     */
+
+    //GET
+    //request parameter: id (String)
+    //response: file
+    public void getProfPic(String userid, FileAsyncHttpResponseHandler handler){
+        RequestParams params = new RequestParams();
+        params.put("userid", userid);
+        String getProfPicURL = SERVER_URL + "/process/getProfileImage";
+        client.setCookieStore(smgr.myCookies);
+        client.get(getProfPicURL, params, handler);
+    }
+
 }
