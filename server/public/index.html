@@ -63,6 +63,32 @@
     </div>
 
     <div class="container">
+        <form action="/process/updateUserInfo" method="post">
+            <div class="panel panel-primary">
+                <div class="panel-heading">사용자 정보 변경 (/process/updateUserInfo)</div>
+                <div class="panel-body">
+                    <label for="name">이름</label>
+                    <input class="form-control" type="text" name="name" id="">
+                    <label for="password">비밀번호</label>
+                    <input class="form-control" type="password" name="password">
+                    <label for="rank">계급</label>
+                    <input class="form-control" type="text" name="rank" id="">
+                    <label for="unit">부대명</label>
+                    <input class="form-control" type="text" name="unit" id="">
+                    <label for="gender">성별</label>
+                    <input class="form-control" type="text" name="gender" id="">
+                    <label for="favoriteEvent">좋아하는 종목</label>
+                    <input class="form-control" type="text" name="favoriteEvent" id="">
+                    <label for="description">자기소개</label>
+                    <input class="form-control" type="text" name="description" id="">
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-primary btn-lg" type="submit">정보 변경하기</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="container">
         <form action="/process/requestMatch" method="post">
             <div class="panel panel-primary">
                 <div class="panel-heading">큐에 넣기 (/process/requestMatch)</div>
