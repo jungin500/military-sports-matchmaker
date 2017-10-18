@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -24,11 +25,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.FileAsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
@@ -132,7 +136,6 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
 
-        //TODO: add get picture
         proxy.getUserInfo(new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -149,6 +152,22 @@ public class EditProfileActivity extends AppCompatActivity {
                         descView.setText(response.getString("description"));
                         rankView.setSelection(RankHelper.numRanks() - 1 -  response.getInt("rank"));
                         sexView.setSelection(response.getString("gender").equals("여성") ? 0 : 1);
+                        if (response.getBoolean("profile_image")){
+                            proxy.getProfPic(id, new FileAsyncHttpResponseHandler(getApplicationContext()) {
+                                public void onSuccess(int i, Header[] headers, File file){
+                                    Log.e("TAG", String.valueOf(file.length()));
+                                    String filePath = file.getAbsolutePath();
+                                    Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+                                    RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
+                                    rbd.setCornerRadius(bitmap.getHeight()/8.0f);
+                                    profPic.setImageBitmap(bitmap);
+                                }
+                                @Override
+                                public void onFailure(int i, Header[] headers, Throwable throwable, File file) {
+                                    Log.e("TAG", "Error: file open failed");
+                                }
+                            });
+                        }
                     }
                     else {
                         Toast.makeText(getApplicationContext(), "회원정보를 가져오는데 실패했습니다.", Toast.LENGTH_SHORT).show();
@@ -158,6 +177,9 @@ public class EditProfileActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+
         submitButton = (Button) findViewById(R.id.editProfile_submit);
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -202,7 +224,6 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 int rankid = RankHelper.rankToInt(rank);
                 int sexid = (sex.equals("여성") ? 0 : 1);
-                //TODO: add sending picture file
                 proxy.updateUserInfo(id, pw, name, rankid, unit, sexid, fav, desc, getPath(profPicUri), new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -220,7 +241,6 @@ public class EditProfileActivity extends AppCompatActivity {
                                 else {
                                     Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
                                 }
-
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

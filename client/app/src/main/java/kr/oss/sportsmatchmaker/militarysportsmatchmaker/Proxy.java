@@ -185,8 +185,8 @@ public class Proxy {
     //response: file
     public void getProfPic(String userid, FileAsyncHttpResponseHandler handler){
         RequestParams params = new RequestParams();
-        params.put("id", userid);
-        String getProfPicURL = SERVER_URL + "/process/getProfPic";
+        params.put("userid", userid);
+        String getProfPicURL = SERVER_URL + "/process/getProfileImage";
         client.setCookieStore(smgr.myCookies);
         client.get(getProfPicURL, params, handler);
     }
