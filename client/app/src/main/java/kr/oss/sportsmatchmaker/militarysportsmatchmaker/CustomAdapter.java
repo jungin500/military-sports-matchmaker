@@ -89,14 +89,25 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
                                     @Override
                                     public void onClick(
                                             DialogInterface dialog, int id) {
-                                            armnum.setText(search.getText().toString());
 
-                                            if(SearchPlayer(search.getText().toString()) < 0)
-                                                Toast.makeText(context,"해당 선수가 없습니다.",Toast.LENGTH_SHORT).show();
+                                            if(SearchPlayer(search.getText().toString()) < 0) {
+                                                Toast.makeText(context, "해당 선수가 없습니다.", Toast.LENGTH_SHORT).show();
+                                                armnum.setText("");
+                                                name.setText("선수를 추가시켜주세요.");
+                                            }
                                             else {
                                                 armnum.setText(search.getText().toString());
                                                 name.setText(Information[1][SearchPlayer(search.getText().toString())]);
-                                                face.setImageResource(R.drawable.img_basketball);
+                                                String temp = armnum.getText().toString();
+                                                if(SearchPlayer(search.getText().toString())<0){
+                                                    int temp2 = context.getResources().getIdentifier("img_defaultface.png","drawable","kr.oss.sportsmatchmaker.militarysportsmatchmaker");
+                                                    face.setImageResource(temp2);
+                                                }
+
+                                                else {
+                                                    int temp3 = context.getResources().getIdentifier("img_" + armnum.getText().toString(), "drawable", "kr.oss.sportsmatchmaker.militarysportsmatchmaker");
+                                                    face.setImageResource(temp3);
+                                                }
                                             }
 
                                     }

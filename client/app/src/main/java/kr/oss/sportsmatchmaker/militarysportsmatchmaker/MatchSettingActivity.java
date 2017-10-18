@@ -82,7 +82,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                 }
                 else {
                     for (int i = 0; i < num - numPlayer[0]; i++){
-                        ListData data = new ListData("01.jpg", id + "의 일행", "", "정보 입력\n(선택)");
+                        ListData data = new ListData("img_defaultface.png", "선수를 추가시켜주세요.", "", "정보 입력\n(선택)");
                         listDataArray.add(data);
                     }
                 }
