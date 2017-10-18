@@ -58,7 +58,6 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
 
-        //TODO: get queue status
         // queue status message
         displayMatchStatus();
 

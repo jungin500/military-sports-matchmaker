@@ -25,10 +25,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.zip.Inflater;
+
+import cz.msebera.android.httpclient.Header;
 
 public class CustomAdapter extends ArrayAdapter<ListData>{
     private Context context;
@@ -43,7 +52,6 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
         this.listData = listData;
     }
 
-    String Information[][] = {{"00", "01", "02"}, {"소령 이무기", "대장 강정호", "소위 김찬양"}};
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent){
@@ -63,6 +71,9 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
         nameView.setText(listData.get(position).getName());
         button.setText(listData.get(position).getButton());
         idView.setText(listData.get(position).getId());
+        if (listData.get(position).getId().equals("anon")){
+            idView.setText("");
+        }
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,54 +84,71 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setTitle("선수 검색");
                 alertDialogBuilder.setMessage("군번을 입력하세요.");
-
                 final EditText search = new EditText(context);
                 alertDialogBuilder.setView(search);
                 alertDialogBuilder.setPositiveButton("닫기", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        // 다이얼로그 취소
-                        dialog.cancel();
+                    // 다이얼로그 취소
+                    dialog.cancel();
                     }
                 });
                 alertDialogBuilder.setNegativeButton("검색", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id){
+                        smgr = new SessionManager(context);
+
+                        final String queryid = search.getText().toString();
+                        if (queryid.equals(smgr.getProfile().get(smgr.ID))) {
+                            Toast.makeText(context, "자기 자신을 검색할 수 없습니다.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        AsyncHttpClient client = new AsyncHttpClient();
+                        RequestParams params = new RequestParams();
+                        params.put("id", queryid);
+                        client.setCookieStore(smgr.myCookies);
+                        String queueURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/searchUserDetails";
+                        client.post(queueURL, params, new JsonHttpResponseHandler() {
                             @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                String queryid = search.getText().toString();
-                                if(SearchPlayer(queryid) < 0) {
-                                    Toast.makeText(context, "해당 선수가 없습니다.", Toast.LENGTH_SHORT).show();
-                                    idView.setText("");
-                                    idView.setText("선수를 추가해주세요.");
-                                }
-                                else {
-                                    listData.get(position).setId(queryid);
-                                    listData.get(position).setName(Information[1][SearchPlayer(queryid)]);
-                                    nameView.setText(Information[1][SearchPlayer(queryid)]);
-                                    idView.setText(queryid);
-                                    int temp3 = context.getResources().getIdentifier("img_" + idView.getText().toString(), "drawable", "kr.oss.sportsmatchmaker.militarysportsmatchmaker");
-                                    listData.get(position).setFace(BitmapFactory.decodeResource(context.getResources(), temp3));
-                                    notifyDataSetChanged();
+                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                try {
+                                    boolean result = response.getBoolean("result");
+                                    if (result){
+                                        listData.get(position).setId(queryid);
+                                        listData.get(position).setName(RankHelper.intToRank(response.getInt("rank")) + " " + response.getString("name"));
+                                        //TODO: 프로필 사진 기능 만들면 프사 받아와서 구현
+                                        String temp = "img_0" + String.valueOf(position % 3);
+                                        int temp3 = context.getResources().getIdentifier(temp, "drawable", "kr.oss.sportsmatchmaker.militarysportsmatchmaker");
+                                        listData.get(position).setFace(BitmapFactory.decodeResource(context.getResources(), temp3));
+                                        notifyDataSetChanged();
+                                    }
+                                    else {
+                                        String errorName = response.getString("reason");
+                                        if (errorName.equals("NoSuchUserException")){
+                                            Toast.makeText(context, "군번이 없습니다.", Toast.LENGTH_SHORT).show();
+                                        }
+                                        else if (errorName.equals("NotLoggedInException")){
+                                            Toast.makeText(context, "세션이 만료되었습니다. 다시 로그인해주십시오.", Toast.LENGTH_SHORT).show();
+                                            smgr.logout();
+                                        }
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
                                 }
                             }
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                                super.onFailure(statusCode, headers, responseString, throwable);
+                            }
                         });
+
+                    }
+                });
 
                 alertDialogBuilder.show();
             }
         });
 
         return row;
-    }
-
-    public int SearchPlayer(CharSequence armnum){
-        int num = -1;
-
-        for(int i=0;i<3;i++) {
-            if (Information[0][i].equals(armnum)) {
-                num = i;
-                break;
-            }
-        }
-
-        return num;
     }
 }
