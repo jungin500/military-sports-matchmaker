@@ -47,6 +47,75 @@
 
 ---
 
+## /process/checkExistingUser (POST)
+### Input
+- id: 사용자 ID
+
+### Output
+- result: 결과 (true/false)
+- DatabaseManager.Model.user.findId의 Callback result
+
+---
+
+## /process/searchUserDetails (POST)
+### Input
+- (Session) userInfo: 로그인 정보 (로그인 여부 체크)
+- id: 사용자 ID
+
+### Output
+- result: 결과 (true/false)
+- name: 성공 시 사용자 이름
+- rank: 성공 시 사용자 계급
+- reason: 실패 시 사유 (result = false)
+    - NoSuchUserException
+    - NotLoggedInException
+
+---
+
+## /process/getUserInfo (GET)
+### Input
+- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
+- (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
+
+### Output
+- result: 성공 여부 (true/false)
+- id: 사용자 ID
+- name: 사용자 이름
+- rank: 사용자 계급
+- gender: 사용자 성별
+- unit: 사용자 부대명
+- favoriteEvent: 사용자가 좋아하는 운동
+- description: 사용자 자기소개
+- created_at: 사용자 생성일자
+- updated_at: 사용자 마지막 수정일자 (JSON)
+- reason: 실패시 사유 (result = false)
+    - NotLoggedInException
+    - NoSuchUserException (불가능)
+    - MultipleUserException (불가능)
+    - MongoError
+- mongoerror: MongoError 객체 (오류 시)
+
+---
+
+## /process/updateUserInfo (POST)
+### Input
+- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
+- (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
+- 아래는 있는 값들만 변경을 한다. (보내지 않거나 데이터가 없으면, eg, "", 수정 X)
+    - name: 변경된 사용자 이름
+    - rank: 변경된 사용자 계급
+    - gender: 변경된 사용자 성별
+    - password: 변경할 사용자 비밀번호
+    - unit: 변경된 사용자 부대명
+    - favoriteEvent: 변경된 사용자가 좋아하는 운동
+    - description: 변경된 사용자 자기소개
+
+### Output
+- result: 성공 여부 (true/false)
+- reason: 실패시 사유 (result = false)
+
+---
+
 ## /process/getMatchList (GET)
 ### Input
 
@@ -57,6 +126,26 @@
 - mongoerror: reason = 'MongoError'인 경우 에러
 - docs: 성공한 경우 결과 Document
     - 배열 안의 _doc가 Document
+
+---
+
+## /process/getUserMatch (POST)
+### Input
+- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
+- (Session) userInfo.id: 로그인한 ID (해당 유저의 Match 검색시 활용)
+
+### Output
+- result: 결과 (true/false)
+- match: 성공시 Match 정보
+    - activityType: 경기 종류
+    - players: 플레이어 목록 (배열)
+    - stadium: 경기장 이름
+    - start_at: 매치 생성 시간
+    - matchId: 매치 고유 ID
+    - initiatorId: 매치 생성자 ID
+- reason: 실패 시 사유 (result = false)
+    - NoSuchMatchException
+    - NotLoggedInException
 
 ---
 
@@ -108,93 +197,3 @@
 
 ### Output (JSON)
 - result: true
-
----
-
-## /process/checkExistingUser (POST)
-### Input
-- id: 사용자 ID
-
-### Output
-- result: 결과 (true/false)
-- DatabaseManager.Model.user.findId의 Callback result
-
----
-
-## /process/searchUserDetails (POST)
-### Input
-- (Session) userInfo: 로그인 정보 (로그인 여부 체크)
-- id: 사용자 ID
-
-### Output
-- result: 결과 (true/false)
-- name: 성공 시 사용자 이름
-- rank: 성공 시 사용자 계급
-- reason: 실패 시 사유 (result = false)
-    - NoSuchUserException
-    - NotLoggedInException
-
----
-
-## /process/getUserMatch (POST)
-### Input
-- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
-- (Session) userInfo.id: 로그인한 ID (해당 유저의 Match 검색시 활용)
-
-### Output
-- result: 결과 (true/false)
-- match: 성공시 Match 정보
-    - activityType: 경기 종류
-    - players: 플레이어 목록 (배열)
-    - stadium: 경기장 이름
-    - start_at: 매치 생성 시간
-    - matchId: 매치 고유 ID
-    - initiatorId: 매치 생성자 ID
-- reason: 실패 시 사유 (result = false)
-    - NoSuchMatchException
-    - NotLoggedInException
-
-
----
-
-## /process/getUserInfo (GET)
-### Input
-- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
-- (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
-
-### Output
-- result: 성공 여부 (true/false)
-- id: 사용자 ID
-- name: 사용자 이름
-- rank: 사용자 계급
-- gender: 사용자 성별
-- unit: 사용자 부대명
-- favoriteEvent: 사용자가 좋아하는 운동
-- description: 사용자 자기소개
-- created_at: 사용자 생성일자
-- updated_at: 사용자 마지막 수정일자 (JSON)
-- reason: 실패시 사유 (result = false)
-    - NotLoggedInException
-    - NoSuchUserException (불가능)
-    - MultipleUserException (불가능)
-    - MongoError
-- mongoerror: MongoError 객체 (오류 시)
-
----
-
-## /process/updateUserInfo (POST)
-### Input
-- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
-- (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
-- 아래는 있는 값들만 변경을 한다. (보내지 않거나 데이터가 없으면, eg, "", 수정 X)
-    - name: 변경된 사용자 이름
-    - rank: 변경된 사용자 계급
-    - gender: 변경된 사용자 성별
-    - password: 변경할 사용자 비밀번호
-    - unit: 변경된 사용자 부대명
-    - favoriteEvent: 변경된 사용자가 좋아하는 운동
-    - description: 변경된 사용자 자기소개
-
-### Output
-- result: 성공 여부 (true/false)
-- reason: 실패시 사유 (result = false)
