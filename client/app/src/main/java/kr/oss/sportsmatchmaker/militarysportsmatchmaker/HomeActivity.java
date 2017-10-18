@@ -96,16 +96,16 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                     }
                     else {
                         String reason = response.getString("reason");
-                        if (reason == "NoSuchMatchException") {
+                        if (reason.equals("NoSuchMatchException")) {
                             textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
                         }
                         else {
-                            textQStatus.setText("코드 오류입니다.");
+                            textQStatus.setText("오류: " + reason);
                         }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), "데이터 오류가 있습니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "데이터 오류입니다.", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -122,7 +122,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onResume() {
         super.onResume();
 
-        smgr.checkLogin();
+        smgr.checkSession();
     }
 
     private void setHomeMenu(ListView homeMenu){
@@ -162,6 +162,11 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                     case 1:
                         Intent intent1 = new Intent(getApplicationContext(), ReservePlaceActivity.class);
                         startActivity(intent1);
+                        break;
+                    //프로필 수정
+                    case 3:
+                        Intent intent3 = new Intent(getApplicationContext(), EditProfileActivity.class);
+                        startActivity(intent3);
                         break;
                     //장소 고르기
                     default:
