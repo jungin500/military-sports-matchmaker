@@ -22,6 +22,8 @@ import cz.msebera.android.httpclient.Header;
 
 /**
  * Session Managing methods using SharedPreferences
+ * SharedPreferences also caches current match data upon POST to getUserMatch
+ * and deletes data upon POST to deleteMatch.
  */
 
 public class SessionManager {
