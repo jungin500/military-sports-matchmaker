@@ -44,13 +44,13 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
         // welcome message
+
+        // logout button settings
+        logoutButton = (Button) findViewById(R.id.logout);
         String user_name = prof.get(SessionManager.NAME);
         String user_rank = prof.get(SessionManager.RANK);
         textWelcome = (TextView) findViewById(R.id.home_welcome);
         textWelcome.setText("환영합니다, " + user_name + " " + user_rank + "님.\n오늘은 어떤 체육활동을 하시겠어요?");
-
-        // logout button settings
-        logoutButton = (Button) findViewById(R.id.logout);
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,9 +119,9 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
+    // 회원정보 수정후 돌아옴.
     protected void onResume() {
         super.onResume();
-
         smgr.checkSession();
     }
 
