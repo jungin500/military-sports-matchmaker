@@ -154,7 +154,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="1.8"
                 android:background="@android:color/holo_blue_light"
-                android:text="전투체육 일지"
+                android:text="큐 체크리스트"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
                 android:textStyle="bold" />

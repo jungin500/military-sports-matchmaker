@@ -44,7 +44,7 @@ import java.util.zip.Inflater;
 
 import cz.msebera.android.httpclient.Header;
 
-public class CustomAdapter extends ArrayAdapter<ListData>{
+    public class CustomAdapter extends ArrayAdapter<ListData>{
     private Context context;
     private int layoutResource;
     private ArrayList<ListData> listData;
