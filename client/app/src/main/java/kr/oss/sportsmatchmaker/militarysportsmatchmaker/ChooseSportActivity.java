@@ -59,27 +59,3 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
         }
     }
 }
-    /*
-    public String[] setnum(String[] player ,int num){
-        player = new String[num];
-
-        for(int i=0;i<num;i++){
-            player[i] = "팀원" + (i+1);
-        }
-
-        return player;
-    }
-    */
-    /*
-    public void select(View name, String a){
-        name.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(
-                        getApplicationContext(),
-                        .class);
-                startActivity(intent);
-            }
-        });
-    }
-    */

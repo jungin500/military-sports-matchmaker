@@ -8,9 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +24,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
     //Helper
     private SessionManager smgr;
+    private Proxy proxy;
     private HashMap<String, String> prof;
     private SimpleAdapter menuAdapter;
 
@@ -43,6 +42,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
         // initialize session on create
         smgr = new SessionManager(getApplicationContext());
+        proxy = new Proxy(getApplicationContext());
 
         // define widgets
         logoutButton = (Button) findViewById(R.id.logout);
@@ -69,12 +69,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                     return;
                 }
                 String matchId = smgr.getMatchId();
-                AsyncHttpClient client = new AsyncHttpClient();
-                RequestParams params = new RequestParams();
-                params.put("matchId", matchId);
-                String quitMatchURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/deleteMatch";
-                client.setCookieStore(smgr.myCookies);
-                client.post(quitMatchURL, params, new JsonHttpResponseHandler(){
+                proxy.deleteMatch(matchId, new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
@@ -95,22 +90,16 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                                 }
                                 else {
                                     Toast.makeText(getApplicationContext(), "실패했습니다. 오류 종류: " + reason, Toast.LENGTH_SHORT).show();
+                                    Log.e("deleteMatch error", reason);
                                 }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                        super.onFailure(statusCode, headers, responseString, throwable);
-                    }
                 });
-
             }
         });
-
         // add adapter to listview. Long boring stuff, so factor into separate method.
         homeMenu = (ListView) findViewById(R.id.home_menu);
         setHomeMenu(homeMenu);
@@ -119,13 +108,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private void displayMatchStatus(){
         textQStatus = (TextView) findViewById(R.id.home_qstatus);
-
-        // initialize asynchttpclient
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        String loginURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/getUserMatch";
-        client.setCookieStore(smgr.myCookies);
-        client.get(loginURL, params, new JsonHttpResponseHandler(){
+        proxy.getUserMatch(new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
@@ -167,7 +150,6 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                     Toast.makeText(getApplicationContext(), "데이터 오류입니다.", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                 textQStatus.setText("매치 정보를 가져오지 못했습니다. 다시 접속해주세요.");

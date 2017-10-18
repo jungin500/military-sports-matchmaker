@@ -11,9 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
 
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +25,7 @@ public class MatchSettingActivity extends AppCompatActivity {
 
     // current session
     private SessionManager smgr;
+    private Proxy proxy;
 
     // declare widgets
     private ArrayList<ListData> listDataArray;
@@ -37,15 +36,16 @@ public class MatchSettingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        smgr = new SessionManager(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_match_setting);
+
+        smgr = new SessionManager(getApplicationContext());
+        proxy = new Proxy(getApplicationContext());
 
         // get client id
         final String id = smgr.getProfile().get(SessionManager.ID);
         final String name = smgr.getProfile().get(SessionManager.NAME);
         final String rank = smgr.getProfile().get(SessionManager.RANK);
-
         final String rankname = rank + " " + name;
         // initialize widgets
         final EditText playerNumber = (EditText) findViewById(R.id.playerNumber);
@@ -104,7 +104,6 @@ public class MatchSettingActivity extends AppCompatActivity {
             }
         });
 
-
         enterQueue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,13 +123,7 @@ public class MatchSettingActivity extends AppCompatActivity {
 
     // current session player (checked with cookie) queue for game gameType, with participant array .
     private void requestMatch(String gameType, String participants) {
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        params.put("activityType", gameType);
-        params.put("players", participants);
-        client.setCookieStore(smgr.myCookies);
-        String queueURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/requestMatch";
-        client.post(queueURL, params, new JsonHttpResponseHandler(){
+        proxy.requestMatch(gameType, participants, new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
