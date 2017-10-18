@@ -2,6 +2,7 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -46,7 +47,7 @@ public class SelectProfileActivity extends AppCompatActivity implements OnClickL
         if (requestCode == GET_PICTURE_URI) {
             if (resultCode == Activity.RESULT_OK) {
                 try {
-                    Uri uri = data.getData();
+                    Uri uri = getRealPathUri(data.getData());
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                     selectprofile = (ImageView) findViewById(R.id.SelectProfile);
                     selectprofile.setImageBitmap(bitmap);
@@ -56,5 +57,17 @@ public class SelectProfileActivity extends AppCompatActivity implements OnClickL
                 }
             }
         }
+    }
+
+    private Uri getRealPathUri(Uri uri){
+        Uri filePathUri = uri;
+        if (uri.getScheme().toString().compareTo("content")==0){
+            Cursor cursor = getApplicationContext().getContentResolver().query(uri,null,null,null,null);
+            if (cursor.moveToFirst()){
+                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                filePathUri = Uri.parse(cursor.getString(column_index));
+            }
+        }
+        return uri;
     }
 }

@@ -1,6 +1,16 @@
 package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,6 +30,8 @@ public class SignupActivity extends AppCompatActivity {
     public static final String EXTRA_ID = "kr.oss.sportsmatchmaker.signup.id";
     public static final String EXTRA_PW = "kr.oss.sportsmatchmaker.signup.pw";
 
+    public final int GET_PICTURE_URI = 1;
+
     public ArrayList<String> ranks;
     public ArrayList<String> sexes;
     public ArrayList<String> units;
@@ -35,12 +47,36 @@ public class SignupActivity extends AppCompatActivity {
     private Spinner sexView;
     private Spinner unitView;
     private Button signupButton;
+    private ImageButton profPic;
+    private Uri profPicUri;
 
     // id uniqueness check flag
     private Boolean idFlag;
 
     // Proxy
     public Proxy proxy;
+
+
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +86,7 @@ public class SignupActivity extends AppCompatActivity {
 
         initializeSpinner();
         idFlag = true;
-
+        verifyStoragePermissions(this);
         // connect widgets
         idView = (EditText) findViewById(R.id.signup_id);
         pwView = (EditText) findViewById(R.id.signup_pw);
@@ -58,7 +94,8 @@ public class SignupActivity extends AppCompatActivity {
         nameView = (EditText) findViewById(R.id.signup_name);
         favView = (EditText) findViewById(R.id.signup_favorite);
         descView = (EditText) findViewById(R.id.signup_desc);
-
+        idCheckButton = (Button) findViewById(R.id.signup_idcheck);
+        profPic = (ImageButton) findViewById(R.id.signup_profPic);
 
         // set spinner to rank
         rankView = (Spinner) findViewById(R.id.signup_rank);
@@ -79,7 +116,6 @@ public class SignupActivity extends AppCompatActivity {
 
 
         // check if id already exists in DB.
-        idCheckButton = (Button) findViewById(R.id.signup_idcheck);
         idCheckButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,6 +146,17 @@ public class SignupActivity extends AppCompatActivity {
             }
         });
 
+        // profpic button adds profile picture!
+        profPicUri = Uri.EMPTY;
+        profPic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
+                intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), GET_PICTURE_URI);
+            }
+        });
 
         signupButton = (Button) findViewById(R.id.signup_signup);
         signupButton.setOnClickListener(new View.OnClickListener() {
@@ -185,8 +232,8 @@ public class SignupActivity extends AppCompatActivity {
                     descView.requestFocus();
                     return;
                 }
-
-                proxy.signup(id, pw, name, rankid, unit, sexid, fav, desc, new JsonHttpResponseHandler(){
+                //TODO: does getPath work?
+                proxy.signup(id, pw, name, rankid, unit, sexid, fav, desc, getPath(profPicUri), new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
@@ -252,4 +299,33 @@ public class SignupActivity extends AppCompatActivity {
         units.add("4대대");
     }
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode,data);
+
+        if (requestCode == GET_PICTURE_URI) {
+            if (resultCode == Activity.RESULT_OK) {
+                try {
+                    profPicUri = data.getData();
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), profPicUri);
+                    RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
+                    rbd.setCornerRadius(bitmap.getHeight()/8.0f);
+                    profPic.setImageDrawable(rbd);
+                } catch (Exception e) {
+                    Log.e("test", e.getMessage());
+                }
+            }
+        }
+    }
+
+    public String getPath(Uri uri)
+    {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        if (cursor == null) return null;
+        int column_index =             cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String s=cursor.getString(column_index);
+        cursor.close();
+        return s;
+    }
 }
