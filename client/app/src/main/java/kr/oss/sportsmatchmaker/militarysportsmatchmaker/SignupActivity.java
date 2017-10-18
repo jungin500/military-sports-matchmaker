@@ -22,6 +22,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
@@ -48,7 +49,7 @@ public class SignupActivity extends AppCompatActivity {
     private Spinner unitView;
     private Button signupButton;
     private ImageButton profPic;
-    private Uri profPicUri;
+    private byte[] byteImage;
 
     // id uniqueness check flag
     private Boolean idFlag;
@@ -147,7 +148,7 @@ public class SignupActivity extends AppCompatActivity {
         });
 
         // profpic button adds profile picture!
-        profPicUri = Uri.EMPTY;
+        byteImage = null;
         profPic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -233,7 +234,7 @@ public class SignupActivity extends AppCompatActivity {
                     return;
                 }
                 //TODO: does getPath work?
-                proxy.signup(id, pw, name, rankid, unit, sexid, fav, desc, getPath(profPicUri), new JsonHttpResponseHandler(){
+                proxy.signup(id, pw, name, rankid, unit, sexid, fav, desc, byteImage, new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
@@ -305,11 +306,14 @@ public class SignupActivity extends AppCompatActivity {
         if (requestCode == GET_PICTURE_URI) {
             if (resultCode == Activity.RESULT_OK) {
                 try {
-                    profPicUri = data.getData();
-                    Bitmap bitmap = cropToSquare(MediaStore.Images.Media.getBitmap(getContentResolver(), profPicUri));
+                    Uri profPicUri = data.getData();
+                    Bitmap bitmap = formatBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), profPicUri));
                     RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
                     rbd.setCornerRadius(bitmap.getHeight()/8.0f);
                     profPic.setImageDrawable(rbd);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    byteImage = stream.toByteArray();
                 } catch (Exception e) {
                     Log.e("test", e.getMessage());
                 }
@@ -317,21 +321,9 @@ public class SignupActivity extends AppCompatActivity {
         }
     }
 
-    public String getPath(Uri uri)
-    {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-        if (cursor == null) return null;
-        int column_index =             cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        String s=cursor.getString(column_index);
-        cursor.close();
-        return s;
-    }
-
-    // crop bitmap to square.
+    // crop bitmap to square then resize to 240*240 pixel.
     // Source: https://stackoverflow.com/questions/26263660/crop-image-to-square-android
-    public static Bitmap cropToSquare(Bitmap bitmap){
+    public static Bitmap formatBitmap(Bitmap bitmap){
         int width  = bitmap.getWidth();
         int height = bitmap.getHeight();
         int newWidth = (height > width) ? width : height;
@@ -340,7 +332,6 @@ public class SignupActivity extends AppCompatActivity {
         cropW = (cropW < 0)? 0: cropW;
         int cropH = (height - width) / 2;
         cropH = (cropH < 0)? 0: cropH;
-        Bitmap cropImg = Bitmap.createBitmap(bitmap, cropW, cropH, newWidth, newHeight);
-        return cropImg;
+        return Bitmap.createScaledBitmap(Bitmap.createBitmap(bitmap, cropW, cropH, newWidth, newHeight), 240, 240, false);
     }
 }
