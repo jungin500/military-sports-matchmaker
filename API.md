@@ -79,6 +79,7 @@
 - result: 결과(true/false)
 - reason: false일경우 이유
     - NotLoggedInException
+    - MatchAlreadyExistsException (이미 매치를 가지고 있는 사용자의 경우)
     - MongoError (DB 오류)
 - mongoerror: reason = 'MongoError'인 경우 에러
 
@@ -119,7 +120,8 @@
 
 ## /process/getUserMatch (POST)
 ### Input
-- (Session) userInfo: 로그인 정보 (해당 유저의 Match인지 체크)
+- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
+- (Session) userInfo.id: 로그인한 ID (해당 유저의 Match 검색시 활용)
 
 ### Output
 - result: 결과 (true/false)
@@ -131,5 +133,20 @@
     - matchId: 매치 고유 ID
     - initiatorId: 매치 생성자 ID
 - reason: 실패 시 사유 (result = false)
+    - NoSuchMatchException
+    - NotLoggedInException
+
+---
+
+## /process/deleteMatch (POST)
+### Input
+- (Session) userInfo: 로그인 정부 (로그인한 유저인지 체크)
+- (Session) userInfo.id: 로그인한 ID (해당 유저의 Match인지 체크) → initiatorId (매치 만든 사람)으로 저장되어 있음...
+- matchId: 매치 ID (삭제할 매치 ID. 해당 유저의 매치 목록은 /process/getUserMatch로 확인)
+
+### Output
+- result: 성공 여부(true/false)
+- reason: 실패 사유(result = false)
+    - ForbiddenOperationException: 내 매치가 아닌 다른 사람의 매치를 삭제하려고 시도했을 경우
     - NoSuchMatchException
     - NotLoggedInException

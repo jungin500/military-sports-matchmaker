@@ -23,7 +23,7 @@ var http = require('http'),
 
 // express 이용 HTTP 서버 설정
 var app = express();
-app.set('port', process.env.PORT || 14402);
+app.set('port', process.env.PORT || 14403);
 app.set('mongoose-reconnect-max', 5);
 
 // express Router 이용 Request routing
@@ -166,9 +166,19 @@ router.route('/process/requestMatch').post(function (req, res) {
         players: req.body.players.split('|')
     }
 
-    DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
-        res.json(result);
-        res.end();
+    DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
+        if(result.result) {
+            res.json({
+                result: false,
+                reason: 'MatchAlreadyExistsException'
+            });
+            res.end();
+        } else {
+            DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
+                res.json(result);
+                res.end();
+            });
+        }
     });
 });
 
@@ -266,12 +276,12 @@ app.use(session({
     saveUninitialized: true
 }));
 
-app.use(function(req, res, next) {
+/* app.use(function(req, res, next) {
     console.log('접근 받음');
     console.dir(req);
 
     next();
-});
+}); */
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
