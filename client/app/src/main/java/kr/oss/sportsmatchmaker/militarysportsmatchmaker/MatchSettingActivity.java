@@ -11,9 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
 
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +25,7 @@ public class MatchSettingActivity extends AppCompatActivity {
 
     // current session
     private SessionManager smgr;
+    private Proxy proxy;
 
     // declare widgets
     private ArrayList<ListData> listDataArray;
@@ -37,14 +36,17 @@ public class MatchSettingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        smgr = new SessionManager(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_match_setting);
+
+        smgr = new SessionManager(getApplicationContext());
+        proxy = new Proxy(getApplicationContext());
 
         // get client id
         final String id = smgr.getProfile().get(SessionManager.ID);
         final String name = smgr.getProfile().get(SessionManager.NAME);
-
+        final String rank = smgr.getProfile().get(SessionManager.RANK);
+        final String rankname = rank + " " + name;
         // initialize widgets
         final EditText playerNumber = (EditText) findViewById(R.id.playerNumber);
         Button playerShow = (Button) findViewById(R.id.player_show);
@@ -79,10 +81,14 @@ public class MatchSettingActivity extends AppCompatActivity {
                 // 첫 플레이어는 항상 내 자신, 수정 불가능.
                 else if (numPlayer[0] == 0){
                     //TODO: add client's profile image
+<<<<<<< HEAD
                     ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), name, id, "리더");
+=======
+                    ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname, id, "정보 입력 x");
+>>>>>>> f306a415f1027746c660aa394079c465664b3146
                     listDataArray.add(data);
                     for (int i = 1; i < num; i++){
-                        data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), name + "의 동료", id, "선수 추가\n(선택)");
+                        data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname + "의 동료", "anon", "선수 추가\n(선택)");
                         listDataArray.add(data);;
                     }
                 }
@@ -93,7 +99,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                 }
                 else {
                     for (int i = 0; i < num - numPlayer[0]; i++){
-                        ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), name + "의 동료", id, "선수 추가\n(선택)");
+                        ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname + "의 동료", "anon", "선수 추가\n(선택)");
                         listDataArray.add(data);
                     }
                 }
@@ -101,7 +107,6 @@ public class MatchSettingActivity extends AppCompatActivity {
                 customAdapter.notifyDataSetChanged();
             }
         });
-
 
         enterQueue.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,13 +127,7 @@ public class MatchSettingActivity extends AppCompatActivity {
 
     // current session player (checked with cookie) queue for game gameType, with participant array .
     private void requestMatch(String gameType, String participants) {
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        params.put("activityType", gameType);
-        params.put("players", participants);
-        client.setCookieStore(smgr.myCookies);
-        String queueURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/requestMatch";
-        client.post(queueURL, params, new JsonHttpResponseHandler(){
+        proxy.requestMatch(gameType, participants, new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {

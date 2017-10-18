@@ -31,9 +31,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,10 +59,12 @@ public class LoginActivity extends AppCompatActivity {
     // Session manager
     private SessionManager smgr;
 
+    // Proxy
+    public Proxy proxy;
 
     // UI references.
-    private EditText mIdView;
-    private EditText mPasswordView;
+    public EditText mIdView;
+    public EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -75,6 +75,8 @@ public class LoginActivity extends AppCompatActivity {
 
         smgr = new SessionManager(getApplicationContext());
         smgr.clearSession();
+
+        proxy = new Proxy(getApplicationContext());
 
         // Set up the login form.
         mIdView = (EditText) findViewById(R.id.id);
@@ -123,7 +125,7 @@ public class LoginActivity extends AppCompatActivity {
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String id = mIdView.getText().toString();
+        final String id = mIdView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -149,10 +151,49 @@ public class LoginActivity extends AppCompatActivity {
             focusView.requestFocus();
         } else {
             // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            // login task attempt -> UserLoginTask
+            // perform login on proxy.
             showProgress(true);
-            loginTask(id, password);
+            // loginTask(id, password);
+            proxy.login(id, password, new JsonHttpResponseHandler(){
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    try {
+                        boolean success = response.getBoolean("result");
+                        if (success) {
+                            String name = response.getString("name");
+                            int rankId = response.getInt("rank");
+                            smgr.createSession(id, name, RankHelper.intToRank(rankId));
+                            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                        else {
+                            String reason = response.getString("reason");
+                            if (reason.equals("NoSuchUserException")) {
+                                mIdView.setError("아이디가 없습니다.");
+                                mIdView.requestFocus();
+                                showProgress(false);
+                            }
+                            else {
+                                mPasswordView.setError("비밀번호가 틀렸습니다.");
+                                mPasswordView.requestFocus();
+                                showProgress(false);
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getApplicationContext(), "로그인 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                        showProgress(false);
+                    }
+
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                    super.onFailure(statusCode, headers, responseString, throwable);
+                    showProgress(false);
+                }
+            });
         }
     }
 
@@ -164,7 +205,7 @@ public class LoginActivity extends AppCompatActivity {
      * Shows the progress UI and hides the login form.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
+    protected void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
@@ -195,61 +236,6 @@ public class LoginActivity extends AppCompatActivity {
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-
-    private void loginTask(final String id, final String pw){
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        params.put("id", id);
-        params.put("password", pw);
-        String loginURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/loginUser";
-        client.setCookieStore(smgr.myCookies);
-        client.post(loginURL, params, new JsonHttpResponseHandler(){
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                try {
-                    boolean success = response.getBoolean("result");
-                    if (success) {
-                        String name = response.getString("name");
-                        int rankId = response.getInt("rank");
-                        smgr.createSession(id, name, RankHelper.intToRank(rankId));
-                        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                    else {
-                        String reason = response.getString("reason");
-                        if (reason.equals("NoSuchUserException")) {
-                            mIdView.setError("아이디가 없습니다.");
-                            mIdView.requestFocus();
-                            showProgress(false);
-                        }
-                        else {
-                            mPasswordView.setError("비밀번호가 틀렸습니다.");
-                            mPasswordView.requestFocus();
-                            showProgress(false);
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), "로그인 실패하였습니다.", Toast.LENGTH_SHORT).show();
-                    showProgress(false);
-                }
-
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
-                showProgress(false);
-            }
-        });
-    }
-
 
     // After signup
     protected void onActivityResult(int requestCode, int resultCode, Intent data){

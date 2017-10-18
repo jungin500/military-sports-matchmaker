@@ -137,6 +137,21 @@
     </div>
 
     <div class="container">
+        <form action="/process/readProfileImage" method="post">
+            <div class="panel panel-primary">
+                <div class="panel-heading">프로필 이미지 받아보기 (/process/readProfileImage)</div>
+                <div class="panel-body">
+                    <label for="id">군번 (=아이디)</label>
+                    <input class="form-control" type="text" name="id" id="">
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-primary btn-lg" type="submit">받아보기</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
         <form action="/process/searchUserDetails" method="post">
             <div class="panel panel-primary">
                 <div class="panel-heading">사용자 정보 가져오기 (/process/searchUserDetails)</div>
@@ -146,6 +161,21 @@
                 </div>
                 <div class="panel-footer">
                     <button class="btn btn-primary btn-lg" type="submit">정보 가져오기</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
+        <form action="/process/writePhoto" method="post">
+            <div class="panel panel-primary">
+                <div class="panel-heading">사용자 프로필 설정하기 (/process/writePhoto)</div>
+                <div class="panel-body">
+                    <label for="image">파일 선택</label>
+                    <input type="file" name="image" id="">
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-primary btn-lg" type="submit">프로필 설정하기</button>
                 </div>
             </div>
         </form>

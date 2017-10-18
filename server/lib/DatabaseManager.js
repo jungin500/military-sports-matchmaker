@@ -84,7 +84,9 @@ var mongoErrorCallbackCheck = function (err, callback) {
 */
 var createSchema = function () {
 
-    // 사용자 스키마
+    /**
+     * 사용자 정보 스키마 및 메소드 정의
+     */
     Schema.user = mongoose.Schema({
         id: { type: String, required: true, unique: true, default: ' ' },
         hashed_password: { type: String, required: true, unique: false, default: ' ' },
@@ -95,6 +97,7 @@ var createSchema = function () {
         unit: { type: String, index: 'hashed', default: ' ' },
         favoriteEvent: { type: Object, required: false, default: {} },
         description: { type: String, required: true, unique: false, default: ' ' },
+        profile_image: { type: String, required: false, unique: false },
         match_history: { type: Array, required: false, unique: false, default: [] },
         match_ongoing: { type: String, required: false, unique: false, default: ' ' },
         created_at: { type: Date, index: { unique: false }, default: Date.now },
@@ -209,6 +212,23 @@ var createSchema = function () {
         });
     };
 
+    Schema.user.static('findId', findId);
+    Schema.user.static('authenticate', authenticate);
+    Schema.user.static('getUserInfo', getUserInfo);
+    Schema.user.static('updateUserInfo', updateUserInfo);
+
+    /**
+     * 경기 매칭 스키마 및 메소드 정의
+     */
+    Schema.matching = mongoose.Schema({
+        initiatorId: { type: String, required: true, unique: false },
+        activityType: { type: String, required: true, unique: false, default: ' ' },
+        players: { type: Array, required: true, unique: false, default: [] },
+        matchId: { type: String, required: true, unique: true },
+        stadium: { type: String, required: true, unique: false },
+        start_at: { type: Date, required: true, index: { unique: false }, default: Date.now }
+    });
+
     var getMatch = function (initiatorId, callback) {
         this.find({ 'initiatorId': initiatorId }, function (err, result) {
             if (mongoErrorCallbackCheck(err, callback) && result.length == 0)
@@ -229,65 +249,84 @@ var createSchema = function () {
         });
     };
 
-    var findMatch = function (matchInfo, callback) {
-        console.dir(matchInfo);
-        if (matchInfo.matchId)
-            this.getMatch(matchInfo.matchId, function (result) {
-                if (!result.result)
-                    callback(result);
-                else {
-                    var maxUsers = result.doc.maxUsers;
-                    var partUsers = result.doc.participants.length;
-
-                    if (partUsers >= maxUsers) {
-                        callback({
-                            result: false,
-                            reason: 'FullMatchException'
-                        })
-                    } else {
-                        callback({
-                            result: true,
-                            participants: result.doc.participants,
-                            description: 'MatchUpdatePending'
-                        })
-                    }
-                }
-            });
-        else
-            callback({
-                result: false,
-                reason: 'NoMatchIdException'
-            })
-    };
-
     var createMatch = function (matchInfo, callback) {
         matchInfo.matchId = generateMatchId();
-        console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchInfo.matchId);
 
-        var match = new Model.matching(matchInfo);
+        // 적절한 위치를 찾아서 매치를 생성한다.
+        Model.user.findOne({ id: matchInfo.initiatorId }, function (err, result) {
+            var unit = result._doc.unit;
 
-        match.save(function (err) {
-            if (mongoErrorCallbackCheck(err, callback))
-                // 사용자에게 해당 Match를 저장합니다.
-                Model.user.update({ id: matchInfo.initiatorId }, {
-                    match_ongoing: matchInfo.matchId,
-                    $push: {
-                        match_history: matchInfo.matchId
-                    }
-                }, function (err) {
-                    if (err) {
+            Model.stadium.find({
+                available_type: matchInfo.activityType,
+                location: unit
+            }, function (err, result) {
+                if (mongoErrorCallbackCheck(err, callback)) {
+                    if (result.length == 0)
                         callback({
                             result: false,
-                            reason: 'MongoError',
-                            mongoerror: err
+                            reason: 'NoMatchingStadiumException'
+                        });
+                    else {
+
+                        // 오름차순 Sorting
+                        result.sort(function (a, b) {
+                            var leftStadiumLeft = a._doc.maxPlayers - a._doc.players.length;
+                            var rightStadiumLeft = b._doc.maxPlayers - b._doc.players.length;
+                            return leftStadiumLeft == rightStadiumLeft ? 0 :
+                                leftStadiumLeft < rightStadiumLeft ? -1 : 1;
+                        });
+
+                        // 있는 것들중에서 가장 낮은수의 남은 Player부터 Assign.
+                        for (var i = 0; i < result.length; i++) {
+                            if (result[i]._doc.maxPlayers - result[i]._doc.players.length >= matchInfo.players.length) {
+                                var doc = result[i]._doc;
+                                if (doc.players.length == 0)
+                                    doc.players = matchInfo.players;
+                                else if (doc.players.length + matchInfo.players <= doc.max_players)
+                                    doc.players = doc.players.concat(matchInfo.players);
+
+                                // 완료되면 사용자에게 매치 데이터를 저장한다.
+
+                                var match = new Model.matching(matchInfo);
+
+                                match.save(function (err) {
+                                    if (mongoErrorCallbackCheck(err, callback))
+                                        // 사용자에게 해당 Match를 저장합니다.
+                                        Model.user.update({ id: matchInfo.initiatorId }, {
+                                            match_ongoing: matchInfo.matchId,
+                                            $push: {
+                                                match_history: matchInfo.matchId
+                                            }
+                                        }, function (err) {
+                                            if (err) {
+                                                callback({
+                                                    result: false,
+                                                    reason: 'MongoError',
+                                                    mongoerror: err
+                                                });
+                                                return;
+                                            }
+                                            console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchInfo.matchId);
+                                            console.log('[정보] 유저 %s에게 매치 데이터를 저장했습니다.', matchInfo.initiatorId);
+                                            callback({
+                                                result: true,
+                                                stadium: doc.name
+                                            });
+                                        });
+                                });
+                                return; 
+                            }
+                        }
+
+                        // Assign 불가능할 경우 Fail.
+                        callback({
+                            result: false,
+                            reason: 'FailedAssigningStadiumException'
                         });
                         return;
                     }
-                    console.log('[알림] 유저 %s에게 매치 데이터를 저장했습니다.', matchInfo.initiatorId);
-                    callback({
-                        result: true
-                    });
-                });
+                }
+            });
         });
     };
 
@@ -333,23 +372,7 @@ var createSchema = function () {
         });
     };
 
-    Schema.user.static('findId', findId);
-    Schema.user.static('authenticate', authenticate);
-    Schema.user.static('getUserInfo', getUserInfo);
-    Schema.user.static('updateUserInfo', updateUserInfo);
-
-    // 경기 매칭 스키마
-    Schema.matching = mongoose.Schema({
-        initiatorId: { type: String, required: true, unique: false },
-        activityType: { type: String, required: true, unique: false, default: ' ' },
-        players: { type: Array, required: true, unique: false, default: [] },
-        matchId: { type: String, required: true, unique: true },
-        stadium: { type: String, required: true, unique: false, default: 'Normal Stadium' },
-        start_at: { type: Date, required: true, index: { unique: false }, default: Date.now }
-    });
-
     Schema.matching.static('getMatch', getMatch);
-    Schema.matching.static('findMatch', findMatch);
     Schema.matching.static('createMatch', createMatch);
     Schema.matching.static('deleteMatch', deleteMatch);
     Schema.matching.static('getAllMatches', getAllMatches);
