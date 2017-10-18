@@ -41,20 +41,15 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-
-        // session data
+        // initialize session on create
         smgr = new SessionManager(getApplicationContext());
-        prof = smgr.getProfile();
 
         // define widgets
         logoutButton = (Button) findViewById(R.id.logout);
         textWelcome = (TextView) findViewById(R.id.home_welcome);
         quitMatchButton = (Button) findViewById(R.id.home_quitMatch);
 
-        //
-        String user_name = prof.get(SessionManager.NAME);
-        String user_rank = prof.get(SessionManager.RANK);
-        textWelcome.setText("환영합니다, " + user_name + " " + user_rank + "님.\n오늘은 어떤 체육활동을 하시겠어요?");
+        updateTextWelcome();
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -188,6 +183,14 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onResume() {
         super.onResume();
         smgr.checkSession();
+        updateTextWelcome();
+    }
+
+    private void updateTextWelcome(){
+        prof = smgr.getProfile();
+        String user_name = prof.get(SessionManager.NAME);
+        String user_rank = prof.get(SessionManager.RANK);
+        textWelcome.setText("환영합니다, " + user_name + " " + user_rank + "님.\n오늘은 어떤 체육활동을 하시겠어요?");
     }
 
     private void setHomeMenu(ListView homeMenu){

@@ -73,7 +73,6 @@ public class EditProfileActivity extends AppCompatActivity {
         final String id = smgr.getProfile().get(smgr.ID);
         idView.setText("군번: " + id + " (수정 불가)");
 
-        //TODO: 회원정보를 받아서 표시.
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         String getInfoURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/getUserInfo";
@@ -93,7 +92,6 @@ public class EditProfileActivity extends AppCompatActivity {
                     }
                     else {
                         Toast.makeText(getApplicationContext(), "회원정보를 가져오는데 실패했습니다.", Toast.LENGTH_SHORT).show();
-                        finish();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -106,7 +104,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 super.onFailure(statusCode, headers, responseString, throwable);
             }
         });
-        /*
         //TODO: submitButton 수정
         submitButton = (Button) findViewById(R.id.editProfile_submit);
         submitButton.setOnClickListener(new View.OnClickListener() {
@@ -114,11 +111,11 @@ public class EditProfileActivity extends AppCompatActivity {
             public void onClick(View view) {
                 final String pw = pwView.getText().toString();
                 String pw2 = pwView2.getText().toString();
-                String name = nameView.getText().toString();
+                final String name = nameView.getText().toString();
                 String unit = unitView.getText().toString();
                 String fav = favView.getText().toString();
                 String desc = descView.getText().toString();
-                String rank = rankView.getSelectedItem().toString();
+                final String rank = rankView.getSelectedItem().toString();
                 String sex = sexView.getSelectedItem().toString();
                 boolean pwChanged = !pw.equals("");
                 // 제대로 다 입력했는지 확인.
@@ -170,26 +167,20 @@ public class EditProfileActivity extends AppCompatActivity {
                 params.put("description",desc);
 
                 client.setCookieStore(smgr.myCookies);
-                //TODO: change URL
-                String registerURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/registerUser";
+                String registerURL = Proxy.SERVER_URL + ":" + Proxy.SERVER_PORT + "/process/updateUserInfo";
                 client.post(registerURL, params, new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
                             boolean result = response.getBoolean("result");
-                            //TODO: success in editing profile - modify sesson manager and go to HomeActivity!!
                             if (result){
-                                // HomeActivity로 돌아가기.
+                                smgr.createSession(id, name, rank);
+                                finish();
                             }
                             else {
                                 String error = response.getString("reason");
                                 if (error.equals("MissingValuesException")) {
                                     Toast.makeText(getApplicationContext(), "입력하지 않은 값이 있습니다.", Toast.LENGTH_SHORT).show();
-                                }
-                                else if (error.equals("AlreadyExistingException")){
-                                    idView.setError("이미 존재하는 군번입니다.");
-                                    idView.requestFocus();
-                                    idFlag = true;
                                 }
                                 else {
                                     Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
@@ -199,7 +190,6 @@ public class EditProfileActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-
                     }
 
                     @Override
@@ -210,7 +200,6 @@ public class EditProfileActivity extends AppCompatActivity {
 
             }
         });
-        */
     }
 
     //initialize spinners
