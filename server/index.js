@@ -263,7 +263,7 @@ router.route('/process/searchUserDetails').post(function (req, res) {
 router.route('/process/getUserInfo').get(function (req, res) {
     if(!checkAndSendLoggedIn(req, res)) return;
 
-    Database.Model.user.getUserInfo(req.session.userInfo, function(result) {
+    DatabaseManager.Model.user.getUserInfo(req.session.userInfo, function(result) {
         res.json(result);
         res.end();
     });
