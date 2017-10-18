@@ -10,6 +10,10 @@
  * @author 김범수, 안정인, 임대인
  */
 
+console.log('전투체육 매칭 Backend');
+console.log('=====================');
+console.log('[정보] 서버를 시작합니다.');
+
 var http = require('http'),
     express = require('express'),
     cookieParser = require('cookie-parser'),
@@ -43,9 +47,6 @@ function checkAndSendLoggedIn(req, res) {
 }
 
 function sendIllegalParameters(req, res) {
-    console.log('[경고] 잘못된 Paramaeters. 받은 Parameters ↓');
-    console.log(req.body);
-
     res.json({
         result: false,
         reason: 'IllegalParametersException'
@@ -93,6 +94,10 @@ router.route('/process/registerUser').post(function (req, res) {
             }
         } else {
             console.log('[정보] 회원가입 완료: ID [%s]', userInfo.id);
+            req.session.userInfo = {
+                id: userInfo.id
+            };
+
             res.json({
                 result: true
             });
@@ -103,7 +108,12 @@ router.route('/process/registerUser').post(function (req, res) {
 });
 
 router.route('/process/checkLoggedIn').get(function (req, res) {
-    checkAndSendLoggedIn(req, res);
+    if (checkAndSendLoggedIn(req, res)) {
+        res.json({
+            result: true
+        });
+        res.end();
+    }
 });
 
 router.route('/process/loginUser').post(function (req, res) {
@@ -112,8 +122,8 @@ router.route('/process/loginUser').post(function (req, res) {
         password: req.body.password
     };
 
-    for(var key in userInfo)
-        if(!userInfo[key]) {
+    for (var key in userInfo)
+        if (!userInfo[key]) {
             sendIllegalParameters(req, res);
             return;
         }
@@ -133,7 +143,7 @@ router.route('/process/loginUser').post(function (req, res) {
 });
 
 router.route('/process/logoutUser').get(function (req, res) {
-    if(!checkAndSendLoggedIn())
+    if (checkAndSendLoggedIn(req, res))
         req.session.destroy(function (err) {
             if (err) throw err;
             res.json({
@@ -153,7 +163,7 @@ router.route('/process/getMatchList').get(function (req, res) {
 });
 
 router.route('/process/getUserMatch').get(function (req, res) {
-    if(!checkAndSendLoggedIn(req, res)) return;
+    if (!checkAndSendLoggedIn(req, res)) return;
 
     DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
         res.json(result);
@@ -162,9 +172,9 @@ router.route('/process/getUserMatch').get(function (req, res) {
 });
 
 router.route('/process/requestMatch').post(function (req, res) {
-    if(!checkAndSendLoggedIn(req, res)) return;
+    if (!checkAndSendLoggedIn(req, res)) return;
 
-    if(!(req.body.activityType && req.body.players)) {
+    if (!(req.body.activityType && req.body.players)) {
         sendIllegalParameters(req, res); return;
     }
 
@@ -191,9 +201,9 @@ router.route('/process/requestMatch').post(function (req, res) {
 });
 
 router.route('/process/deleteMatch').post(function (req, res) {
-    if(!checkAndSendLoggedIn(req, res)) return;
+    if (!checkAndSendLoggedIn(req, res)) return;
 
-    if(!req.body.matchId) {
+    if (!req.body.matchId) {
         sendIllegalParameters(req, res); return;
     }
 
@@ -206,7 +216,7 @@ router.route('/process/deleteMatch').post(function (req, res) {
 });
 
 router.route('/process/getStadiumList').post(function (req, res) {
-    if(!checkAndSendLoggedIn(req, res)) return;
+    if (!checkAndSendLoggedIn(req, res)) return;
 
     DatabaseManager.Model.user.findId(req.session.userInfo, function (result) {
         if (!result.result) {
@@ -242,8 +252,8 @@ router.route('/process/checkExistingUser').post(function (req, res) {
 });
 
 router.route('/process/searchUserDetails').post(function (req, res) {
-    if(!checkAndSendLoggedIn(req, res)) return;
-    
+    if (!checkAndSendLoggedIn(req, res)) return;
+
     DatabaseManager.Model.user.findId({ id: req.body.id }, function (result) {
         if (result.result)
             res.json({
@@ -261,23 +271,39 @@ router.route('/process/searchUserDetails').post(function (req, res) {
 });
 
 router.route('/process/getUserInfo').get(function (req, res) {
-    if(!checkAndSendLoggedIn(req, res)) return;
+    if (!checkAndSendLoggedIn(req, res)) return;
 
-    DatabaseManager.Model.user.getUserInfo(req.session.userInfo, function(result) {
+    DatabaseManager.Model.user.getUserInfo(req.session.userInfo, function (result) {
         res.json(result);
         res.end();
     });
 });
 
 router.route('/process/updateUserInfo').post(function (req, res) {
-    if(!checkAndSendLoggedIn(req, res)) return;
+    if (!checkAndSendLoggedIn(req, res)) return;
+
+    var targetId = req.session.userInfo.id;
 
     var userInfo = {
-
+        name: req.body.name,
+        rank: req.body.rank,
+        gender: req.body.gender,
+        password = req.body.password,
+        unit: req.body.unit,
+        favoriteEvent: req.body.favoriteEvent,
+        description: req.body.description
     };
 
-    DatabaseManager.user.updateUserInfo(userInfo, function(result) {
+    // 빈 값은 들어가지 않도록 한다.
+    for(var key in userInfo)
+        if(!userInfo[key])
+            delete(userInfo.key);
 
+    if(req.body.password)
+
+    DatabaseManager.Model.user.updateUserInfo(targetId, userInfo, function (result) {
+        res.json(result);
+        res.end();
     });
 });
 
@@ -289,15 +315,25 @@ app.use(session({
     saveUninitialized: true
 }));
 
-app.use(function(req, res, next) {
-    console.log('접근 받음: %s로의 Request. POST Request 목록 ↓', req.url);
-    console.dir(req.body);
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+app.use(function (req, res, next) {
+    var connectionInfo = {
+        timestamp: Date.now(),
+        location: (req.connection.remoteAddress == '::1') ? '로컬' : req.connection.remoteAddress.toString().split('::ffff:')[1],
+        requestUrl: req.url,
+        requests: req.body,
+        session: req.session
+    }
+
+    if(connectionInfo.requestUrl.indexOf('favicon.ico') == -1) {
+        console.log('[정보] 연결 정보');
+        console.dir(connectionInfo);
+    }
 
     next();
 });
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 
 app.use(static(path.join(__dirname, 'public')));
 
@@ -314,11 +350,4 @@ app.use(expressErrorHandler({
 var server = http.createServer(app).listen(app.get('port'), function () {
     DatabaseManager.connectDB(app);
     console.log('[정보] 서버 시작됨. %d번 Port에서 listen 중', app.get('port'));
-});
-
-server.on('request', function (req, res) {
-    if (req.connection.remoteAddress == '::1')
-        console.log('[정보] 내부 연결');
-    else
-        console.log('[정보] 외부 연결: %s', req.connection.remoteAddress.toString().split('::ffff:')[1]);
 });
