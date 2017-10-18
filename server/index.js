@@ -38,6 +38,12 @@ var app = express();
 app.set('port', process.env.PORT || 14402);
 app.set('mongoose-reconnect-max', 5);
 
+/* app.configure(function() {
+   app.use(express.limit('10mb'));
+   app.use(bodyParser({ uploadDir: __dirname + '/files/images/' }));
+
+}); */
+
 // express Router 이용 Request routing
 var router = express.Router();
 
@@ -63,18 +69,21 @@ function sendIllegalParameters(req, res) {
 }
 
 function generateRandomHex(size) {
-    return crypto.randomBytes(size).toString(hex);
+    return crypto.randomBytes(size).toString('hex');
 }
 
 // 사용자 이미지 파일 저장소 설정
-/* 
+
 var storage = multer.diskStorage({
     destination: function (req, file, callback) {
         callback(null, 'files/image');
     },
-    filename: function (erq, file, check) {
-        var fileName = file.originalname.split('.');
-        callback(null, generateRandomHex(24) + fileName[fileName.length - 1]);
+    filename: function (req, file, callback) {
+        var split = file.originalname.split('.');
+        var extension = split[split.length - 1];
+        var randomId = generateRandomHex(24);
+
+        callback(null, randomId + '.' + extension);
     }
 })
 
@@ -85,12 +94,12 @@ var upload = multer({
         fileSize: 1024 * 1024 * 16
     }
 });
- */
+
 
 
 // 라우터 설정
 // 사용자 추가 (회원가입)
-router.route('/process/registerUser').post(function (req, res) {
+router.route('/process/registerUser').post(upload.single('profPic'), function (req, res) {
     var userInfo = {
         id: req.body.id,
         password: req.body.password,
@@ -99,7 +108,8 @@ router.route('/process/registerUser').post(function (req, res) {
         unit: req.body.unit,
         gender: req.body.gender,
         favoriteEvent: req.body.favoriteEvent,
-        description: req.body.description
+        description: req.body.description,
+        profile_image: req.file ? req.file.path : null
     };
 
     // 정보 중 하나라도 빠졌을 시 오류
@@ -180,84 +190,6 @@ router.route('/process/logoutUser').get(function (req, res) {
         });
 });
 
-router.route('/process/getMatchList').get(function (req, res) {
-    DatabaseManager.Model.matching.getAllMatches(function (result) {
-        res.json(result);
-        res.end();
-    });
-});
-
-router.route('/process/getUserMatch').get(function (req, res) {
-    if (!checkAndSendLoggedIn(req, res)) return;
-
-    DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
-        res.json(result);
-        res.end();
-    });
-});
-
-router.route('/process/requestMatch').post(function (req, res) {
-    if (!checkAndSendLoggedIn(req, res)) return;
-
-    if (!(req.body.activityType && req.body.players)) {
-        sendIllegalParameters(req, res); return;
-    }
-
-    var matchInfo = {
-        initiatorId: req.session.userInfo.id,
-        activityType: req.body.activityType,
-        players: req.body.players.split('|')
-    }
-
-    DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
-        if (result.result) {
-            res.json({
-                result: false,
-                reason: 'MatchAlreadyExistsException'
-            });
-            res.end();
-        } else
-            DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
-                res.json(result);
-                res.end();
-            });
-    });
-});
-
-router.route('/process/deleteMatch').post(function (req, res) {
-    if (!checkAndSendLoggedIn(req, res)) return;
-
-    if (!req.body.matchId) {
-        sendIllegalParameters(req, res); return;
-    }
-
-    var initiatorId = req.session.userInfo.id;
-    var matchId = req.body.matchId;
-    DatabaseManager.Model.matching.deleteMatch(initiatorId, matchId, function (result) {
-        res.json(result);
-        res.end();
-    });
-});
-
-router.route('/process/getStadiumList').post(function (req, res) {
-    if (!checkAndSendLoggedIn(req, res)) return;
-
-    DatabaseManager.Model.user.findId(req.session.userInfo, function (result) {
-        if (!result.result) {
-            res.json(result);
-            res.end();
-        } else {
-            //  vi userInfo = 
-        }
-    })
-});
-
-router.route('/process/heartbeat').get(function (req, res) {
-    // Heartbeat
-    res.json({ result: 'result' });
-    res.end();
-});
-
 router.route('/process/checkExistingUser').post(function (req, res) {
     // 기존 회원 ID를 확인한다.
     var userInfo = {
@@ -303,7 +235,7 @@ router.route('/process/getUserInfo').get(function (req, res) {
     });
 });
 
-router.route('/process/updateUserInfo').post(function (req, res) {
+router.route('/process/updateUserInfo').post(upload.single('profPic'), function (req, res) {
     if (!checkAndSendLoggedIn(req, res)) return;
 
     var targetId = req.session.userInfo.id;
@@ -315,13 +247,18 @@ router.route('/process/updateUserInfo').post(function (req, res) {
         password: req.body.password,
         unit: req.body.unit,
         favoriteEvent: req.body.favoriteEvent,
-        description: req.body.description
+        description: req.body.description,
+        profile_image: req.file ? req.file.path : null
     };
 
     // 빈 값은 들어가지 않도록 한다.
     for (var key in userInfo)
         if (!userInfo[key])
-            delete (userInfo.key);
+            delete userInfo[key];
+
+
+    console.dir(userInfo);
+    console.dir(req.file);
 
     DatabaseManager.Model.user.updateUserInfo(targetId, userInfo, function (result) {
         res.json(result);
@@ -329,42 +266,137 @@ router.route('/process/updateUserInfo').post(function (req, res) {
     });
 });
 
-router.route('/process/writePhoto').post(function (req, res) {
-    if (!checkAndSendLoggedIn(req, res)) return;
+router.route('/process/getProfileImage').get(function (req, res) {
+    var userId = req.query.userid;
 
-    var files = req.files;
-    if (files.length == 0)
-        callback({
-            result: false,
-            reason: 'NoAttachmentFileError'
-        });
-    else {
-        // 파일 받아서 처리!
-    }
-});
-
-router.route('/process/readProfileImage').post(function (req, res) {
-    var userId = req.body.userId;
-
-    DatabaseManagaer.Model.user.findOne({ id: userId }, function (result) {
-        var filename;
-        if (!(filename = result.profile_image)) {
+    DatabaseManager.Model.user.getUserInfo({ id: userId }, function (result) {
+        var filepath;
+        if (!result) {
+            res.json({
+                result: false,
+                reason: 'NoSuchUserException'
+            });
+            res.end();
+        } else if (!(filepath = result.profile_image)) {
             res.json({
                 result: false,
                 reason: 'NoProfileImageException'
             });
             return;
-        }
+        } else
+            fs.readFile(path.join(__dirname, filepath), function (err, data) {
+                res.pipe(data);
+                res.end();
+            });
+    });
+});
 
-        fs.readFile(path.join(__dirname, 'filename'), function (err, data) {
-            var data = new Buffer(data).toString('base64');
+router.route('/process/getMatchList').get(function (req, res) {
+    DatabaseManager.Model.matching.getAll(function (result) {
+        res.json(result);
+        res.end();
+    });
+});
+
+router.route('/process/getUserMatch').get(function (req, res) {
+    if (!checkAndSendLoggedIn(req, res)) return;
+
+    DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
+        res.json(result);
+        res.end();
+    });
+});
+
+router.route('/process/requestMatch').post(function (req, res) {
+    if (!checkAndSendLoggedIn(req, res)) return;
+
+    if (!(req.body.activityType && req.body.players)) {
+        sendIllegalParameters(req, res); return;
+    }
+
+    var matchInfo = {
+        initiatorId: req.session.userInfo.id,
+        activityType: req.body.activityType,
+        players: req.body.players.split('|')
+    }
+
+    DatabaseManager.Model.matching.getMatch(req.session.userInfo.id, function (result) {
+        if (result.result) {
+            // 사용자가 이미 매치를 가지고 있는 경우
             res.json({
-                result: true,
-                data: data
+                result: false,
+                reason: 'MatchAlreadyExistsException'
             });
             res.end();
-        });
+        } else  // 그렇지 않은 경우
+            DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
+                res.json(result);
+                res.end();
+            });
     });
+});
+
+router.route('/process/deleteMatch').post(function (req, res) {
+    if (!checkAndSendLoggedIn(req, res)) return;
+
+    if (!req.body.matchId) {
+        sendIllegalParameters(req, res); return;
+    }
+
+    var initiatorId = req.session.userInfo.id;
+    var matchId = req.body.matchId;
+    DatabaseManager.Model.matching.deleteMatch(initiatorId, matchId, function (result) {
+        res.json(result);
+        res.end();
+    });
+});
+
+router.route('/process/getStadiumList').get(function (req, res) {
+    DatabaseManager.Model.stadium.find({}, function (err, result) {
+        if (err)
+            res.json({
+                result: false,
+                reason: 'MongoError',
+                mongoerror: err
+            });
+        else
+            res.json(result);
+        res.end();
+    })
+});
+
+/**
+ * 경기장
+ */
+router.route('/process/createStadium').post(function (req, res) {
+
+    var stadiumInfo = {
+        name: req.body.name,
+        available_type: req.body.available_type,
+        belong_at: req.body.belong_at,
+        max_players: req.body.max_players
+    };
+
+    // 정보 중 하나라도 빠졌을 시 오류
+    for (var key in stadiumInfo)
+        if (!stadiumInfo[key]) {
+            sendIllegalParameters(req, res);
+            return;
+        }
+
+    // "|" 으로 분리
+    stadiumInfo.available_type = stadiumInfo.available_type.split('|');
+
+    DatabaseManager.Model.stadium.createStadium(stadiumInfo, function (result) {
+        res.json(result);
+        res.end();
+    });
+});
+
+router.route('/process/heartbeat').get(function (req, res) {
+    // Heartbeat
+    res.json({ result: 'result' });
+    res.end();
 });
 
 // Express에 각 미들웨어 적용 및 서버 시작
@@ -380,7 +412,7 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-app.use(function (req, res, next) {
+/* app.use(function (req, res, next) {
     var connectionInfo = {
         timestamp: Date.now(),
         location: (req.connection.remoteAddress == '::1') ? '로컬' : req.connection.remoteAddress.toString().split('::ffff:')[1],
@@ -396,7 +428,7 @@ app.use(function (req, res, next) {
     }
 
     next();
-});
+}); */
 
 app.use(static(path.join(__dirname, 'public')));
 app.use(static(path.join(__dirname, 'files')));

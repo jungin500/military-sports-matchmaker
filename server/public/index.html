@@ -181,6 +181,28 @@
         </form>
     </div>
 
+    <div class="container">
+        <form action="/process/createStadium" method="post">
+            <div class="panel panel-danger">
+                <div class="panel-heading">(디버그) 경기장 만들기 /process/createStadium</div>
+                <div class="panel-body">
+                    <label for="name">경기장 이름</label>
+                    <input class="form-control" type="text" name="name" id="">
+                    <label for="available_type">가능한 경기 (| 구분)</label>
+                    <input class="form-control" type="text" name="available_type" id="">
+                    <label for="belong_at">위치</label>
+                    <input class="form-control" type="text" name="belong_at" id="">
+                    <label for="max_players">최대 사용자 수</label>
+                    <input class="form-control" type="text" name="max_players" id="">
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-primary btn-lg" type="submit">경기장 추가하기</button>
+                    <button class="btn btn-success btn-lg" type="button" onclick='window.location = "/process/getStadiumList"'>모든 경기장 리스트 가져오기</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
