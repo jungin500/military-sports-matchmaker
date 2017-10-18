@@ -2,6 +2,8 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.content.Context;
 import com.loopj.android.http.*;
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -37,23 +39,7 @@ public class Proxy {
 
     //POST signup
     public void signup(String id, String pw, String name, int rankid, String unit,
-                        int sexid, String fav, String desc, JsonHttpResponseHandler handler){
-        RequestParams params = new RequestParams();
-        params.put("id", id);
-        params.put("password", pw);
-        params.put("name", name);
-        params.put("rank", rankid);
-        params.put("unit", unit);
-        params.put("gender",sexid);
-        params.put("favoriteEvent",fav);
-        params.put("description",desc);
-
-        String registerURL = SERVER_URL + "/process/registerUser";
-        client.post(registerURL, params, handler);
-    }
-
-    public void signup(String id, String pw, String name, int rankid, String unit,
-                       int sexid, String fav, String desc, String filePath,
+                       int sexid, String fav, String desc, byte[] byteImage,
                        JsonHttpResponseHandler handler){
         RequestParams params = new RequestParams();
         params.put("id", id);
@@ -64,12 +50,14 @@ public class Proxy {
         params.put("gender",sexid);
         params.put("favoriteEvent",fav);
         params.put("description",desc);
-
+        params.put("profPic", new ByteArrayInputStream(byteImage), "profPic.PNG");
+        /*
         try {
             params.put("profPic", new File(filePath));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        */
 
         String registerURL = SERVER_URL + "/process/registerUser";
         client.post(registerURL, params, handler);
@@ -111,7 +99,7 @@ public class Proxy {
     //POST updateUserInfo with Profile Picture
 
     public void updateUserInfo(String id, String pw, String name, int rankid, String unit,
-                               int sexid, String fav, String desc, String filePath,
+                               int sexid, String fav, String desc, byte[] byteImage,
                                        JsonHttpResponseHandler handler){
         RequestParams params = new RequestParams();
         params.put("id", id);
@@ -122,11 +110,7 @@ public class Proxy {
         params.put("gender",sexid);
         params.put("favoriteEvent",fav);
         params.put("description",desc);
-        try {
-            params.put("profPic", new File(filePath));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        params.put("profPic", new ByteArrayInputStream(byteImage), "profPic.PNG");
         client.setCookieStore(smgr.myCookies);
         String registerURL = SERVER_URL + "/process/updateUserInfo";
         client.post(registerURL, params, handler);
