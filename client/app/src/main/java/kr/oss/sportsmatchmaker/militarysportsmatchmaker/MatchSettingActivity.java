@@ -85,7 +85,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                     listDataArray.add(data);
                     for (int i = 1; i < num; i++){
                         data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname + "의 동료", "anon", "선수 추가\n(선택)");
-                        listDataArray.add(data);;
+                        listDataArray.add(data);
                     }
                 }
                 else if (num < numPlayer[0]){
