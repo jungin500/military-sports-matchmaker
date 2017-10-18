@@ -242,8 +242,10 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                         break;
                     //장소 고르기
                     default:
-                        Toast.makeText(getApplicationContext(), "아직 미구현", Toast.LENGTH_SHORT).show();
+                        Intent intent4 = new Intent(getApplicationContext(), SelectProfileActivity.class);
+                        startActivity(intent4);
                         break;
+                    //임시 사진 선택
                 }
                 break;
         }

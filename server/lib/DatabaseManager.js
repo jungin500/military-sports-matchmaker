@@ -188,10 +188,24 @@ var createSchema = function () {
 
     var updateUserInfo = function (targetId, query, callback) {
         this.update({ id: targetId }, query, function (err) {
-            if(mongoErrorCallbackCheck(err, callback))
-                callback({
-                    result: true
-                });
+            if (mongoErrorCallbackCheck(err, callback)) {
+                if (query.password) {
+                    Model.user.findOne({ id: targetId }, function (err, result) {
+                        if (mongoErrorCallbackCheck(err, callback)) {
+                            result.set('password', query.password);
+                            result.save(function (err) {
+                                if (mongoErrorCallbackCheck(err, callback))
+                                    callback({
+                                        result: true
+                                    });
+                            });
+                        }
+                    });
+                } else
+                    callback({
+                        result: true
+                    });
+            }
         });
     };
 

@@ -22,14 +22,6 @@
 
 ---
 
-## /process/checkLoggedIn (GET)
-### Input
-
-### Output (JSON)
-- result: 결과 (true/false)
-
----
-
 ## /process/loginUser (POST)
 ### Input
 - id: 사용자 군번 (=아이디)

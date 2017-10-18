@@ -83,8 +83,7 @@ public class CustomAdapter extends ArrayAdapter<ListData>{
                         dialog.cancel();
                     }
                 });
-                alertDialogBuilder.setNegativeButton("검색",
-                        new DialogInterface.OnClickListener() {
+                alertDialogBuilder.setNegativeButton("검색", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 String queryid = search.getText().toString();

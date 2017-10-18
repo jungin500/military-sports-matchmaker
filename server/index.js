@@ -107,15 +107,6 @@ router.route('/process/registerUser').post(function (req, res) {
     });
 });
 
-router.route('/process/checkLoggedIn').get(function (req, res) {
-    if (checkAndSendLoggedIn(req, res)) {
-        res.json({
-            result: true
-        });
-        res.end();
-    }
-});
-
 router.route('/process/loginUser').post(function (req, res) {
     var userInfo = {
         id: req.body.id,
@@ -288,7 +279,7 @@ router.route('/process/updateUserInfo').post(function (req, res) {
         name: req.body.name,
         rank: req.body.rank,
         gender: req.body.gender,
-        password = req.body.password,
+        password: req.body.password,
         unit: req.body.unit,
         favoriteEvent: req.body.favoriteEvent,
         description: req.body.description
@@ -298,8 +289,6 @@ router.route('/process/updateUserInfo').post(function (req, res) {
     for(var key in userInfo)
         if(!userInfo[key])
             delete(userInfo.key);
-
-    if(req.body.password)
 
     DatabaseManager.Model.user.updateUserInfo(targetId, userInfo, function (result) {
         res.json(result);
