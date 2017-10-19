@@ -74,16 +74,11 @@ public class QueListActivity extends AppCompatActivity {
                     final String match_status = response.getString("match_status");
                     // if not in match and waiting for match
                     if (match_status.equals("ready")){
-<<<<<<< HEAD
-                        smgr.changeMatchStatus(false);
-                        smgr.setMatchId("null");
-
 
                         // Dialog 띄워서
                         // 큐가 사라졌습니다. 메인 화면으로 돌아갑니다.
                         // 확인 버튼을 누르면
                         // HomeActivity를 시작하고 얘를 finish()
-=======
                         smgr.changeMatchStatus(false, null);
                         smgr.changeStadiumName(null);
 
@@ -91,7 +86,6 @@ public class QueListActivity extends AppCompatActivity {
                         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                         params.weight = 0f;
                         quitMatchButton.setLayoutParams(params);
->>>>>>> 5929a964e7fd9ed18d48c8a631807bb039d255c3
                     }
                     // if match, get match and....
                     else {

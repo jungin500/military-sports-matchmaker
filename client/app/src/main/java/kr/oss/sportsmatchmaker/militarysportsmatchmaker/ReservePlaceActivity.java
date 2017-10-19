@@ -2,6 +2,7 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.Image;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +14,8 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import static kr.oss.sportsmatchmaker.militarysportsmatchmaker.R.id.free;
 
 public class ReservePlaceActivity extends AppCompatActivity implements OnClickListener{
 
@@ -35,6 +38,7 @@ public class ReservePlaceActivity extends AppCompatActivity implements OnClickLi
 
         selectStadium = (TextView) findViewById(R.id.select);
         ImageButton scoccer = (ImageButton) findViewById(R.id.scoccer);
+        ImageButton free = (ImageButton) findViewById(R.id.free);
         /*
         ImageButton basketball = (ImageButton) findViewById(R.id.basketball);
         ImageButton footwear = (ImageButton) findViewById(R.id.footwear);
@@ -48,6 +52,7 @@ public class ReservePlaceActivity extends AppCompatActivity implements OnClickLi
         BL.setAdapter(adapterSP1);
 
         scoccer.setOnClickListener(this);
+        free.setOnClickListener(this);
     }
 
         @Override
@@ -87,8 +92,10 @@ public class ReservePlaceActivity extends AppCompatActivity implements OnClickLi
 
                 //case R.id.basketball:
                 //case R.id.footwear:
-                case R.id.free:
+                case free:
                     Intent intent3 = new Intent(getApplicationContext(), NotificationExamActivity.class);
+                    startActivity(intent3);
+                    break;
             }
     }
 }
