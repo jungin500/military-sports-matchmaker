@@ -53,7 +53,7 @@ public class ListData2 {
         }
 
         private int getRank(String id, String rankname){
-            if (id.equals("anon")) return -1;
+            if (id.split("_")[0].equals("anon")) return -1;
             return RankHelper.rankToInt(rankname.split("")[0]);
         };
     }

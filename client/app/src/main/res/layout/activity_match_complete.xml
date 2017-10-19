@@ -2,172 +2,251 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/blank12"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.05" />
+
+        <ImageView
+            android:id="@+id/match_profpic"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1"
+            app:srcCompat="@drawable/img_defaultface" />
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="0.5"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/match_welcome"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="4dp"
+                android:gravity="center"
+                android:textColor="@color/colorAccent"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/logout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_weight="0.25"
+            android:background="@drawable/border2"
+            android:text="결과 입력"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/blank9"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.05" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/game_type"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/border"
+        android:gravity="center"
+        android:text="족구 경기"
+        android:textSize="24sp" />
 
     <TextView
         android:id="@+id/stadium"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.4"
-        android:background="@null"
-        android:gravity="center"
-        android:text="정보통신학교 연병장" />
-
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
         android:background="@drawable/border"
         android:gravity="center"
-        android:text="족구"
-        android:textSize="24sp" />
+        android:text="정보통신학교 연병장
+2017-10-20 16:00" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:orientation="horizontal"
-        android:background="@drawable/border">
-
-        <ImageButton
-            android:id="@+id/team1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/border"
-            app:srcCompat="@android:color/transparent" />
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="@drawable/border">
-
-            <TextView
-                android:id="@+id/teamname1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/border"
-                android:gravity="center" />
-
-            <TextView
-                android:id="@+id/teamprofile1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/border"
-                android:gravity="center" />
-
-            <TextView
-                android:id="@+id/shift1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/border"
-                android:gravity="center"
-                android:text="어따스냐 이거"/>
-        </LinearLayout>
-
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@drawable/border"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@drawable/border">
+
 
         <LinearLayout
+            android:id="@+id/team1_head"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:orientation="horizontal">
+            android:layout_weight="1">
 
-            <TextView
-                android:id="@+id/VS1"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <ImageView
+                android:id="@+id/team1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/border"
+                app:srcCompat="@drawable/img_defaultface"
+                    android:layout_margin="4dp"/>
+            </LinearLayout>
+            
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center" />
-        </LinearLayout>
+                android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/vs"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="VS"
-            android:textSize="30sp" />
+                <TextView
+                    android:id="@+id/teamtext1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:background="@drawable/border"
+                    android:text="내 팀" />
+
+                <TextView
+                    android:id="@+id/teamname1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/border"
+                    android:gravity="center" />
+
+                <TextView
+                    android:id="@+id/teamprofile1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/border"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/team2_head"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:orientation="horizontal">
+            android:layout_weight="1">
 
-            <TextView
-                android:id="@+id/VS2"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+            <ImageView
+                android:id="@+id/team2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/border"
+                app:srcCompat="@drawable/img_defaultface"
+                android:layout_margin="4dp"/>
+            </LinearLayout>
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/teamtext2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:background="@drawable/border"
+                    android:text="상대 팀" />
+
+                <TextView
+                    android:id="@+id/teamname2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/border"
+                    android:gravity="center" />
+
+                <TextView
+                    android:id="@+id/teamprofile2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/border"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
         </LinearLayout>
+
     </LinearLayout>
 
+    
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="3"
+        android:weightSum="1"
         android:orientation="horizontal"
         android:background="@drawable/border">
 
-        <ImageButton
-            android:id="@+id/team2"
+        <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/border"
-            app:srcCompat="@android:color/transparent" />
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
+            android:layout_weight="0.5"
             android:background="@drawable/border">
-
-            <TextView
-                android:id="@+id/teamname2"
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/border"
-                android:gravity="center" />
+                android:layout_height="match_parent"
+                android:fillViewport="true">
 
-            <TextView
-                android:id="@+id/teamprofile2"
+                <ListView
+                    android:id="@+id/team1_list"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/border">
+                </ListView>
+            </ScrollView>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:background="@drawable/border">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <ListView
+                android:id="@+id/team2_list"
+                android:layout_weight="1"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/border"
-                android:gravity="center" />
+                android:layout_height="match_parent"
+                android:background="@drawable/border"/>
+        </ScrollView>
+        </RelativeLayout>
 
-            <TextView
-                android:id="@+id/shift2"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/border"
-                android:gravity="center"
-                android:text="어땨스냐 이거"/>
-
-        </LinearLayout>
 
     </LinearLayout>
-
+    -->
 </LinearLayout>

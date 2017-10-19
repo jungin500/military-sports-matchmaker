@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -41,8 +42,10 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
                     if (! response.getString("match_status").equals("ready")){
-                        // TODO: Dialogue 알림으로 경고하고
-                        // Home activity로 도망감
+                        Toast.makeText(getApplicationContext(), "초대된 큐가 있습니다.",Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                        startActivity(intent);
+                        finish();
 
                     }
                 } catch (JSONException e) {

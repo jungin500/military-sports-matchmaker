@@ -26,20 +26,21 @@ import java.util.ArrayList;
 import cz.msebera.android.httpclient.Header;
 
 
-public class MatchCompleteActivity extends AppCompatActivity implements OnClickListener{
+public class MatchCompleteActivity extends AppCompatActivity{
 
     SessionManager smgr;
     Proxy proxy;
 
 
     //widget
-    TextView stadium;
-    ImageButton buttonTeam1;
-    ImageButton buttonTeam2;
-    TextView teamName1;
-    TextView teamProfile1;
-    TextView teamName2;
-    TextView teamProfile2;
+    ImageView buttonTeam1;
+    ImageView buttonTeam2;
+    ListView list1;
+    ListView list2;
+
+    // list
+    ArrayList<String> leftTeamPlayers;
+    ArrayList<String> rightTeamPlayers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +58,18 @@ public class MatchCompleteActivity extends AppCompatActivity implements OnClickL
         final TextView teamName2 = (TextView) findViewById(R.id.teamname2);
         final TextView teamProfile2 = (TextView) findViewById(R.id.teamprofile2);
 
-        buttonTeam1 = (ImageButton) findViewById(R.id.team1);
-        buttonTeam1.setOnClickListener(this);
-        buttonTeam2 = (ImageButton) findViewById(R.id.team2);
-        buttonTeam2.setOnClickListener(this);
+        buttonTeam1 = (ImageView) findViewById(R.id.team1);
+        buttonTeam2 = (ImageView) findViewById(R.id.team2);
+
+        list1 = (ListView) findViewById(R.id.team1_list);
+        list2 = (ListView) findViewById(R.id.team2_list);
+
+        leftTeamPlayers = new ArrayList<String>();
+        rightTeamPlayers = new ArrayList<String>();
+        final ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, leftTeamPlayers);
+        final ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, rightTeamPlayers);
+        list1.setAdapter(adapter1);
+        list2.setAdapter(adapter2);
 
         proxy.prepareMatchingTeamStadium(smgr.getStadiumName(), new JsonHttpResponseHandler(){
             @Override
@@ -75,41 +84,42 @@ public class MatchCompleteActivity extends AppCompatActivity implements OnClickL
                         JSONArray leftTeam = response.getJSONArray("leftTeam");
                         JSONArray rightTeam = response.getJSONArray("rightTeam");
 
-                        ArrayList<String> leftTeamPlayers = new ArrayList<String>();
-                        ArrayList<String> rightTeamPlayers = new ArrayList<String>();
+                        String myid = smgr.getProfile().get(smgr.ID);
+                        boolean myTeamisLeft = false;
+                        for (int i = 0; i < leftTeam.length(); i++){
+                            String currPlayer = leftTeam.getJSONObject(i).getJSONArray("players").getString(0);
+                            if (myid.equals(currPlayer))
+                                myTeamisLeft = true;
+                        }
+                        if (! myTeamisLeft){
+                            JSONArray temp = leftTeam;
+                            leftTeam = rightTeam;
+                            rightTeam = temp;
+                        }
+
                         String leftTeamOne = null;
                         String rightTeamOne = null;
-
-                        // debugging purpose
-                        StringBuilder lsb = new StringBuilder();
-                        StringBuilder rsb = new StringBuilder();
                         for (int i = 0; i < leftTeam.length(); i++) {
                             String currPlayer = leftTeam.getJSONObject(i).getJSONArray("players").getString(0);
                             leftTeamPlayers.add(currPlayer);
-                            if ((leftTeamOne == null) && (!currPlayer.equals("anon"))){
+                            if ((leftTeamOne == null) && (!currPlayer.split("_")[0].equals("anon"))){
                                 leftTeamOne = currPlayer;
                             }
-                            lsb.append(currPlayer + "|");
                         }
                         for (int i = 0; i < rightTeam.length(); i++) {
                             String currPlayer = rightTeam.getJSONObject(i).getJSONArray("players").getString(0);
                             rightTeamPlayers.add(currPlayer);
-                            if ((rightTeamOne == null) && (!currPlayer.equals("anon"))){
+                            if ((rightTeamOne == null) && (!currPlayer.split("_")[0].equals("anon"))){
                                 rightTeamOne = currPlayer;
                             }
-                            rsb.append(currPlayer + "|");
                         }
-                        String ls = lsb.toString();
 
-                        String rs = rsb.toString();
-
-
-
+                        adapter1.notifyDataSetChanged();
+                        adapter2.notifyDataSetChanged();
                         final String leftTeamLeader = leftTeamOne;
                         final String rightTeamLeader = rightTeamOne;
                         final String[] leftArray = leftTeamPlayers.toArray(new String[leftTeamPlayers.size()]);
                         final String[] rightArray = rightTeamPlayers.toArray(new String[rightTeamPlayers.size()]);
-
 
 
                         // leftTeam UI 초기화.
@@ -122,8 +132,8 @@ public class MatchCompleteActivity extends AppCompatActivity implements OnClickL
                                         String leaderRank = RankHelper.intToRank(response.getInt("rank"));
                                         String leaderName = response.getString("name");
 
-                                        teamName1.setText("왼쪽 팀");
-                                        teamProfile1.setText(leaderRank + " " + leaderName + " 외 " + String.valueOf(leftArray.length - 1) + "명");
+                                        teamName1.setText("주장: " + leaderRank + " " + leaderName);
+                                        teamProfile1.setText("총원: " + String.valueOf(leftArray.length) + "명");
 
                                         // add picture and notifyDataSetChanged();
                                         if (response.getBoolean("profile_image")){
@@ -172,10 +182,10 @@ public class MatchCompleteActivity extends AppCompatActivity implements OnClickL
                                         String leaderRank = RankHelper.intToRank(response.getInt("rank"));
                                         String leaderName = response.getString("name");
 
-                                        teamName2.setText("오른쪽 팀");
-                                        teamProfile2.setText(leaderRank + " " + leaderName + " 외 " + String.valueOf(rightArray.length - 1) + "명");
+                                        teamName2.setText("주장: " + leaderRank + " " + leaderName);
+                                        teamProfile2.setText("총원: " + String.valueOf(leftArray.length) + "명");
 
-                                        // add picture and notifyDataSetChanged();
+                                        // add picture
                                         if (response.getBoolean("profile_image")){
                                             proxy.getProfPic(rightTeamLeader, new FileAsyncHttpResponseHandler(getApplicationContext()) {
                                                 public void onSuccess(int i, Header[] headers, File file){
@@ -238,24 +248,5 @@ public class MatchCompleteActivity extends AppCompatActivity implements OnClickL
                 }
             }
         });
-    }
-
-    public void onClick(View v){
-
-        switch(v.getId()){
-            case R.id.team1 :
-                AlertDialog.Builder alertdialog1 = new AlertDialog.Builder(MatchCompleteActivity.this);
-                alertdialog1.setTitle("첫번째 팀");
-                alertdialog1.setMessage("내용 ~~~~");
-                alertdialog1.show();
-                break;
-
-            case R.id.team2 :
-                AlertDialog.Builder alertdialog2 = new AlertDialog.Builder(MatchCompleteActivity.this);
-                alertdialog2.setTitle("두번째 팀");
-                alertdialog2.setMessage("내용 ~~~~");
-                alertdialog2.show();
-                break;
-        }
     }
 }

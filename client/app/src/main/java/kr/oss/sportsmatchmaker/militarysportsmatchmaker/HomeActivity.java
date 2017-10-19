@@ -186,13 +186,12 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                                         else {
                                             textQStatus.setText("경기를 찾는 중입니다.\n큐 상태를 확인하세요.");
                                         }
-                                        // Case 3. 경기를 찾았다!!!
                                         proxy.prepareMatchingTeamStadium(smgr.getStadiumName(), new JsonHttpResponseHandler() {
                                             @Override
                                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                                                 try {
                                                     boolean result = response.getBoolean("result");
-                                                    // 매칭 성공
+                                                    // Case 3. 경기를 찾았다!!!
                                                     if (result) {
                                                         textQStatus.setText("경기를 찾았습니다!\n경기 정보를 확인하세요.");
                                                     }

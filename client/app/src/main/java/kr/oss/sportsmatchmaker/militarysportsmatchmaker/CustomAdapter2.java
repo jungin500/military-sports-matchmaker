@@ -64,7 +64,7 @@ public class CustomAdapter2 extends ArrayAdapter<ListData2>{
         nameView.setText(listData.get(position).getName());
         button.setText(listData.get(position).getButton());
         idView.setText(listData.get(position).getId());
-        if (listData.get(position).getId().equals("anon")){
+        if (listData.get(position).getId().split("_")[0].equals("anon")){
             idView.setText("");
         }
 
