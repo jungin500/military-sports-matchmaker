@@ -16,12 +16,19 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/blank16"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.25"
+            android:background="#FFD3D9FD" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="0.7"
             android:background="#FFD3D9FD"
-            android:gravity="bottom|center"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <TextView
@@ -53,6 +60,7 @@
                 android:id="@+id/quitMatch"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="0.2"
                 android:background="@drawable/border"
                 android:text="큐 제거" />
@@ -68,6 +76,7 @@
                 android:id="@+id/acceptMatch"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="0.14"
                 android:background="@drawable/border"
                 android:text="수락" />
@@ -92,7 +101,7 @@
             android:id="@+id/blank13"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.2"
+            android:layout_weight="0.1"
             android:background="#FFD3D9FD" />
 
         <TextView
