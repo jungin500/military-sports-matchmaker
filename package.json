@@ -4,10 +4,10 @@
   "description": "전투체육 매치메이커 (Node.js + MongoDB)",
   "main": "index.js",
   "scripts": {
-    "test": "./test.sh",
-    "start": "./start.sh",
-    "restart": "./restart.sh",
-    "stop": "./stop.sh"
+    "test": "bash test.sh",
+    "start": "bash start.sh",
+    "restart": "bash restart.sh",
+    "stop": "bash stop.sh"
   },
   "repository": {
     "type": "git",
