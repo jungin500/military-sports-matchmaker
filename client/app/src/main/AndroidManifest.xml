@@ -15,11 +15,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".LoginActivity"
@@ -29,13 +24,19 @@
             android:label="@string/title_activity_signup" />
         <activity android:name=".HomeActivity" />
         <activity android:name=".ChooseSportActivity" />
-        <activity android:name=".MatchCompleteAtivity" />
         <activity android:name=".MatchCompleteActivity" />
         <activity android:name=".MatchSettingActivity" />
         <activity android:name=".ReservePlaceActivity" />
         <activity android:name=".EditProfileActivity" />
         <activity android:name=".QueListActivity" />
-        <activity android:name=".NotificationExamActivity"></activity>
+        <activity android:name=".NotificationExamActivity" />
+        <activity android:name=".FirstActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
