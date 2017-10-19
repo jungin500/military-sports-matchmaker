@@ -2,10 +2,8 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -26,7 +24,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.FileAsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -41,11 +38,22 @@ import cz.msebera.android.httpclient.Header;
 
 public class EditProfileActivity extends AppCompatActivity {
 
+<<<<<<< HEAD
     private final int GET_PICTURE_URI = 1;
     private ArrayList<String> ranks;
     private ArrayList<String> sexes;
     private ArrayList<String> units;
     // widgets
+=======
+    public final int GET_PICTURE_URI = 1;
+    public ArrayList<String> ranks;
+    public ArrayList<String> sexes;
+    public ArrayList<String> units;
+
+    /*
+     위젯 선언부
+     */
+>>>>>>> b91040171e3a0225f562b3a68f258bb0de0f5ae8
     private TextView idView;
     private EditText pwView;
     private EditText pwView2;
@@ -65,14 +73,23 @@ public class EditProfileActivity extends AppCompatActivity {
     private SessionManager smgr;
     private Proxy proxy;
 
-    // Storage Permissions
+    /*
+     갤러리 사용을 위한 Permissions 선언
+    */
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
+<<<<<<< HEAD
     private static void verifyStoragePermissions(Activity activity) {
+=======
+    /*
+     갤러리 사용을 위한 Permissions 선언
+    */
+    public static void verifyStoragePermissions(Activity activity) {
+>>>>>>> b91040171e3a0225f562b3a68f258bb0de0f5ae8
         // Check if we have write permission
         int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
@@ -89,6 +106,10 @@ public class EditProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /*
+         상태바 없애는 코드
+         */
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_edit_profile);
@@ -101,7 +122,7 @@ public class EditProfileActivity extends AppCompatActivity {
         initializeSpinner();
         idFlag = true;
 
-        // connect widgets
+        // 위젯들 사용위한 선언부
         idView = (EditText) findViewById(R.id.editProfile_id);
         pwView = (EditText) findViewById(R.id.editProfile_pw);
         pwView2 = (EditText) findViewById(R.id.editProfile_pw2);
@@ -110,16 +131,23 @@ public class EditProfileActivity extends AppCompatActivity {
         descView = (EditText) findViewById(R.id.editProfile_desc);
         profPic = (ImageButton) findViewById(R.id.editProfile_profPic);
 
-        // set spinner to rank
+        /*
+        계급고르는 스피너
+        */
         rankView = (Spinner) findViewById(R.id.editProfile_rank);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, ranks);
         rankView.setAdapter(adapter);
 
-        // set spinner to sex
+        /*
+         성별고르는 스피너
+         */
         sexView = (Spinner) findViewById(R.id.editProfile_sex);
         ArrayAdapter<String> adapterSex = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, sexes);
         sexView.setAdapter(adapterSex);
 
+        /*
+         소속부대고르는 스피너
+         */
         unitView = (Spinner) findViewById(R.id.editProfile_unit);
         ArrayAdapter<String> adapterUnits = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, units);
         unitView.setAdapter(adapterUnits);
@@ -128,7 +156,9 @@ public class EditProfileActivity extends AppCompatActivity {
         idView.setText(id);
         idView.setEnabled(false);
 
-        // profpic button adds profile picture!
+        /*
+        프로필사진 추가시키는 버튼
+        */
         byteImage = null;
         profPic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,6 +170,9 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
 
+        /*
+         지금 로그인 되어있는 회원 정보 불로오기
+         */
         proxy.getUserInfo(new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -182,6 +215,9 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
 
+        /*
+         프로필 수정란에 적었던것들 받아오기
+         */
         submitButton = (Button) findViewById(R.id.editProfile_submit);
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -254,7 +290,9 @@ public class EditProfileActivity extends AppCompatActivity {
         });
     }
 
-    //initialize spinners
+    /*
+     스피너 내용물들 초기화
+     */
     private void initializeSpinner(){
         // spinner for rank
         ranks = new ArrayList<String>();
@@ -276,7 +314,9 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
 
-    // on profile pic search
+    /*
+     수정하거나 등록할 사진 선택
+     */
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode,data);
 
@@ -298,9 +338,17 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+<<<<<<< HEAD
     // crop bitmap to square then resize to 240*240 pixel.
     // Source: https://stackoverflow.com/questions/26263660/crop-image-to-square-android
     private static Bitmap formatBitmap(Bitmap bitmap){
+=======
+    /*
+     비트맵 사진을 240*240pixel로 맞추는 함수
+     참조 소스 : https://stackoverflow.com/questions/26263660/crop-image-to-square-android
+    */
+    public static Bitmap formatBitmap(Bitmap bitmap){
+>>>>>>> b91040171e3a0225f562b3a68f258bb0de0f5ae8
         int width  = bitmap.getWidth();
         int height = bitmap.getHeight();
         int newWidth = (height > width) ? width : height;

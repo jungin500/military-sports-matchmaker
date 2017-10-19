@@ -1,16 +1,12 @@
 package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.WindowManager;
-
 import com.loopj.android.http.JsonHttpResponseHandler;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import cz.msebera.android.httpclient.Header;
 
 

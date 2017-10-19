@@ -1,6 +1,6 @@
 # API
 
-## /process/registerUser (POST, multipart/form-data) √
+## /process/registerUser (POST, multipart/form-data) 
 ### Input
 - id: 사용자 군번 (=아이디)
 - password: 사용자 비밀번호
@@ -23,7 +23,7 @@
 
 ---
 
-## /process/loginUser (POST) √
+## /process/loginUser (POST) 
 ### Input
 - id: 사용자 군번 (=아이디)
 - password: 사용자 비밀번호
@@ -40,7 +40,7 @@
 
 ---
 
-## /process/logoutUser (GET) √
+## /process/logoutUser (GET) 
 ### Input
 
 ### Output (JSON)
@@ -48,7 +48,7 @@
 
 ---
 
-## /process/checkExistingUser (POST) √
+## /process/checkExistingUser (POST) 
 ### Input
 - id: 사용자 ID
 
@@ -58,7 +58,7 @@
 
 ---
 
-## /process/searchUserDetails (POST) √
+## /process/getUserDetails (POST) 
 ### Input
 - (Session) userInfo: 로그인 정보 (로그인 여부 체크)
 - id: 사용자 ID
@@ -74,7 +74,21 @@
 
 ---
 
-## /process/getUserInfo (GET) √
+## /process/getUsersDetails (POST) 
+### Input
+- (Session) userInfo: 로그인 정보 (로그인 여부 체크)
+- users: 사용자 ID들 (|으로 구분)
+
+### Output
+- result: 결과 (true/false)
+- data: 결과 배열 (민감한 데이터만 삭제된 배열)
+- reason: 실패 시 사유 (result = false)
+    - NoSuchUserException
+    - NotLoggedInException
+
+---
+
+## /process/getUserInfo (GET) 
 ### Input
 - (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
 - (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
@@ -99,26 +113,25 @@
 
 ---
 
-## /process/updateUserInfo (POST) √
-### Input 
+## /process/getProfileImage (GET) 
+### Input
 - (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
 - (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
-- 아래는 있는 값들만 변경을 한다. (보내지 않거나 데이터가 없으면, eg, "", 수정 X)
-    - name: 변경된 사용자 이름
-    - rank: 변경된 사용자 계급
-    - gender: 변경된 사용자 성별
-    - password: 변경할 사용자 비밀번호
-    - unit: 변경된 사용자 부대명
-    - favoriteEvent: 변경된 사용자가 좋아하는 운동
-    - description: 변경된 사용자 자기소개
 
 ### Output
-- result: 성공 여부 (true/false)
-- reason: 실패시 사유 (result = false)
+- image/*: 이미지 (존재하는 경우)
+
+- result: 성공 여부 (false)
+- reason: 실패시 사유
+    - NotLoggedInException
+    - NoSuchUserException (불가능)
+    - MultipleUserException (불가능)
+    - MongoError
+- mongoerror: MongoError 객체 (오류 시)
 
 ---
 
-## /process/getMatchList (GET) √
+## /process/getMatchList (GET) 
 ### Input
 
 ### Output (JSON)
@@ -131,7 +144,7 @@
 
 ---
 
-## /process/getUserMatch (POST) √
+## /process/getUserMatch (POST) 
 ### Input
 - (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
 - (Session) userInfo.id: 로그인한 ID (해당 유저의 Match 검색시 활용)
@@ -152,20 +165,7 @@
 
 ---
 
-## /process/decideMatch (POST)
-### Input
-- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
-- (Session) userInfo.id: 로그인한 ID (해당 유저의 Match 검색시 활용)
-- is_participating: 참가하는지 (true, false)
-
-### Output
-- result: 결과 (true/false)
-- reason: 실패 시 사유 (result = false)
-    - (동일)
-
----
-
-## /process/requestMatch (POST) √
+## /process/requestMatch (POST) 
 ### Input
 - (Session) userInfo: 사용자 정보 (로그인 여부 체크)
 - (Session) userInfo.id: 사용자 ID
@@ -182,7 +182,39 @@
 
 ---
 
-## /process/deleteMatch (POST) √
+## /process/updateUserInfo (POST) 
+### Input 
+- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
+- (Session) userInfo.id: 로그인한 ID (해당 유저의 정보 받아오기 위해 체크)
+- 아래는 있는 값들만 변경을 한다. (보내지 않거나 데이터가 없으면, eg, "", 수정 X)
+    - name: 변경된 사용자 이름
+    - rank: 변경된 사용자 계급
+    - gender: 변경된 사용자 성별
+    - password: 변경할 사용자 비밀번호
+    - unit: 변경된 사용자 부대명
+    - favoriteEvent: 변경된 사용자가 좋아하는 운동
+    - description: 변경된 사용자 자기소개
+
+### Output
+- result: 성공 여부 (true/false)
+- reason: 실패시 사유 (result = false)
+
+---
+
+## /process/decideMatch (POST)
+### Input
+- (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
+- (Session) userInfo.id: 로그인한 ID (해당 유저의 Match 검색시 활용)
+- is_participating: 참가하는지 (true, false)
+
+### Output
+- result: 결과 (true/false)
+- reason: 실패 시 사유 (result = false)
+    - (동일)
+
+---
+
+## /process/deleteMatch (POST) 
 ### Input
 - (Session) userInfo: 로그인 정보 (로그인한 유저인지 체크)
 - (Session) userInfo.id: 로그인한 ID (해당 유저의 Match인지 체크) → initiatorId (매치 만든 사람)으로 저장되어 있음...

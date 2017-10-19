@@ -42,7 +42,7 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
     private SimpleAdapter menuAdapter;
     private SwipeRefreshLayout mSwipeRefresh;
 
-    //Widgets
+    // 위젯들 선언
     private TextView textWelcome;
     private Button logoutButton;
     private TextView textQStatus;
@@ -55,12 +55,18 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /*
+         상태바 없애는 코드
+         */
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_home);
 
+        /*
+         스와이프를 이용한 새로고침하기 위한 고트
+         */
         mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
-
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override public void onRefresh() {
                 Intent intent = new Intent(HomeActivity.this, HomeActivity.class);
@@ -74,27 +80,30 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         proxy = new Proxy(getApplicationContext());
         smgr.checkSession();
 
-        // define widgets
+        // 위젯들 사용하기 위한 코드
         logoutButton = (Button) findViewById(R.id.logout);
         textWelcome = (TextView) findViewById(R.id.home_welcome);
-
         matching = (Button) findViewById(R.id.searchmatching);
-        matching.setOnClickListener(this);
-
         reserve = (Button) findViewById(R.id.reserveplace);
         reserve.setOnClickListener(this);
 
         viewGame = (Button) findViewById(R.id.viewGame);
         viewGame.setOnClickListener(this);
-
         edit = (Button) findViewById(R.id.profileedit);
-        edit.setOnClickListener(this);
-
-        final String id = smgr.getProfile().get(SessionManager.ID);
         homepro = (ImageView) findViewById(R.id.homeprofile);
+
+
+        matching.setOnClickListener(this);
+        reserve.setOnClickListener(this);
+        edit.setOnClickListener(this);
         homepro.setImageResource(R.drawable.img_defaultface);
 
-        // update welcome text, profile pic, and display message status.
+
+        final String id = smgr.getProfile().get(SessionManager.ID);
+
+        /*
+         사용자 이미지를 불러오는데 없을경우 DefaultImage를 불러온다
+         */
         updateTextWelcome();
         updateProfileImage();
         displayMatchStatus();
@@ -106,14 +115,21 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                 finish();
             }
         });
+        /*
+         큐 상태 메세지
+         */
+        displayMatchStatus();
     }
 
+    /*
+     버튼 클릭 이벤트 선언
+     */
     @Override
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.searchmatching:
                 if (smgr.getMatchStatus()){
-                    Toast.makeText(getApplicationContext(), "현재 큐의 승락상태를 확인합니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "현재 큐의 승낙상태를 확인합니다.", Toast.LENGTH_SHORT).show();
                     Intent intent4 = new Intent(getApplicationContext(), QueListActivity.class);
                     startActivity(intent4);
                     return;
@@ -145,7 +161,9 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         }
     }
 
-    // 매치 상태를 보고 UI를 바꿔준다.
+    /*
+     매치상태에 따라 버튼의 내용를 바꾼다. 그리고 그에 대한 기능들도 바뀐다
+     */
     private void displayMatchStatus(){
         viewGame.setBackgroundColor(getColor(android.R.color.darker_gray));
         viewGame.setText("경기 찾는 중...");
@@ -240,8 +258,11 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         });
     }
 
+
+    /*
+     다시 HomeActivity로 돌아온 경우
+     */
     @Override
-    // 다시 홈으로 돌아온 경우.
     protected void onResume() {
         super.onResume();
         smgr.checkSession();
@@ -250,6 +271,10 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         displayMatchStatus();
     }
 
+
+    /*
+     HomeActivity 상단부분에 나오는 환영 문구
+     */
     private void updateTextWelcome(){
         prof = smgr.getProfile();
         String user_name = prof.get(SessionManager.NAME);
@@ -257,6 +282,10 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         textWelcome.setText("환영합니다, " + user_name + " " + user_rank + "님.\n오늘도 즐거운 하루 되세요!");
     }
 
+
+    /*
+     HomeActivity 상단쪽에 나오는 로그인한 회원의 프로필 사진 출력
+     */
     private void updateProfileImage(){
         // get image and set it. if no image, set default image.
         proxy.getUserInfo(new JsonHttpResponseHandler(){

@@ -88,8 +88,6 @@ var upload = multer({
     }
 });
 
-
-
 // 라우터 설정
 // 사용자 추가 (회원가입)
 router.route('/process/registerUser').post(upload.single('profPic'), function (req, res) {

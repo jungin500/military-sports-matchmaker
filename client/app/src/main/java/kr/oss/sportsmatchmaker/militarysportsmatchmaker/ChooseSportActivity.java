@@ -2,6 +2,7 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -10,33 +11,54 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.loopj.android.http.JsonHttpResponseHandler;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import cz.msebera.android.httpclient.Header;
 
 
 public class ChooseSportActivity extends AppCompatActivity implements OnClickListener {
+
     public static final String EXTRA_PNUM = "EXTRA_PNUM";
     public static final String EXTRA_SPORTTYPE = "EXTRA_SPORTTYPE";
+    private Proxy proxy;
 
+<<<<<<< HEAD
     private static final int PNUM_FOOTBALL = 11;
     private static final int PNUM_BASKETBALL = 5;
     private static final int PNUM_JOKGU = 5;
+=======
+    /*
+     해당 운동 최대 가능 인원 수
+     */
+    public static final int PNUM_FOOTBALL = 11;
+    public static final int PNUM_BASKETBALL = 5;
+    public static final int PNUM_JOKGU = 5;
+>>>>>>> b91040171e3a0225f562b3a68f258bb0de0f5ae8
 
-    private Proxy proxy;
+    /*
+     스와이프 기능을 위한 선언
+     */
+    private SwipeRefreshLayout mSwipeRefresh;
 
-    private TextView numFootball;
+    /*
+     위젯 선언부
+     */
+    private TextView numFootball;    // 남은 축구경기 가능 인원 수
     private TextView numBasketball;
     private TextView numJokgu;
+    private ImageButton football;
+    private ImageButton basketball;
+    private ImageButton jokgu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /*
+         상태바 없애는 코드
+         */
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_choose_sport);
@@ -44,7 +66,23 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
         proxy = new Proxy(getApplicationContext());
 
 
-        // 현재 들어가있는 큐가 없음을 확인.
+        /*
+         스와이프를 통한 액티비티 새로고침 구현부
+         */
+        mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override public void onRefresh() {
+                Intent intent = new Intent(ChooseSportActivity.this, ChooseSportActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                mSwipeRefresh.setRefreshing(false);
+            }
+        });
+
+
+        /*
+         현재 들어가있는 큐가 없음을 확인.
+         */
         proxy.getUserInfo(new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -62,30 +100,39 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
             }
         });
 
-        ImageButton football = (ImageButton) findViewById(R.id.football);
-        ImageButton basketball = (ImageButton) findViewById(R.id.basketball);
-        ImageButton jokgu = (ImageButton) findViewById(R.id.jokgu);
 
+        /*
+         위젯들 사용 위한 선언부
+         */
+        football = (ImageButton) findViewById(R.id.football);
+        basketball = (ImageButton) findViewById(R.id.basketball);
+        jokgu = (ImageButton) findViewById(R.id.jokgu);
         numFootball = (TextView) findViewById(R.id.num_football);
         numBasketball = (TextView) findViewById(R.id.num_basketball);
         numJokgu = (TextView) findViewById(R.id.num_jokgu);
 
-
-
+        /*
+         이미지 버튼의 클릭 이벤트 지정
+         */
         football.setOnClickListener(this);
         basketball.setOnClickListener(this);
         jokgu.setOnClickListener(this);
 
+        /*
+         각 텍스트 뷰의 내용 지정
+         */
         numFootball.setText("빈자리 검색중..");
         numBasketball.setText("빈자리 검색중..");
         numJokgu.setText("빈자리 검색중..");
 
-        // 숫자 초기화하기 위해 소속대 운동장 전부 불러옴.
+        /*
+         남아있는 경기장 수를 구하기 위한 함수
+         */
         proxy.getUserStadium(new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
-                    // 해부대 stadium 존재
+                    // 해당 부대 stadium 존재
                     if (response.getBoolean("result")){
                         int numf = 0;
                         int numb = 0;
@@ -110,7 +157,8 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
                         numBasketball.setText(String.valueOf(numb));
                         numJokgu.setText(String.valueOf(numj));
                     }
-                    // 해부대 stadium 존재하지 않음
+
+                    // 해당 부대 stadium 존재하지 않을 경우
                     else {
                         if (response.getString("reason").equals("NoSuchStadiumException"))
                             Toast.makeText(getApplicationContext(), "소속대에 등록된 운동장이 없습니다. 소속대에 문의하세요.", Toast.LENGTH_SHORT).show();
@@ -132,6 +180,9 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
         });
     }
 
+    /*
+     버튼 클릭 이벤트 선언
+     */
     @Override
     public void onClick(View v) {
         switch(v.getId()){
