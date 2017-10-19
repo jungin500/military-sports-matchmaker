@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/jungin500/armyportal-k/issues"
   },
-  "homepage": "https://github.com/jungin500/armyportal-k#readme"
+  "homepage": "https://github.com/jungin500/armyportal-k#readme",
+  "dependencies": {
+    "array-tools": "^2.0.9"
+  }
 }

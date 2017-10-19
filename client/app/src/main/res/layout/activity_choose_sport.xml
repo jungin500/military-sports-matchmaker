@@ -8,7 +8,7 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/blank5"
+        android:id="@+id/blank9"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.01" />
@@ -22,7 +22,7 @@
         android:textSize="60sp" />
 
     <TextView
-        android:id="@+id/blank6"
+        android:id="@+id/blank10"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.05" />
@@ -86,15 +86,9 @@
         android:layout_weight="0.1"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/blank6"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.001" />
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
@@ -131,15 +125,10 @@
     <TextView
         android:id="@+id/numberDesc"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="0.01"
         android:textAlignment="center"
         android:textSize="15sp"
         tools:text="  ※ 하단의 숫자는 수용 가능 인원 수입니다." />
-
-    <TextView
-        android:id="@+id/blank7"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.001" />
 
 </LinearLayout>

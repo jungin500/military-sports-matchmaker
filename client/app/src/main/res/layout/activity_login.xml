@@ -34,13 +34,14 @@
         android:layout_height="match_parent"
         android:fillViewport="true">
 
-
         <LinearLayout
             android:id="@+id/email_login_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
 
             <TextView
                 android:id="@+id/textView4"
@@ -55,13 +56,13 @@
                     android:id="@+id/id"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:digits="0123456789-"
                     android:hint="@string/prompt_goonbun"
                     android:inputType="numberSigned"
                     android:maxLines="1"
                     android:singleLine="true"
                     android:textColorLink="@android:color/holo_blue_light" />
-
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout

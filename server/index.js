@@ -68,10 +68,6 @@ function sendIllegalParameters(req, res) {
     res.end();
 }
 
-function generateRandomHex(size) {
-    return crypto.randomBytes(size).toString('hex');
-}
-
 // 사용자 이미지 파일 저장소 설정
 
 var storage = multer.diskStorage({
@@ -81,7 +77,7 @@ var storage = multer.diskStorage({
     filename: function (req, file, callback) {
         var split = file.originalname.split('.');
         var extension = split[split.length - 1];
-        var randomId = generateRandomHex(24);
+        var randomId = crypto.randomBytes(size).toString('hex');
 
         callback(null, randomId + '.' + extension);
     }
@@ -112,6 +108,7 @@ router.route('/process/registerUser').post(upload.single('profPic'), function (r
     };
 
     // 정보 중 하나라도 빠졌을 시 오류
+    console.dir(userInfo);
     for (var key in userInfo)
         if (!userInfo[key]) {
             sendIllegalParameters(req, res);
@@ -209,7 +206,7 @@ router.route('/process/checkExistingUser').post(function (req, res) {
     });
 });
 
-router.route('/process/searchUserDetails').post(function (req, res) {
+router.route('/process/getUserDetails').post(function (req, res) {
     if (!checkAndSendLoggedIn(req, res)) return;
 
     DatabaseManager.Model.user.findId({ id: req.body.id }, function (result) {
@@ -225,6 +222,26 @@ router.route('/process/searchUserDetails').post(function (req, res) {
                 result: false,
                 reason: 'NoSuchUserException'
             });
+        res.end();
+    });
+});
+
+router.route('/process/getUsersDetails').post(function (req, res) {
+    if(!checkAndSendLoggedIn(req, res)) return;
+
+    var users;
+    if(!(users = req.body.users)) {
+        res.json({
+            result: false,
+            reason: 'NoUserSpecifiedException'
+        });
+        res.end();
+        return;
+    }
+    console.log('받은 정보: ' + users);
+
+    DatabaseManager.Model.user.getUsersDetails(users, function(result) {
+        res.json(result);
         res.end();
     });
 });
@@ -277,12 +294,9 @@ router.route('/process/getProfileImage').get(function (req, res) {
         if (!result.result) {
             res.json(result);
             res.end();
-            console.log('오류로 데이터가 아닌 JSON 보냄');
             console.dir(result);
         } else {
-            console.log('데이터 보내는 중');
             fs.createReadStream(path.join(__dirname, result.profile_image)).pipe(res);
-            console.log('데이터 보내짐');
         }
     });
 });
@@ -296,24 +310,24 @@ router.route('/process/getMatchList').get(function (req, res) {
 
 router.route('/process/getUserMatch').get(function (req, res) {
     if (!checkAndSendLoggedIn(req, res)) return;
-
-    DatabaseManager.Model.user.getUserInfo(req.session.userInfo, function (result) {
-        var matchId = result.match_ongoing;
-
-        DatabaseManager.Model.matching.getUserMatch(matchId, function (result) {
-            // 현재 사용자가 초대사용자인지 확인
-            // 초대를 수락한 뒤에는 False.
-            var pendingPlayers = result.pendingPlayers;
-            if (pendingPlayers && pendingPlayers.indexOf(req.session.userInfo.id) != -1)
-                result.is_pending = true;
-            else
-                result.is_pending = false;
-
+    DatabaseManager.Model.matching.getUserMatch(req.session.userInfo.id, function (result) {
+        if (!result.result) {
             res.json(result);
             res.end();
-        });
-    });
+            return;
+        }
 
+        // 현재 사용자가 초대사용자인지 확인
+        // 초대를 수락한 뒤에는 False.
+        var pendingPlayers = result.pendingPlayers;
+        if (pendingPlayers && pendingPlayers.indexOf(req.session.userInfo.id) != -1)
+            result.is_pending = true;
+        else
+            result.is_pending = false;
+
+        res.json(result);
+        res.end();
+    });
 });
 
 router.route('/process/requestMatch').post(function (req, res) {
@@ -350,7 +364,8 @@ router.route('/process/requestMatch').post(function (req, res) {
         initiatorId: players[0],
         activityType: req.body.activityType,
         players: players,
-        pendingPlayers: pendingPlayers
+        pendingPlayers: pendingPlayers,
+        is_team: req.body.is_team
     };
 
     DatabaseManager.Model.matching.getUserMatch(req.session.userInfo.id, function (result) {
@@ -393,20 +408,27 @@ router.route('/process/decideMatch').post(function (req, res) {
 
     DatabaseManager.Model.user.getUserInfo(userInfo, function (result) {
         if (result.match_status == 'ready')
-            callback({
+            res.json({
                 result: false,
                 reason: 'NotInMatchException'
             });
-        else
+        else if (result.match_status == 'matching')
+            res.json({
+                result: false,
+                reason: 'AleradyInMatchException'
+            });
+        else {
             DatabaseManager.Model.matching.decideMatch(userInfo, isParticipating, function (result) {
                 res.json(result);
                 res.end();
             });
-
+            return;
+        }
+        res.end();
     });
 });
 
-router.route('/process/getStadiumList').post(function (req, res) {
+router.route('/process/getStadiumList').get(function (req, res) {
     DatabaseManager.Model.stadium.find({}, function (err, result) {
         if (err)
             res.json({
@@ -420,16 +442,29 @@ router.route('/process/getStadiumList').post(function (req, res) {
     })
 });
 
-router.route('/process/getUserStadium').post(function (req, res) {
+router.route('/process/getUserStadium').get(function (req, res) {
     if (!checkAndSendLoggedIn(req, res)) return;
 
-
+    // 사용자의 unit이 속한 경기장 리스트 보여주기
+    DatabaseManager.Model.user.findId({ id: req.session.userInfo.id }, function (result) {
+        if (!result.result) {
+            res.json(result);
+            res.end();
+        } else {
+            DatabaseManager.Model.stadium.findUserStadium(result.doc.unit, function (result) {
+                res.json(result);
+                res.end();
+            })
+        }
+    });
 });
 
 /**
  * 경기장
  */
 router.route('/process/createStadium').post(function (req, res) {
+    // DEBUG
+    //if(!checkAndSendLoggedIn(req, res)) return;
 
     var stadiumInfo = {
         name: req.body.name,
@@ -454,6 +489,10 @@ router.route('/process/createStadium').post(function (req, res) {
     });
 });
 
+router.route('/process/prepareMatchingTeamStadium').post(function (req, res) {
+    if(!checkAndSendLoggedIn(req, res)) return;
+});
+
 router.route('/process/heartbeat').get(function (req, res) {
     // Heartbeat
     res.json({ result: 'result' });
@@ -468,7 +507,7 @@ app.use(session({
     saveUninitialized: true
 }));
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(cors());
