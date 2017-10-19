@@ -24,18 +24,12 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
     public static final String EXTRA_SPORTTYPE = "EXTRA_SPORTTYPE";
     private Proxy proxy;
 
-<<<<<<< HEAD
-    private static final int PNUM_FOOTBALL = 11;
-    private static final int PNUM_BASKETBALL = 5;
-    private static final int PNUM_JOKGU = 5;
-=======
     /*
      해당 운동 최대 가능 인원 수
      */
     public static final int PNUM_FOOTBALL = 11;
     public static final int PNUM_BASKETBALL = 5;
     public static final int PNUM_JOKGU = 5;
->>>>>>> b91040171e3a0225f562b3a68f258bb0de0f5ae8
 
     /*
      스와이프 기능을 위한 선언
