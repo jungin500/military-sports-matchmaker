@@ -38,12 +38,10 @@ import cz.msebera.android.httpclient.Header;
 
 public class EditProfileActivity extends AppCompatActivity {
 
-    // widgets
-    public final int GET_PICTURE_URI = 1;
-    public ArrayList<String> ranks;
-    public ArrayList<String> sexes;
-    public ArrayList<String> units;
-
+    private final int GET_PICTURE_URI = 1;
+    private ArrayList<String> ranks;
+    private ArrayList<String> sexes;
+    private ArrayList<String> units;
     /*
      위젯 선언부
      */
@@ -324,9 +322,7 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
-    // crop bitmap to square then resize to 240*240 pixel.
-    // Source: https://stackoverflow.com/questions/26263660/crop-image-to-square-android
-    private static Bitmap formatBitmap(Bitmap bitmap){
+    public static Bitmap formatBitmap(Bitmap bitmap){
         int width  = bitmap.getWidth();
         int height = bitmap.getHeight();
         int newWidth = (height > width) ? width : height;
