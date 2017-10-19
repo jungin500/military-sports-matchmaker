@@ -38,22 +38,14 @@ import cz.msebera.android.httpclient.Header;
 
 public class EditProfileActivity extends AppCompatActivity {
 
-<<<<<<< HEAD
     private final int GET_PICTURE_URI = 1;
     private ArrayList<String> ranks;
     private ArrayList<String> sexes;
     private ArrayList<String> units;
-    // widgets
-=======
-    public final int GET_PICTURE_URI = 1;
-    public ArrayList<String> ranks;
-    public ArrayList<String> sexes;
-    public ArrayList<String> units;
 
     /*
      위젯 선언부
      */
->>>>>>> b91040171e3a0225f562b3a68f258bb0de0f5ae8
     private TextView idView;
     private EditText pwView;
     private EditText pwView2;
@@ -82,14 +74,10 @@ public class EditProfileActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
-<<<<<<< HEAD
-    private static void verifyStoragePermissions(Activity activity) {
-=======
     /*
      갤러리 사용을 위한 Permissions 선언
     */
     public static void verifyStoragePermissions(Activity activity) {
->>>>>>> b91040171e3a0225f562b3a68f258bb0de0f5ae8
         // Check if we have write permission
         int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
@@ -338,17 +326,11 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
-<<<<<<< HEAD
-    // crop bitmap to square then resize to 240*240 pixel.
-    // Source: https://stackoverflow.com/questions/26263660/crop-image-to-square-android
-    private static Bitmap formatBitmap(Bitmap bitmap){
-=======
     /*
      비트맵 사진을 240*240pixel로 맞추는 함수
      참조 소스 : https://stackoverflow.com/questions/26263660/crop-image-to-square-android
     */
     public static Bitmap formatBitmap(Bitmap bitmap){
->>>>>>> b91040171e3a0225f562b3a68f258bb0de0f5ae8
         int width  = bitmap.getWidth();
         int height = bitmap.getHeight();
         int newWidth = (height > width) ? width : height;

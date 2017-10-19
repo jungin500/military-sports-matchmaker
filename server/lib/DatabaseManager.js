@@ -698,7 +698,7 @@ var createSchema = function () {
         });
     };
 
-    var prepareMatchingTeamStadium = function (cacheStorage, stadiumInfo, callback) {
+    var prepareMatchingTeamStadium = function (stadiumInfo, callback) {
         this.findOne({ name: stadiumInfo.name }, function (err, result) {
             if (!mongoErrorCallbackCheck(err, callback)) return;
 
@@ -752,16 +752,10 @@ var createSchema = function () {
 
                 // 가져온 사용자들을 팀으로 나눈다.
                 var teams = checkArrayMatchup(users);
-                var resultCallback = {
+                callback({
                     result: true,
                     leftTeam: teams.left,
                     rightTeam: teams.right
-                };
-                cacheStorage.set(stadiumInfo.name, resultCallback, function(err) {
-                    if(!mongoErrorCallbackCheck(err, callback)) return;
-
-                    // 앞에서 만들어둔 resultCallback
-                    callback(resultCallback);
                 });
             })
         });

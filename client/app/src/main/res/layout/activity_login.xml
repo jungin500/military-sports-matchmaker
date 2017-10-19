@@ -23,10 +23,13 @@
 
     <ImageView
         android:id="@+id/imageView2"
+        android:layout_width="match_parent"
         android:layout_height="156dp"
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/img_login"
-        android:layout_width="129dp" />
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:scaleType="centerInside"
+        app:srcCompat="@drawable/img_login" />
 
     <ScrollView
         android:id="@+id/login_form"
