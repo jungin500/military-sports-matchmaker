@@ -18,6 +18,7 @@ var http = require('http'),
     express = require('express'),
     cookieParser = require('cookie-parser'),
     session = require('express-session'),
+    MongoStore = require('connect-mongo')(session),
     expressErrorHandler = require('express-error-handler'),
     bodyParser = require('body-parser'),
     fs = require('fs'),
@@ -114,34 +115,31 @@ router.route('/process/registerUser').post(upload.single('profPic'), function (r
     userInfo.profile_image = (req.file) ? req.file.path : null;
 
     // 가져온 정보를 MongoOSE 이용하여 DB에 저장
-    DatabaseManager.createUser(userInfo, function (err) {
-        if (err) {
-            if (err.code == 11000) {
-                console.log('[오류] 이미 존재하는 사용자에 대한 회원가입');
+    DatabaseManager.createUser(userInfo, function (result) {
+        if (!result.result) {
+            if (result.mongoerror && result.mongoerror.code == 11000)
                 res.json({
                     result: false,
                     reason: 'AlreadyExistingException'
                 });
-                res.end();
-                return;
-            } else {
-                console.log('에러 발생!');
-                console.dir(err);
-                console.log('에러 출력 완료');
-                throw err;
-            }
-        } else {
-            console.log('[정보] 회원가입 완료: ID [%s]', userInfo.id);
-            req.session.userInfo = {
-                id: userInfo.id
-            };
+            else
+                res.json(result);
+            res.end();
+            return;
+        }
 
+
+        console.log('[정보] 회원가입 완료: ID [%s]', userInfo.id);
+        req.session.userInfo = {
+            id: userInfo.id
+        };
+        req.session.save(function (err) {
+            if (err) throw err;
             res.json({
                 result: true
             });
             res.end();
-            return;
-        }
+        });
     });
 });
 
@@ -159,12 +157,14 @@ router.route('/process/loginUser').post(function (req, res) {
 
     DatabaseManager.Model.user.authenticate(userInfo, function (result) {
         if (result.result) {
-            console.log('[정보] 로그인 완료. 세션에 추가 중');
             req.session.userInfo = {
                 id: userInfo.id
             };
-        } else {
-            console.log('[오류] 로그인 불가. 사유: %s', result.reason);
+            req.session.save(function (err) {
+                res.json(result);
+                res.end();
+            })
+            return;
         }
         res.json(result);
         res.end();
@@ -433,11 +433,13 @@ router.route('/process/getUserStadium').get(function (req, res) {
 
     // 사용자의 unit이 속한 경기장 리스트 보여주기
     DatabaseManager.Model.user.findId({ id: req.session.userInfo.id }, function (result) {
+        console.dir(result);
         if (!result.result) {
             res.json(result);
             res.end();
         } else {
             DatabaseManager.Model.stadium.findUserStadium(result.doc.unit, function (result) {
+                console.dir(result);
                 res.json(result);
                 res.end();
             })
@@ -499,7 +501,8 @@ app.use(cookieParser());
 app.use(session({
     secret: 'F$GKeE%tJaf($&#(SfGISf*%#n#@!zSWh9',
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    store: new MongoStore({ mongooseConnection: DatabaseManager.connection })
 }));
 
 app.use(bodyParser.urlencoded({ extended: true }));

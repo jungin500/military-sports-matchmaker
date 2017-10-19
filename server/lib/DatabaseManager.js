@@ -35,6 +35,7 @@ var Model = {
 var connectDB = function (app) {
     // var databaseUrl = 'mongodb://military-sports-matchmaker:622dfe4f39c220a76ec78eabd75e609b@ds125335.mlab.com:25335/heroku_w2n7bnmn';
     var databaseUrl = 'mongodb://localhost:27017/matching';
+   
     mongoose.Promise = global.Promise;
     mongoose.connect(databaseUrl, { useMongoClient: true });
     database = mongoose.connection;
@@ -422,18 +423,16 @@ var createSchema = function () {
                         return;
                     } else {
                         // 오름차순 Sorting
-                        result.sort(function (a, b) {
-                            var leftStadiumLeft = a._doc.max_players - a._doc.in_players;
-                            var rightStadiumLeft = b._doc.max_players - b._doc.in_players;
+                        result = result.sort(function (a, b) {
+                            var leftStadiumLeft = a.max_players - a.in_players;
+                            var rightStadiumLeft = b.max_players - b.in_players;
                             return leftStadiumLeft == rightStadiumLeft ? 0 :
                                 leftStadiumLeft < rightStadiumLeft ? -1 : 1;
                         });
 
-                        console.dir(result);    
-
                         // 있는 것들중에서 가장 낮은수의 남은 Player의 Stadium부터 Assign.
                         for (var i = 0; i < result.length; i++) {
-                            var doc = result[i]._doc;
+                            var doc = result[i];
                             var totalPlayers = matchInfo.players.length + matchInfo.pendingPlayers.length;
                             var remainSeats = doc.max_players - doc.in_players;
 
@@ -744,7 +743,7 @@ var createSchema = function () {
                         users.push({
                             type: 'team',
                             size: document.players.length,
-                            players: new Array(document.players)
+                            players: document.players
                         });
                 }
 
@@ -781,8 +780,11 @@ var createSchema = function () {
 var createUser = function (userInfo, callback) {
     var User = new Model.user(userInfo);
     User.save(function (err) {
-        if (err) callback(err);
-        else callback(null);
+        if(!mongoErrorCallbackCheck(err, callback)) return;
+        
+        callback({
+            result: true
+        });
     });
 };
 
@@ -827,6 +829,7 @@ var checkArrayMatchup = function (arr) {
 module.exports = {
     // Global Variables
     database: database,
+    connection: mongoose.connection,
     Schema: Schema,
     Model: Model,
 
