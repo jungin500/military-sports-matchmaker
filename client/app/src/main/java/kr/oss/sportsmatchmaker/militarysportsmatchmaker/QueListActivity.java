@@ -38,7 +38,7 @@ public class QueListActivity extends AppCompatActivity {
     private Button acceptMatchButton;
     private Button rejectMatchButton;
 
-    private ArrayList<ListData> QueDataArray;
+    private ArrayList<ListData2> QueDataArray;
     private boolean[] Que_Yes_or_No = {true,false,true,true,false};
 
 
@@ -63,7 +63,7 @@ public class QueListActivity extends AppCompatActivity {
         acceptMatchButton = (Button) findViewById(R.id.acceptMatch);
         rejectMatchButton = (Button) findViewById(R.id.rejectMatch);
 
-        QueDataArray = new ArrayList<ListData>();
+        QueDataArray = new ArrayList<ListData2>();
         ListView listview = (ListView) findViewById(R.id.quelist);
         final CustomAdapter2 customAdapter = new CustomAdapter2(this, R.layout.list_btn_sty, QueDataArray);
         listview.setAdapter(customAdapter);
@@ -102,7 +102,7 @@ public class QueListActivity extends AppCompatActivity {
                                             gameTypeKor = "농구";
 
                                         // i am initiator <=> show quit button.
-                                        String initiatorId = match.getString("initiatorId");
+                                        final String initiatorId = match.getString("initiatorId");
                                         if (id.equals(initiatorId)) {
                                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                                             params.weight = 0.25f;
@@ -163,34 +163,31 @@ public class QueListActivity extends AppCompatActivity {
                                                 try {
                                                     if (response.getBoolean("result")){
                                                         if (!response.getBoolean("complete")){
-                                                            Log.e("TAG", "data corrupt");
+                                                            Log.e("TAG", "data corrupt: complete gives false on existing ids");
                                                         }
                                                         JSONArray userData = response.getJSONArray("data");
-                                                        String initrankname = RankHelper.intToRank(userData.getJSONObject(0).getInt("rank")) + " " + userData.getJSONObject(0).getString("name");
-                                                        ListData initListData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), initrankname, pArray[0], "방장");
-                                                        QueDataArray.add(initListData);
-
-                                                        int i = 1;
-                                                        for (; i < accnum - finalAnoncount; i++){
+                                                        String initrankname = initiatorId;
+                                                        for (int i=0; i < pArray.length; i++){
+                                                            String currid = userData.getJSONObject(i).getString("id");
                                                             String currrankname = RankHelper.intToRank(userData.getJSONObject(i).getInt("rank")) + " " + userData.getJSONObject(i).getString("name");
-                                                            ListData listData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), currrankname, pArray[i], "수락함");
+                                                            boolean existProfPic = userData.getJSONObject(i).getBoolean("profile_image");
+                                                            String userStatus = userData.getJSONObject(i).getString("match_status");
+                                                            String buttonInput = "수락함";
+                                                            if (currid.equals(initiatorId)) {
+                                                                buttonInput = "방장";
+                                                                initrankname = currrankname;
+                                                            }
+                                                            else if (userStatus.equals("pending")) buttonInput = "대기중";
+                                                            else if (userStatus.equals("ready")) buttonInput = "거절함";
+                                                            ListData2 listData = new ListData2(existProfPic, currrankname, currid, buttonInput);
                                                             QueDataArray.add(listData);
                                                         }
                                                         for (int j=0;j<finalAnoncount;j++){
                                                             String anonName = initrankname + " 의 동료";
-                                                            ListData listData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), anonName, "anon", "수락함");
+                                                            ListData2 listData = new ListData2(false, anonName, "anon", "수락함");
                                                             QueDataArray.add(listData);
                                                         }
-                                                        for (; i < accnum + pendnum-finalAnoncount; i++){
-                                                            String currrankname = RankHelper.intToRank(userData.getJSONObject(i).getInt("rank")) + " " + userData.getJSONObject(i).getString("name");
-                                                            ListData listData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), currrankname, pArray[i], "대기중");
-                                                            QueDataArray.add(listData);
-                                                        }
-                                                        for (; i < accnum + pendnum + rejnum-finalAnoncount;i++){
-                                                            String currrankname = RankHelper.intToRank(userData.getJSONObject(i).getInt("rank")) + " " + userData.getJSONObject(i).getString("name");
-                                                            ListData listData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), currrankname, pArray[i], "거절함");
-                                                            QueDataArray.add(listData);
-                                                        }
+                                                        Collections.sort(QueDataArray, new ListData2.data2Comparator());
                                                         customAdapter.notifyDataSetChanged();
                                                     }
                                                     else {
@@ -201,33 +198,13 @@ public class QueListActivity extends AppCompatActivity {
                                                 }
                                             }
                                         });
-                                        /*
-                                        // add players to list
-                                        // add initiator separately
-                                        ListData initData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), acceptPlayers.get(0).toString(), acceptPlayers.get(0).toString(), "방장");
-                                        QueDataArray.add(initData);
-                                        for (int i = 1; i < accnum; i++) {
-                                            String id = acceptPlayers.get(i).toString();
-                                            ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), acceptPlayers.get(i).toString(), acceptPlayers.get(i).toString(), "수락함");
-                                            QueDataArray.add(data);
-                                        }
-                                        for (int i = 0; i < pendnum; i++) {
-                                            ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), pendingPlayers.get(i).toString(), pendingPlayers.get(i).toString(), "대기중");
-                                            QueDataArray.add(data);
-                                        }
-                                        for (int i = 0; i < rejnum; i++) {
-                                            ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rejectedPlayers.get(i).toString(), rejectedPlayers.get(i).toString(), "거절함");
-                                            QueDataArray.add(data);
-                                        }
-                                        customAdapter.notifyDataSetChanged();
-                                        */
                                     }
                                     else {
-                                        Log.e("TAG", "DATA CORRUPT; match not ready but no match");
+                                        Log.e("TAG", "DATA CORRUPT; user status not *ready* but no match");
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();
-                                    Toast.makeText(getApplicationContext(), "데이터 오류입니다.", Toast.LENGTH_SHORT).show();
+                                    Log.e("TAG", "JSON error");
                                 }
                             }
                             @Override
@@ -302,26 +279,13 @@ public class QueListActivity extends AppCompatActivity {
                 proxy.decideMatch("true", new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        for (ListData i : QueDataArray){
+                        for (ListData2 i : QueDataArray){
                             if (id.equals(i.getId())){
                                 i.setButton("수락함");
                             }
                         }
                         // sort dataset.
-                        Collections.sort(QueDataArray, new Comparator<ListData>() {
-                            @Override
-                            public int compare(ListData o1, ListData o2) {
-                                return help(o1.getButton()) - help(o2.getButton());
-                            }
-
-                            private int help(String str){
-                                if (str.equals("방장")) return 0;
-                                if (str.equals("수락함")) return 1;
-                                if (str.equals("대기중")) return 2;
-                                if (str.equals("거절함")) return 3;
-                                return 4;
-                            }
-                        });
+                        Collections.sort(QueDataArray, new ListData2.data2Comparator());
 
 
                         // remove 수락/거절 버튼
@@ -345,7 +309,7 @@ public class QueListActivity extends AppCompatActivity {
                 proxy.decideMatch("", new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        for (ListData i : QueDataArray){
+                        for (ListData2 i : QueDataArray){
                             if (id.equals(i.getId())){
                                 i.setButton("거절함");
                             }
