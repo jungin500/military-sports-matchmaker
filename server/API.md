@@ -1,6 +1,6 @@
 # API
 
-## /process/registerUser (POST) √
+## /process/registerUser (POST, multipart/form-data) √
 ### Input
 - id: 사용자 군번 (=아이디)
 - password: 사용자 비밀번호
@@ -10,8 +10,9 @@
 - gender: 성별 (0=남성)
 - favoriteEvent: 좋아하는 종목 (이름들, 현재 사용 X)
 - description: 자기소개 (현재 사용 X)
+- profPic: 프로필 사진 (data) → profile_image
 
-### Output (JSON) 
+### Output (JSON)
 - result: 결과 (true/false)
 - reason: 실패 시 사유 
     - MissingValuesException
