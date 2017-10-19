@@ -1,0 +1,18 @@
+***** (app / server crash)
+
+
+
+**** (Exception, error)
+
+
+
+*** (malfunction)
+
+
+
+** (features to fix)
+
+
+
+* (features to add)
+button 누를시 highlight color

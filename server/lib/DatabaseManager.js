@@ -9,7 +9,7 @@
  * @description 전투체육 매칭 Application Backend
  * @author 김범수, 안정인, 임대인
  */
-var arrayTools = require('array-tools'),
+var at = require('array-tools'),
     mongoose = require('mongoose'),
     crypto = require('crypto');
 
@@ -224,7 +224,7 @@ var createSchema = function () {
                 for (var resultIdx in result)
                     resultUsersList.push(result[resultIdx].id);
 
-                var omittedUsers = arrayTools.without(userIdList, resultUsersList);
+                var omittedUsers = at.without(userIdList, resultUsersList)._data;
                 resultObj.omittedUsers = omittedUsers;
             }
             for (var i = 0; i < result.length; i++) {
@@ -240,6 +240,8 @@ var createSchema = function () {
                 // Set에 추가
                 resultSet.push(data);
             }
+
+            console.log(resultObj);
 
             callback(resultObj);
         });
@@ -285,12 +287,29 @@ var createSchema = function () {
         });
     };
 
+    var checkIdsExistance = function (ids, callback) {
+        this.find({ id: { $in: ids } }, function (err, result) {
+            if (!mongoErrorCallbackCheck(err, callback)) return;
+
+            var data = [];
+            for (var key in result)
+                data.push(result[key]._doc.id);
+
+            callback({
+                result: true,
+                existingUser: data,
+                notFoundUser: at(ids).without(data)._data
+            });
+        });
+    };
+
     Schema.user.static('findId', findId);
     Schema.user.static('authenticate', authenticate);
     Schema.user.static('getUserInfo', getUserInfo);
     Schema.user.static('getUsersDetails', getUsersDetails);
     Schema.user.static('updateUserInfo', updateUserInfo);
     Schema.user.static('getProfileImagePath', getProfileImagePath);
+    Schema.user.static('checkIdsExistance', checkIdsExistance);
 
     /**
      * 경기 매칭 스키마 및 메소드 정의
@@ -374,95 +393,121 @@ var createSchema = function () {
                 belong_at: result._doc.unit
             };
 
-            Model.stadium.find(query, function (err, result) {
+            Model.user.find({
+                $or: [{
+                    id: { $in: matchInfo.players },
+                    match_status: { $ne: 'ready' }
+                }, {
+                    id: { $in: matchInfo.pendingPlayers },
+                    match_status: { $ne: 'ready' }
+                }]
+            }, function (err, result) {
                 if (!mongoErrorCallbackCheck(err, callback)) return;
-                if (result.length == 0) {
+
+                if (result.length > 0) {
                     callback({
                         result: false,
-                        reason: 'NoMatchingStadiumException'
-                    });
-                    return;
-                } else {
-                    // 오름차순 Sorting
-                    result.sort(function (a, b) {
-                        var leftStadiumLeft = a._doc.max_players - a._doc.in_players;
-                        var rightStadiumLeft = b._doc.max_players - b._doc.in_players;
-                        return leftStadiumLeft == rightStadiumLeft ? 0 :
-                            leftStadiumLeft < rightStadiumLeft ? -1 : 1;
-                    });
-
-                    // 있는 것들중에서 가장 낮은수의 남은 Player부터 Assign.
-                    for (var i = 0; i < result.length; i++) {
-                        var doc = result[i]._doc;
-                        var totalPlayers = matchInfo.players.length + matchInfo.pendingPlayers.length;
-
-                        if (doc.max_players - doc.in_players >= matchInfo.players.length) {
-                            console.log('총 %d명을 추가합니다!', totalPlayers);
-                            Model.stadium.updateMany({ _id: doc._id }, {
-                                $inc: {
-                                    in_players: totalPlayers
-                                },
-                                $push: {
-                                    matchings: matchInfo.matchId
-                                }
-                            }, function (err) {
-                                if (!mongoErrorCallbackCheck(err, callback)) return;
-
-                                // 완료되면 사용자에게 매치 데이터를 저장한다.
-                                // 저장할 때 Stadium 정보가 필요하므로 기록했던 데이터로부터 가져온다.
-                                matchInfo.stadium = doc.name;
-                                var match = new Model.matching(matchInfo);
-
-                                match.save(function (err) {
-                                    if (!mongoErrorCallbackCheck(err, callback)) return;
-
-                                    // 사용자들에게 해당 Match를 저장한다.
-                                    // 필터 기준은 id가 각각 players와 pendingPlayers에 속하는 경우.
-                                    var findQuery = {
-                                        $or: [{ id: { $in: matchInfo.pendingPlayers } }, { id: { $in: matchInfo.players } }]
-                                    };
-
-                                    var updateQuery = {
-                                        match_ongoing: matchInfo.matchId,
-                                        $push: {
-                                            match_history: matchInfo.matchId
-                                        },
-                                        match_status: 'pending'
-                                    };
-
-                                    Model.user.updateMany(findQuery, updateQuery, function (err) {
-                                        if (!mongoErrorCallbackCheck(err, callback)) return;
-
-                                        Model.user.updateMany({ id: { $in: matchInfo.players } }, {
-                                            match_status: 'matching'
-                                        }, function (err) {
-                                            if (!mongoErrorCallbackCheck(err, callback)) return;
-
-                                            console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchInfo.matchId);
-                                            console.log('[정보] 유저 [%s, %s](들)에게 매치 데이터를 저장했습니다.', JSON.stringify(matchInfo.players), JSON.stringify(matchInfo.pendingPlayers));
-                                            callback({
-                                                result: true,
-                                                stadium: doc.name
-                                            });
-                                        });
-                                    });
-                                });
-
-                            });
-                            return;
-                        }
-                    }
-
-                    // Assign 불가능할 경우 Fail.
-                    callback({
-                        result: false,
-                        reason: 'FailedAssigningStadiumException'
+                        reason: 'SubuserAlreadyInMatchException'
                     });
                     return;
                 }
 
-            });
+                Model.stadium.find(query, function (err, result) {
+                    if (!mongoErrorCallbackCheck(err, callback)) return;
+                    if (result.length == 0) {
+                        callback({
+                            result: false,
+                            reason: 'NoMatchingStadiumException'
+                        });
+                        return;
+                    } else {
+                        // 오름차순 Sorting
+                        result.sort(function (a, b) {
+                            var leftStadiumLeft = a._doc.max_players - a._doc.in_players;
+                            var rightStadiumLeft = b._doc.max_players - b._doc.in_players;
+                            return leftStadiumLeft == rightStadiumLeft ? 0 :
+                                leftStadiumLeft < rightStadiumLeft ? -1 : 1;
+                        });
 
+                        // 있는 것들중에서 가장 낮은수의 남은 Player의 Stadium부터 Assign.
+                        for (var i = 0; i < result.length; i++) {
+                            var doc = result[i]._doc;
+                            var totalPlayers = matchInfo.players.length + matchInfo.pendingPlayers.length;
+                            var remainSeats = doc.max_players - doc.in_players;
+
+                            console.log('%d명의 총 플레이어, %d명의 남는 자리.', totalPlayers, remainSeats);
+
+                            if (remainSeats >= totalPlayers) {
+                                console.log('총 %d명을 추가합니다!', totalPlayers);
+
+                                var in_players = doc.in_players + totalPlayers;
+
+                                Model.stadium.updateMany({ _id: doc._id }, {
+                                    $inc: {
+                                        in_players: totalPlayers
+                                    },
+                                    $push: {
+                                        matchings: matchInfo.matchId
+                                    }
+                                }, function (err) {
+                                    if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                                    // 완료되면 사용자에게 매치 데이터를 저장한다.
+                                    // 저장할 때 Stadium 정보가 필요하므로 기록했던 데이터로부터 가져온다.
+                                    matchInfo.stadium = doc.name;
+                                    var match = new Model.matching(matchInfo);
+
+                                    match.save(function (err) {
+                                        if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                                        // 사용자들에게 해당 Match를 저장한다.
+                                        // 필터 기준은 id가 각각 players와 pendingPlayers에 속하는 경우.
+                                        var findQuery = {
+                                            $or: [{ id: { $in: matchInfo.pendingPlayers } }, { id: { $in: matchInfo.players } }]
+                                        };
+
+                                        var updateQuery = {
+                                            match_ongoing: matchInfo.matchId,
+                                            $push: {
+                                                match_history: matchInfo.matchId
+                                            },
+                                            match_status: 'pending'
+                                        };
+
+                                        Model.user.updateMany(findQuery, updateQuery, function (err) {
+                                            if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                                            Model.user.updateMany({ id: { $in: matchInfo.players } }, {
+                                                match_status: 'matching'
+                                            }, function (err) {
+                                                if (!mongoErrorCallbackCheck(err, callback)) return;
+
+                                                console.log('[정보] 새로운 매칭을 생성합니다. 매치 ID [%s]', matchInfo.matchId);
+                                                console.log('[정보] 유저 [%s, %s](들)에게 매치 데이터를 저장했습니다.', JSON.stringify(matchInfo.players), JSON.stringify(matchInfo.pendingPlayers));
+                                                callback({
+                                                    result: true,
+                                                    stadium: doc.name,
+                                                    ready: doc.max_players <= in_players
+                                                });
+                                            });
+                                        });
+                                    });
+
+                                });
+                                return; // 종료해야 2개 이상의 Stadium에 Assign되지 않음.
+                            }
+                        }
+
+                        // Assign 불가능할 경우 Fail.
+                        callback({
+                            result: false,
+                            reason: 'FailedAssigningStadiumException'
+                        });
+                        return;
+                    }
+
+                });
+            });
         });
     };
 
@@ -653,17 +698,35 @@ var createSchema = function () {
         this.findOne({ name: stadiumInfo.name }, function (err, result) {
             if (!mongoErrorCallbackCheck(err, callback)) return;
 
+            if (!result) {
+                callback({
+                    result: false,
+                    return: 'NoSuchStadiumException'
+                });
+                return;
+            }
+
             var stadium = result._doc;
 
-            Model.matching.find({ id: { $in: stadium.matchings } }, function (err, result) {
+            // 꽉 찼는지 확인
+            if (stadium.max_players > stadium.in_players) {
+                callback({
+                    result: false,
+                    reason: 'PreparingNotReadyException'
+                });
+                return;
+            }
+
+            Model.matching.find({ matchId: { $in: stadium.matchings } }, function (err, result) {
                 if (!mongoErrorCallbackCheck(err, callback)) return;
+                // console.dir(result);
 
                 // 사용자를 모두 가져온다.
                 var users = [];
                 for (var matchIdx in result) {
                     var document = result[matchIdx]._doc;
                     if (!document.is_team)
-                        for (var playerIdx in document.players)
+                        for (var playerIdx = 0; playerIdx < document.players.length; playerIdx++)
                             users.push({
                                 type: 'player',
                                 size: 1,
@@ -673,9 +736,9 @@ var createSchema = function () {
                         users.push({
                             type: 'team',
                             size: document.players.length,
-                            players: document.players
+                            players: new Array(document.players)
                         });
-                    }
+                }
 
                 // 가져온 사용자들을 팀으로 나눈다.
                 var teams = checkArrayMatchup(users);

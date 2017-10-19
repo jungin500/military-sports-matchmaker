@@ -125,11 +125,6 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
             //장소 고르기
             case R.id.notepad:
                 Toast.makeText(getApplicationContext(), "임시..", Toast.LENGTH_SHORT).show();
-                // Intent intent5 = new Intent(getApplicationContext(), NotificationExamActivity.class);
-                if (!smgr.getMatchStatus()) {
-                    Toast.makeText(getApplicationContext(), "큐가 없는데 여기로 들어오면 안됨", Toast.LENGTH_SHORT).show();
-                    break;
-                }
                 Intent intent5 = new Intent(getApplicationContext(), MatchCompleteActivity.class);
                 startActivity(intent5);
                 break;
