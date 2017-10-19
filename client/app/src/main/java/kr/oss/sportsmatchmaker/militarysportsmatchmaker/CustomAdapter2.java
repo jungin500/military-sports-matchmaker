@@ -68,13 +68,20 @@ public class CustomAdapter2 extends ArrayAdapter<ListData2>{
             idView.setText("");
         }
 
+        // QueListActivity에서 사용.
         if (button.getText().equals("대기중")){
             button.setBackgroundColor(context.getColor(android.R.color.holo_orange_dark));
         }
         else if (button.getText().equals("거절함")){
             button.setBackgroundColor(context.getColor(android.R.color.holo_red_dark));
         }
-        else button.setBackgroundColor(context.getColor(android.R.color.holo_green_dark));
+        else if (button.getText().equals("방장") || button.getText().equals("수락함")){
+            button.setBackgroundColor(context.getColor(android.R.color.holo_green_dark));
+        }
+        // MatchCompleteActivity에서 사용.
+        else {
+            button.setVisibility(View.GONE);
+        }
 
         //TODO: show picture
         if (listData.get(position).getExistPic()){

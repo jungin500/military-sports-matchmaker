@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -39,8 +40,8 @@ public class MatchCompleteActivity extends AppCompatActivity{
     ListView list2;
 
     // list
-    ArrayList<String> leftTeamPlayers;
-    ArrayList<String> rightTeamPlayers;
+    ArrayList<ListData2> leftTeamUsers;
+    ArrayList<ListData2> rightTeamUsers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +65,14 @@ public class MatchCompleteActivity extends AppCompatActivity{
         list1 = (ListView) findViewById(R.id.team1_list);
         list2 = (ListView) findViewById(R.id.team2_list);
 
-        leftTeamPlayers = new ArrayList<String>();
-        rightTeamPlayers = new ArrayList<String>();
-        final ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, leftTeamPlayers);
-        final ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, rightTeamPlayers);
-        list1.setAdapter(adapter1);
-        list2.setAdapter(adapter2);
+        leftTeamUsers = new ArrayList<ListData2>();
+        rightTeamUsers = new ArrayList<ListData2>();
+
+        final CustomAdapter2 leftAdapter = new CustomAdapter2(this, R.layout.list_btn_sty, leftTeamUsers);
+        final CustomAdapter2 rightAdapter = new CustomAdapter2(this, R.layout.list_btn_sty, rightTeamUsers);
+        list1.setAdapter(leftAdapter);
+        list2.setAdapter(rightAdapter);
+
 
         proxy.prepareMatchingTeamStadium(smgr.getStadiumName(), new JsonHttpResponseHandler(){
             @Override
@@ -87,9 +90,12 @@ public class MatchCompleteActivity extends AppCompatActivity{
                         String myid = smgr.getProfile().get(smgr.ID);
                         boolean myTeamisLeft = false;
                         for (int i = 0; i < leftTeam.length(); i++){
-                            String currPlayer = leftTeam.getJSONObject(i).getJSONArray("players").getString(0);
-                            if (myid.equals(currPlayer))
-                                myTeamisLeft = true;
+                            JSONArray leftTeami = leftTeam.getJSONObject(i).getJSONArray("players");
+                            for (int j = 0; j < leftTeami.length(); j++){
+                                String currPlayer = leftTeami.getString(j);
+                                if (myid.equals(currPlayer))
+                                    myTeamisLeft = true;
+                            }
                         }
                         if (! myTeamisLeft){
                             JSONArray temp = leftTeam;
@@ -97,73 +103,123 @@ public class MatchCompleteActivity extends AppCompatActivity{
                             rightTeam = temp;
                         }
 
-                        String leftTeamOne = null;
-                        String rightTeamOne = null;
+                        // temporary arraylist storing users
+                        ArrayList<String> leftTeamPlayers = new ArrayList<String>();
+                        ArrayList<String> rightTeamPlayers = new ArrayList<String>();
+                        final ArrayList<String> leftTeamAnons = new ArrayList<String>();
+                        final ArrayList<String> rightTeamAnons = new ArrayList<String>();
+
                         for (int i = 0; i < leftTeam.length(); i++) {
-                            String currPlayer = leftTeam.getJSONObject(i).getJSONArray("players").getString(0);
-                            leftTeamPlayers.add(currPlayer);
-                            if ((leftTeamOne == null) && (!currPlayer.split("_")[0].equals("anon"))){
-                                leftTeamOne = currPlayer;
-                            }
-                        }
-                        for (int i = 0; i < rightTeam.length(); i++) {
-                            String currPlayer = rightTeam.getJSONObject(i).getJSONArray("players").getString(0);
-                            rightTeamPlayers.add(currPlayer);
-                            if ((rightTeamOne == null) && (!currPlayer.split("_")[0].equals("anon"))){
-                                rightTeamOne = currPlayer;
+                            JSONArray leftTeami = leftTeam.getJSONObject(i).getJSONArray("players");
+                            for (int j = 0; j < leftTeami.length(); j++) {
+                                String currPlayer = leftTeami.getString(j);
+                                if (currPlayer.split("_")[0].equals("anon")) {
+                                    leftTeamAnons.add(currPlayer);
+                                }
+                                else {
+                                    leftTeamPlayers.add(currPlayer);
+                                }
                             }
                         }
 
-                        adapter1.notifyDataSetChanged();
-                        adapter2.notifyDataSetChanged();
-                        final String leftTeamLeader = leftTeamOne;
-                        final String rightTeamLeader = rightTeamOne;
+                        for (int i = 0; i < rightTeam.length(); i++) {
+                            JSONArray rightTeami = rightTeam.getJSONObject(i).getJSONArray("players");
+                            for (int j = 0; j < rightTeami.length(); j++) {
+                                String currPlayer = rightTeami.getString(j);
+                                if (currPlayer.split("_")[0].equals("anon")) {
+                                    rightTeamAnons.add(currPlayer);
+                                }
+                                else {
+                                    rightTeamPlayers.add(currPlayer);
+                                }
+                            }
+                        }
                         final String[] leftArray = leftTeamPlayers.toArray(new String[leftTeamPlayers.size()]);
                         final String[] rightArray = rightTeamPlayers.toArray(new String[rightTeamPlayers.size()]);
 
-                        // leftTeam 리더 UI 초기화.
-                        proxy.getUserDetail(leftTeamLeader, new JsonHttpResponseHandler() {
-                            @Override
+
+                        // leftTeam UI 불러오기
+                        proxy.getUsersDetails(leftArray, new JsonHttpResponseHandler(){
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                                 try {
-                                    boolean result = response.getBoolean("result");
-                                    if (result){
-                                        String leaderRank = RankHelper.intToRank(response.getInt("rank"));
-                                        String leaderName = response.getString("name");
-
-                                        teamName1.setText("주장: " + leaderRank + " " + leaderName);
-                                        teamProfile1.setText("총원: " + String.valueOf(leftArray.length) + "명");
-
-                                        // add picture and notifyDataSetChanged();
-                                        if (response.getBoolean("profile_image")){
-                                            proxy.getProfPic(leftTeamLeader, new FileAsyncHttpResponseHandler(getApplicationContext()) {
-                                                public void onSuccess(int i, Header[] headers, File file){
-                                                    String filePath = file.getAbsolutePath();
-                                                    Bitmap bitmap = BitmapFactory.decodeFile(filePath);
-                                                    RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
-                                                    rbd.setCornerRadius(bitmap.getHeight()/8.0f);
-                                                    buttonTeam1.setImageDrawable(rbd);
-                                                }
-                                                @Override
-                                                public void onFailure(int i, Header[] headers, Throwable throwable, File file) {
-                                                    Log.e("TAG", "Error: file open failed");
-                                                }
-                                            });
+                                    if (response.getBoolean("result")){
+                                        if (!response.getBoolean("complete")){
+                                            Log.e("TAG", "data corrupt: complete gives false on existing ids");
                                         }
-                                        else {
-                                            buttonTeam1.setImageResource(R.drawable.img_defaultleftteam);
+                                        JSONArray userData = response.getJSONArray("data");
+                                        for (int i=0; i < leftArray.length; i++){
+                                            String currid = userData.getJSONObject(i).getString("id");
+                                            String currrankname = RankHelper.intToRank(userData.getJSONObject(i).getInt("rank")) + " " + userData.getJSONObject(i).getString("name");
+                                            boolean existProfPic = userData.getJSONObject(i).getBoolean("profile_image");
+                                            String userStatus = userData.getJSONObject(i).getString("match_status");
+                                            ListData2 listData = new ListData2(existProfPic, currrankname, currid, "");
+                                            leftTeamUsers.add(listData);
                                         }
+                                        // add anons
+                                        for (int j = 0; j < leftTeamAnons.size(); j++){
+                                            String currAnon = leftTeamAnons.get(j);
+                                            ListData2 listData = new ListData2(false, currAnon.split("_")[1]+ " 의 동료", currAnon, "");
+                                            leftTeamUsers.add(listData);
+                                        }
+
+                                        Collections.sort(leftTeamUsers, new ListData2.data2Comparator());
+                                        leftAdapter.notifyDataSetChanged();
+                                        // 리더 UI 초기화.
+
+                                        final String leftTeamLeader = leftTeamUsers.get(0).getId();
+
+                                        // leftTeam 리더 UI 초기화.
+                                        proxy.getUserDetail(leftTeamLeader, new JsonHttpResponseHandler() {
+                                            @Override
+                                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                                try {
+                                                    boolean result = response.getBoolean("result");
+                                                    if (result){
+                                                        String leaderRank = RankHelper.intToRank(response.getInt("rank"));
+                                                        String leaderName = response.getString("name");
+
+                                                        teamName1.setText("주장: " + leaderRank + " " + leaderName);
+                                                        teamProfile1.setText("총원: " + String.valueOf(leftArray.length) + "명");
+
+                                                        // add picture and notifyDataSetChanged();
+                                                        if (response.getBoolean("profile_image")){
+                                                            proxy.getProfPic(leftTeamLeader, new FileAsyncHttpResponseHandler(getApplicationContext()) {
+                                                                public void onSuccess(int i, Header[] headers, File file){
+                                                                    String filePath = file.getAbsolutePath();
+                                                                    Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+                                                                    RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
+                                                                    rbd.setCornerRadius(bitmap.getHeight()/8.0f);
+                                                                    buttonTeam1.setImageDrawable(rbd);
+                                                                }
+                                                                @Override
+                                                                public void onFailure(int i, Header[] headers, Throwable throwable, File file) {
+                                                                    Log.e("TAG", "Error: file open failed");
+                                                                }
+                                                            });
+                                                        }
+                                                        else {
+                                                            buttonTeam1.setImageResource(R.drawable.img_defaultleftteam);
+                                                        }
+                                                    }
+                                                    else {
+                                                        String errorName = response.getString("reason");
+                                                        if (errorName.equals("NoSuchUserException")){
+                                                            Toast.makeText(getApplicationContext(), "군번이 없습니다.", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                        else if (errorName.equals("NotLoggedInException")){
+                                                            Toast.makeText(getApplicationContext(), "세션이 만료되었습니다. 다시 로그인해주십시오.", Toast.LENGTH_SHORT).show();
+                                                            smgr.logout();
+                                                        }
+                                                        Log.e("TAG1", "ERROR");
+                                                    }
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
                                     }
                                     else {
-                                        String errorName = response.getString("reason");
-                                        if (errorName.equals("NoSuchUserException")){
-                                            Toast.makeText(getApplicationContext(), "군번이 없습니다.", Toast.LENGTH_SHORT).show();
-                                        }
-                                        else if (errorName.equals("NotLoggedInException")){
-                                            Toast.makeText(getApplicationContext(), "세션이 만료되었습니다. 다시 로그인해주십시오.", Toast.LENGTH_SHORT).show();
-                                            smgr.logout();
-                                        }
-                                        Log.e("TAG1", "ERROR");
+                                        Log.e("TAG", "getUsersDetails failed");
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -171,49 +227,88 @@ public class MatchCompleteActivity extends AppCompatActivity{
                             }
                         });
 
-                        // Right Team 리더 UI 초기화
-                        proxy.getUserDetail(rightTeamLeader, new JsonHttpResponseHandler() {
-                            @Override
+                        // Right Team UI 초기화
+                        proxy.getUsersDetails(rightArray, new JsonHttpResponseHandler(){
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                                 try {
-                                    boolean result = response.getBoolean("result");
-                                    if (result){
-                                        String leaderRank = RankHelper.intToRank(response.getInt("rank"));
-                                        String leaderName = response.getString("name");
-
-                                        teamName2.setText("주장: " + leaderRank + " " + leaderName);
-                                        teamProfile2.setText("총원: " + String.valueOf(leftArray.length) + "명");
-
-                                        // add picture
-                                        if (response.getBoolean("profile_image")){
-                                            proxy.getProfPic(rightTeamLeader, new FileAsyncHttpResponseHandler(getApplicationContext()) {
-                                                public void onSuccess(int i, Header[] headers, File file){
-                                                    String filePath = file.getAbsolutePath();
-                                                    Bitmap bitmap = BitmapFactory.decodeFile(filePath);
-                                                    RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
-                                                    rbd.setCornerRadius(bitmap.getHeight()/8.0f);
-                                                    buttonTeam2.setImageDrawable(rbd);
-                                                }
-                                                @Override
-                                                public void onFailure(int i, Header[] headers, Throwable throwable, File file) {
-                                                    Log.e("TAG", "Error: file open failed");
-                                                }
-                                            });
+                                    if (response.getBoolean("result")){
+                                        if (!response.getBoolean("complete")){
+                                            Log.e("TAG", "data corrupt: complete gives false on existing ids");
                                         }
-                                        else {
-                                            buttonTeam2.setImageResource(R.drawable.img_defaultrightteam);
+                                        JSONArray userData = response.getJSONArray("data");
+                                        for (int i=0; i < rightArray.length; i++){
+                                            String currid = userData.getJSONObject(i).getString("id");
+                                            String currrankname = RankHelper.intToRank(userData.getJSONObject(i).getInt("rank")) + " " + userData.getJSONObject(i).getString("name");
+                                            boolean existProfPic = userData.getJSONObject(i).getBoolean("profile_image");
+                                            String userStatus = userData.getJSONObject(i).getString("match_status");
+                                            ListData2 listData = new ListData2(existProfPic, currrankname, currid, "");
+                                            rightTeamUsers.add(listData);
                                         }
+                                        // add anons
+                                        for (int j = 0; j < rightTeamAnons.size(); j++){
+                                            String currAnon = rightTeamAnons.get(j);
+                                            ListData2 listData = new ListData2(false, currAnon.split("_")[1]+ " 의 동료", currAnon, "");
+                                            rightTeamUsers.add(listData);
+                                        }
+
+                                        Collections.sort(rightTeamUsers, new ListData2.data2Comparator());
+                                        rightAdapter.notifyDataSetChanged();
+                                        // 리더 UI 초기화.
+
+                                        final String rightTeamLeader = rightTeamUsers.get(0).getId();
+
+                                        // rightTeam 리더 UI 초기화.
+                                        proxy.getUserDetail(rightTeamLeader, new JsonHttpResponseHandler() {
+                                            @Override
+                                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                                try {
+                                                    boolean result = response.getBoolean("result");
+                                                    if (result){
+                                                        String leaderRank = RankHelper.intToRank(response.getInt("rank"));
+                                                        String leaderName = response.getString("name");
+
+                                                        teamName2.setText("주장: " + leaderRank + " " + leaderName);
+                                                        teamProfile2.setText("총원: " + String.valueOf(rightArray.length) + "명");
+
+                                                        // add picture and notifyDataSetChanged();
+                                                        if (response.getBoolean("profile_image")){
+                                                            proxy.getProfPic(rightTeamLeader, new FileAsyncHttpResponseHandler(getApplicationContext()) {
+                                                                public void onSuccess(int i, Header[] headers, File file){
+                                                                    String filePath = file.getAbsolutePath();
+                                                                    Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+                                                                    RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
+                                                                    rbd.setCornerRadius(bitmap.getHeight()/8.0f);
+                                                                    buttonTeam2.setImageDrawable(rbd);
+                                                                }
+                                                                @Override
+                                                                public void onFailure(int i, Header[] headers, Throwable throwable, File file) {
+                                                                    Log.e("TAG", "Error: file open failed");
+                                                                }
+                                                            });
+                                                        }
+                                                        else {
+                                                            buttonTeam2.setImageResource(R.drawable.img_defaultrightteam);
+                                                        }
+                                                    }
+                                                    else {
+                                                        String errorName = response.getString("reason");
+                                                        if (errorName.equals("NoSuchUserException")){
+                                                            Toast.makeText(getApplicationContext(), "군번이 없습니다.", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                        else if (errorName.equals("NotLoggedInException")){
+                                                            Toast.makeText(getApplicationContext(), "세션이 만료되었습니다. 다시 로그인해주십시오.", Toast.LENGTH_SHORT).show();
+                                                            smgr.logout();
+                                                        }
+                                                        Log.e("TAG1", "ERROR");
+                                                    }
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
                                     }
                                     else {
-                                        String errorName = response.getString("reason");
-                                        if (errorName.equals("NoSuchUserException")){
-                                            Toast.makeText(getApplicationContext(), "군번이 없습니다.", Toast.LENGTH_SHORT).show();
-                                        }
-                                        else if (errorName.equals("NotLoggedInException")){
-                                            Toast.makeText(getApplicationContext(), "세션이 만료되었습니다. 다시 로그인해주십시오.", Toast.LENGTH_SHORT).show();
-                                            smgr.logout();
-                                        }
-                                        Log.e("TAG2", "ERROR");
+                                        Log.e("TAG", "getUsersDetails failed");
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();

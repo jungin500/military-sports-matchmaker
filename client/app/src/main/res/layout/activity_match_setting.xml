@@ -54,7 +54,7 @@
             android:layout_weight="0.01" />
 
         <CheckBox
-            android:id="@+id/sameTeam"
+            android:id="@+id/is_Team"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.2"

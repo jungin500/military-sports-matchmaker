@@ -59,7 +59,7 @@ public class MatchSettingActivity extends AppCompatActivity {
         // initialize widgets
         final EditText playerNumber = (EditText) findViewById(R.id.playerNumber);
         Button playerShow = (Button) findViewById(R.id.player_show);
-        CheckBox sameTeam = (CheckBox) findViewById(R.id.sameTeam);
+        sameTeam = (CheckBox) findViewById(R.id.is_Team);
         Button enterQueue = (Button) findViewById(R.id.enterQueue);
 
         Intent intent = getIntent();
@@ -140,14 +140,14 @@ public class MatchSettingActivity extends AppCompatActivity {
                     stringBuilder.append(anonName+"|");
                 }
                 stringBuilder.setLength(stringBuilder.length() - 1);
-                requestMatch(gameType, stringBuilder.toString());
+                requestMatch(gameType, stringBuilder.toString(), sameTeam.isChecked());
             }
         });
     }
 
     // current session player (checked with cookie) queue for game gameType, with participant array .
-    private void requestMatch(String gameType, String participants) {
-        proxy.requestMatch(gameType, participants, new JsonHttpResponseHandler(){
+    private void requestMatch(String gameType, String participants, boolean is_team) {
+        proxy.requestMatch(gameType, participants, is_team, new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
@@ -155,6 +155,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                     if (success) {
                         Toast.makeText(getApplicationContext(), "큐 진입 성공!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);
                         finish();
                     }

@@ -132,10 +132,12 @@ public class Proxy {
      * creates a new match with gameType and participants.
      */
 
-    public void requestMatch(String gameType, String participants, JsonHttpResponseHandler handler){
+    public void requestMatch(String gameType, String participants, boolean is_team, JsonHttpResponseHandler handler){
+        String isTeamParse = is_team ? "true" : null;
         RequestParams params = new RequestParams();
         params.put("activityType", gameType);
         params.put("players", participants);
+        params.put("is_team", isTeamParse);
         client.setCookieStore(smgr.myCookies);
         String requestURL = SERVER_URL + ":"+ "/process/requestMatch";
         client.post(requestURL, params, handler);
