@@ -18,6 +18,7 @@ import android.widget.*;
 import com.loopj.android.http.FileAsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.ResponseHandlerInterface;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -236,7 +237,6 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                         if (response.getBoolean("profile_image")){
                             proxy.getProfPic(response.getString("id"), new FileAsyncHttpResponseHandler(getApplicationContext()) {
                                 public void onSuccess(int i, Header[] headers, File file){
-                                    Log.e("TAG", String.valueOf(file.length()));
                                     String filePath = file.getAbsolutePath();
                                     Bitmap bitmap = BitmapFactory.decodeFile(filePath);
                                     RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
@@ -248,6 +248,9 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                                     Log.e("TAG", "Error: file open failed");
                                 }
                             });
+                        }
+                        else {
+                            homepro.setImageResource(R.drawable.img_defaultface);
                         }
                     }
                     else {

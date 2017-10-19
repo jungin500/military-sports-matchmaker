@@ -156,7 +156,7 @@ import cz.msebera.android.httpclient.Header;
                             }
                         }
                         //프사 받아와서 보여준다.
-                        proxy.searchUser(queryid, new JsonHttpResponseHandler() {
+                        proxy.getUserDetail(queryid, new JsonHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                                 try {

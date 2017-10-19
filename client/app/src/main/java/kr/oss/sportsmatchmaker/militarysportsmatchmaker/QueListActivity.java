@@ -101,32 +101,107 @@ public class QueListActivity extends AppCompatActivity {
                                         else if (gameTypeEng.equals("basketball"))
                                             gameTypeKor = "농구";
 
-                                        // if i am initiator, show quit button.
+                                        // i am initiator <=> show quit button.
                                         String initiatorId = match.getString("initiatorId");
                                         if (id.equals(initiatorId)) {
                                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                                             params.weight = 0.25f;
                                             quitMatchButton.setLayoutParams(params);
                                         }
-                                        // if i am pending, show accept/reject button.
+                                        else {
+                                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
+                                            params.weight = 0.0f;
+                                            quitMatchButton.setLayoutParams(params);
+                                        }
+                                        // i am pending <=> show accept/reject button.
                                         if (match_status.equals("pending")){
                                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
                                             params.weight = 0.2f;
                                             acceptMatchButton.setLayoutParams(params);
-
                                             LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
                                             params.weight = 0.2f;
+                                            rejectMatchButton.setLayoutParams(params);
+                                        }
+                                        else{
+                                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
+                                            params.weight = 0.0f;
+                                            acceptMatchButton.setLayoutParams(params);
+                                            LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
+                                            params.weight = 0.0f;
                                             rejectMatchButton.setLayoutParams(params);
                                         }
                                         JSONArray acceptPlayers = match.getJSONArray("players");
                                         JSONArray pendingPlayers = match.getJSONArray("pendingPlayers");
                                         JSONArray rejectedPlayers = match.getJSONArray("rejectedPlayers");
-                                        int accnum = acceptPlayers.length();
-                                        int pendnum = pendingPlayers.length();
-                                        int rejnum = rejectedPlayers.length();
+                                        final int accnum = acceptPlayers.length();
+                                        final int pendnum = pendingPlayers.length();
+                                        final int rejnum = rejectedPlayers.length();
                                         textQStatus.setText("현재 큐 정보입니다.");
 
                                         //do i want.. TODO: set profile pic for each player
+                                        int anoncount = 0;
+                                        final ArrayList<String> players = new ArrayList<String>();
+                                        for (int i = 0; i < accnum; i++){
+                                            String player = acceptPlayers.get(i).toString();
+                                            if (player.equals("anon")) {
+                                                anoncount++;
+                                            }
+                                            else {
+                                                players.add(player);
+                                            }
+                                        }
+                                        for (int i = 0; i < pendnum; i++){
+                                            players.add(pendingPlayers.get(i).toString());
+                                        }
+                                        for (int i = 0; i < rejnum; i++){
+                                            players.add(rejectedPlayers.get(i).toString());
+                                        }
+                                        final String[] pArray = players.toArray(new String[players.size()]);
+                                        final int finalAnoncount = anoncount;
+                                        proxy.getUsersDetails(pArray, new JsonHttpResponseHandler(){
+                                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                                try {
+                                                    if (response.getBoolean("result")){
+                                                        if (!response.getBoolean("complete")){
+                                                            Log.e("TAG", "data corrupt");
+                                                        }
+                                                        JSONArray userData = response.getJSONArray("data");
+                                                        String initrankname = RankHelper.intToRank(userData.getJSONObject(0).getInt("rank")) + " " + userData.getJSONObject(0).getString("name");
+                                                        ListData initListData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), initrankname, pArray[0], "방장");
+                                                        QueDataArray.add(initListData);
+
+                                                        int i = 1;
+                                                        for (; i < accnum - finalAnoncount; i++){
+                                                            String currrankname = RankHelper.intToRank(userData.getJSONObject(i).getInt("rank")) + " " + userData.getJSONObject(i).getString("name");
+                                                            ListData listData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), currrankname, pArray[i], "수락함");
+                                                            QueDataArray.add(listData);
+                                                        }
+                                                        for (int j=0;j<finalAnoncount;j++){
+                                                            String anonName = initrankname + " 의 동료";
+                                                            ListData listData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), anonName, "anon", "수락함");
+                                                            QueDataArray.add(listData);
+                                                        }
+                                                        for (; i < accnum + pendnum-finalAnoncount; i++){
+                                                            String currrankname = RankHelper.intToRank(userData.getJSONObject(i).getInt("rank")) + " " + userData.getJSONObject(i).getString("name");
+                                                            ListData listData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), currrankname, pArray[i], "대기중");
+                                                            QueDataArray.add(listData);
+                                                        }
+                                                        for (; i < accnum + pendnum + rejnum-finalAnoncount;i++){
+                                                            String currrankname = RankHelper.intToRank(userData.getJSONObject(i).getInt("rank")) + " " + userData.getJSONObject(i).getString("name");
+                                                            ListData listData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), currrankname, pArray[i], "거절함");
+                                                            QueDataArray.add(listData);
+                                                        }
+                                                        customAdapter.notifyDataSetChanged();
+                                                    }
+                                                    else {
+                                                        Log.e("TAG", "getUsersDetails failed");
+                                                    }
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
+                                        /*
                                         // add players to list
                                         // add initiator separately
                                         ListData initData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), acceptPlayers.get(0).toString(), acceptPlayers.get(0).toString(), "방장");
@@ -144,8 +219,8 @@ public class QueListActivity extends AppCompatActivity {
                                             ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rejectedPlayers.get(i).toString(), rejectedPlayers.get(i).toString(), "거절함");
                                             QueDataArray.add(data);
                                         }
-
                                         customAdapter.notifyDataSetChanged();
+                                        */
                                     }
                                     else {
                                         Log.e("TAG", "DATA CORRUPT; match not ready but no match");
@@ -220,7 +295,7 @@ public class QueListActivity extends AppCompatActivity {
             }
         });
 
-        //TODO: onSuccess and onFailure
+        // 수락 혹은 거절 버튼 누를시 하는 일
         acceptMatchButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {

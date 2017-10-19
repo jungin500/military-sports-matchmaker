@@ -125,6 +125,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                 StringBuilder stringBuilder = new StringBuilder();
 
                 int anoncount = 0;
+                // anon을 맨 뒤로 보내서 더한다.
                 for (int i = 0; i < numPlayer[0]; i++){
                     String currid = listDataArray.get(i).getId();
                     if (currid.equals("anon")){
