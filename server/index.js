@@ -27,6 +27,7 @@ var http = require('http'),
 
     formidable = require('formidable'),
     crypto = require('crypto'),
+    md5 = require('md5'),
 
     at = require('array-tools'),
 
@@ -110,7 +111,6 @@ router.route('/process/registerUser').post(upload.single('profPic'), function (r
     };
 
     // 정보 중 하나라도 빠졌을 시 오류
-    console.dir(userInfo);
     for (var key in userInfo)
         if (!userInfo[key]) {
             sendIllegalParameters(req, res);
@@ -481,6 +481,7 @@ router.route('/process/prepareMatchingTeamStadium').post(function (req, res) {
     if (!stadiumInfo.name) { sendIllegalParameters(req, res); return; }
 
     DatabaseManager.Model.stadium.prepareMatchingTeamStadium(stadiumInfo, function (result) {
+        console.log('{Object} => %s', md5(JSON.stringify(result)));
         res.json(result);
         res.end();
     });
@@ -505,7 +506,7 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-app.use(function (req, res, next) {
+/* app.use(function (req, res, next) {
     var connectionInfo = {
         timestamp: Date.now(),
         location: (req.connection.remoteAddress == '::1') ? '로컬' : req.connection.remoteAddress.toString().split('::ffff:')[1],
@@ -521,7 +522,7 @@ app.use(function (req, res, next) {
     }
 
     next();
-});
+}); */
 
 app.use(static(path.join(__dirname, 'public')));
 app.use(static(path.join(__dirname, 'files')));

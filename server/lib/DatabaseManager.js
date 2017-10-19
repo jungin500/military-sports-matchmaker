@@ -33,8 +33,7 @@ var Model = {
 * @param {express} app Express Application
 */
 var connectDB = function (app) {
-    var databaseUrl = 'mongodb://localhost:27017/matching';
-
+    var databaseUrl = 'mongodb://military-sports-matchmaker:622dfe4f39c220a76ec78eabd75e609b@ds125335.mlab.com:25335/heroku_w2n7bnmn';
     mongoose.Promise = global.Promise;
     mongoose.connect(databaseUrl, { useMongoClient: true });
     database = mongoose.connection;
