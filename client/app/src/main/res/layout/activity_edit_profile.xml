@@ -21,9 +21,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:focusable="true"
-            android:focusableInTouchMode="true">
+            android:focusableInTouchMode="true"
+            android:orientation="vertical">
 
             <ImageButton
                 android:id="@+id/editProfile_profPic"
@@ -59,8 +59,8 @@
             <TextView
                 android:id="@+id/blank2"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3" />
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
@@ -110,14 +110,14 @@
             <TextView
                 android:id="@+id/blank3"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3" />
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:background="@drawable/border3"
+                android:orientation="horizontal"
                 android:weightSum="1">
 
                 <Spinner
@@ -143,8 +143,8 @@
             <TextView
                 android:id="@+id/blank4"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3" />
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
@@ -163,7 +163,7 @@
             <TextView
                 android:id="@+id/blank5"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1" />
 
             <android.support.design.widget.TextInputLayout
