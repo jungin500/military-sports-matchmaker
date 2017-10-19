@@ -123,13 +123,18 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                 startActivity(intent3);
                 break;
             //장소 고르기
-            default:
+            case R.id.notepad:
                 Toast.makeText(getApplicationContext(), "임시..", Toast.LENGTH_SHORT).show();
-                Intent intent5 = new Intent(getApplicationContext(), NotificationExamActivity.class);
-                //Intent intent5 = new Intent(getApplicationContext(), MatchCompleteActivity.class);
+                // Intent intent5 = new Intent(getApplicationContext(), NotificationExamActivity.class);
+                if (!smgr.getMatchStatus()) {
+                    Toast.makeText(getApplicationContext(), "큐가 없는데 여기로 들어오면 안됨", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                Intent intent5 = new Intent(getApplicationContext(), MatchCompleteActivity.class);
                 startActivity(intent5);
                 break;
-            //임시 사진 선택
+            default:
+                break;//임시 사진 선택
         }
     }
 
@@ -166,14 +171,11 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                                         smgr.changeMatchStatus(true, match.getString("matchId"));
                                         smgr.changeStadiumName(match.getString("stadium"));
 
-
-
+                                        // Case 2의 코드 부분.
                                         JSONArray acceptPlayers = match.getJSONArray("players");
                                         JSONArray pendingPlayers = match.getJSONArray("pendingPlayers");
                                         int accnum = acceptPlayers.length();
                                         int pendnum = pendingPlayers.length();
-
-
 
                                         // Case 2-1. 매치 수락 대기중이다.
                                         if (match_status.equals("pending")){

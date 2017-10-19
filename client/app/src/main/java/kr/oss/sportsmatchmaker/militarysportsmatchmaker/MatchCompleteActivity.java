@@ -34,14 +34,7 @@ public class MatchCompleteActivity extends AppCompatActivity implements OnClickL
         ImageButton team2 = (ImageButton) findViewById(R.id.team2);
         team2.setOnClickListener(this);
 
-        //test
-        String[] users = {"9", "8", "00"};
-        proxy.getUsersDetails(users, new JsonHttpResponseHandler(){
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                return;
-            }
-        });
+
 
     }
 

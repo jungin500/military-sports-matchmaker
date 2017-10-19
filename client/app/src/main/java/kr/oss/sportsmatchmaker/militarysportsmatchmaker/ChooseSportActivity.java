@@ -8,6 +8,13 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import cz.msebera.android.httpclient.Header;
+
 
 public class ChooseSportActivity extends AppCompatActivity implements OnClickListener {
     public static final String EXTRA_PNUM = "EXTRA_PNUM";
@@ -17,12 +24,32 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
     public static final int PNUM_BASKETBALL = 5;
     public static final int PNUM_JOKGU = 5;
 
+    private Proxy proxy;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_choose_sport);
+
+        proxy = new Proxy(getApplicationContext());
+
+        // 현재 들어가있는 큐가 없음을 확인.
+        proxy.getUserInfo(new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    if (! response.getString("match_status").equals("ready")){
+                        // TODO: Dialogue 알림으로 경고하고
+                        // Home activity로 도망감
+
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         ImageButton football = (ImageButton) findViewById(R.id.football);
         ImageButton basketball = (ImageButton) findViewById(R.id.basketball);
