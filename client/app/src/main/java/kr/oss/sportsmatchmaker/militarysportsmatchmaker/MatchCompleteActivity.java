@@ -208,7 +208,7 @@ public class MatchCompleteActivity extends AppCompatActivity{
                                                             });
                                                         }
                                                         else {
-                                                            buttonTeam1.setImageResource(R.drawable.img_defaultleftteam);
+                                                            buttonTeam1.setImageResource(R.drawable.img_home);
                                                         }
                                                     }
                                                     else {
@@ -297,7 +297,7 @@ public class MatchCompleteActivity extends AppCompatActivity{
                                                             });
                                                         }
                                                         else {
-                                                            buttonTeam2.setImageResource(R.drawable.img_defaultrightteam);
+                                                            buttonTeam2.setImageResource(R.drawable.img_login);
                                                         }
                                                     }
                                                     else {

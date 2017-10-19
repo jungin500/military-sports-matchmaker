@@ -29,7 +29,7 @@
         android:adjustViewBounds="false"
         android:cropToPadding="false"
         android:scaleType="centerInside"
-        app:srcCompat="@drawable/img_login" />
+        app:srcCompat="@drawable/img_login_sm" />
 
     <ScrollView
         android:id="@+id/login_form"

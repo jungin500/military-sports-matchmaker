@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Military Sports Matchmaker</string>
+    <string name="app_name">전투적인 매치메이커</string>
     <string name="title_activity_login">로그인</string>
     <string name="title_activity_signup">회원가입</string>
 
