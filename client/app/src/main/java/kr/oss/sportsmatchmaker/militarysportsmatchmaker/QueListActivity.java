@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.ResponseHandlerInterface;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,6 +24,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.HttpResponse;
 
 public class QueListActivity extends AppCompatActivity {
 
@@ -71,18 +73,12 @@ public class QueListActivity extends AppCompatActivity {
                     final String match_status = response.getString("match_status");
                     // if not in match and waiting for match
                     if (match_status.equals("ready")){
-                        String reason = response.getString("reason");
-                        if (reason.equals("NoSuchMatchException")) {
-                            textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
-                            smgr.changeMatchStatus(false);
-                            smgr.setMatchId("null");
-                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
-                            params.weight = 0f;
-                            quitMatchButton.setLayoutParams(params);
-                        }
-                        else {
-                            textQStatus.setText("오류: " + reason);
-                        }
+                        textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
+                        smgr.changeMatchStatus(false);
+                        smgr.setMatchId("null");
+                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
+                        params.weight = 0f;
+                        quitMatchButton.setLayoutParams(params);
                     }
                     // if match, get match and....
                     else {
@@ -130,7 +126,11 @@ public class QueListActivity extends AppCompatActivity {
 
                                         //do i want.. TODO: set profile pic for each player
                                         // add players to list
-                                        for (int i = 0; i < accnum; i++) {
+                                        // add initiator separately
+                                        ListData initData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), acceptPlayers.get(0).toString(), acceptPlayers.get(0).toString(), "리더");
+                                        QueDataArray.add(initData);
+                                        for (int i = 1; i < accnum; i++) {
+                                            String id = acceptPlayers.get(i).toString();
                                             ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), acceptPlayers.get(i).toString(), acceptPlayers.get(i).toString(), "수락함");
                                             QueDataArray.add(data);
                                         }
@@ -142,6 +142,7 @@ public class QueListActivity extends AppCompatActivity {
                                             ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rejectedPlayers.get(i).toString(), rejectedPlayers.get(i).toString(), "거절함");
                                             QueDataArray.add(data);
                                         }
+
                                         customAdapter.notifyDataSetChanged();
                                     }
                                     else {
@@ -155,6 +156,11 @@ public class QueListActivity extends AppCompatActivity {
                             @Override
                             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                                 textQStatus.setText("매치 정보를 가져오지 못했습니다. 다시 접속해주세요.");
+                            }
+
+                            @Override
+                            public void onPostProcessResponse(ResponseHandlerInterface instance, HttpResponse response) {
+                                super.onPostProcessResponse(instance, response);
                             }
                         });
                     }

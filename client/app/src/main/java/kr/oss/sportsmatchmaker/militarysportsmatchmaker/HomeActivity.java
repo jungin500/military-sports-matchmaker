@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.PackageInstaller;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import android.widget.*;
 
 import com.loopj.android.http.FileAsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.ResponseHandlerInterface;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.HttpResponse;
 
 
 public class HomeActivity extends AppCompatActivity implements OnClickListener {
@@ -40,13 +43,11 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
     private TextView textWelcome;
     private Button logoutButton;
     private TextView textQStatus;
-    private Button quitMatchButton;
     private Button matching;
     private Button reserve;
     private Button note;
     private Button edit;
     private ImageView homepro;
-    private ListView homeMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +63,6 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         // define widgets
         logoutButton = (Button) findViewById(R.id.logout);
         textWelcome = (TextView) findViewById(R.id.home_welcome);
-        quitMatchButton = (Button) findViewById(R.id.home_quitMatch);
 
         matching = (Button) findViewById(R.id.searchmatching);
         matching.setOnClickListener(this);
@@ -84,7 +84,6 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         updateTextWelcome();
         updateProfileImage();
 
-
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,51 +94,6 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
 
         // queue status message
         displayMatchStatus();
-
-        quitMatchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // do nothing if not in match
-                if (!smgr.getMatchStatus()){
-                    return;
-                }
-                String matchId = smgr.getMatchId();
-
-                proxy.deleteMatch(matchId, new JsonHttpResponseHandler(){
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        try {
-                            if(response.getBoolean("result")){
-                                displayMatchStatus();
-                            }
-                            else{
-                                String reason = response.getString("reason");
-                                if (reason.equals("ForbiddenOperationException")){
-                                    Toast.makeText(getApplicationContext(), "삭제 권한이 없습니다.", Toast.LENGTH_SHORT).show();
-                                }
-                                else if (reason.equals("NoSuchMatchException")){
-                                    Toast.makeText(getApplicationContext(), "진행중인 큐가 없습니다..", Toast.LENGTH_SHORT).show();
-                                }
-                                else if (reason.equals("NotLoggedInException")){
-                                    Toast.makeText(getApplicationContext(), "로그인되어있지 않습니다.", Toast.LENGTH_SHORT).show();
-                                    smgr.checkSession();
-                                }
-                                else {
-                                    Toast.makeText(getApplicationContext(), "실패했습니다. 오류 종류: " + reason, Toast.LENGTH_SHORT).show();
-                                    Log.e("deleteMatch error", reason);
-                                }
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        });
-        // add adapter to listview. Long boring stuff, so factor into separate method.
-        //homeMenu = (ListView) findViewById(R.id.home_menu);
-        //setHomeMenu(homeMenu);
-        //homeMenu.setOnItemClickListener(this);
     }
 
     @Override
@@ -147,7 +101,9 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         switch(v.getId()){
             case R.id.searchmatching:
                 if (smgr.getMatchStatus()){
-                    Toast.makeText(getApplicationContext(), "이미 시합 대기중이십니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "현재 큐의 승낙상태를 확인합니다.", Toast.LENGTH_SHORT).show();
+                    Intent intent4 = new Intent(getApplicationContext(), QueListActivity.class);
+                    startActivity(intent4);
                     return;
                 }
                 Toast.makeText(getApplicationContext(), "종목을 고르시면 \n자동으로 팀원과 상대방을 찾아드립니다.", Toast.LENGTH_SHORT).show();
@@ -167,84 +123,103 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                 break;
             //장소 고르기
             default:
-                Toast.makeText(getApplicationContext(), "현재 큐의 승낙상태를 확인합니다.", Toast.LENGTH_SHORT).show();
-                Intent intent4 = new Intent(getApplicationContext(), QueListActivity.class);
-                startActivity(intent4);
                 break;
             //임시 사진 선택
         }
     }
 
+    // 매치 상태를 보고 UI를 바꿔준다.
     private void displayMatchStatus(){
         textQStatus = (TextView) findViewById(R.id.home_qstatus);
-        proxy.getUserMatch(new JsonHttpResponseHandler(){
-            @Override
+        final String id = smgr.getProfile().get(SessionManager.ID);
+
+        proxy.getUserInfo(new JsonHttpResponseHandler(){
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
-                    boolean success = response.getBoolean("result");
-                    if (success) {
-                        JSONObject match = response.getJSONObject("match");
-                        String gameTypeEng = match.getString("activityType");
-                        String gameTypeKor = "족구";
-                        if (gameTypeEng.equals("football"))
-                            gameTypeKor = "축구";
-                        else if (gameTypeEng.equals("basketball"))
-                            gameTypeKor = "농구";
-                        JSONArray players = match.getJSONArray("players");
-                        String numPlayers = String.valueOf(players.length());
-
-                        //TODO: is IS_PENDING added?
-                        textQStatus.setText("현재 " + numPlayers + "명과 " + gameTypeKor + " 시합 대기중입니다.");
-                        smgr.changeMatchStatus(true);
-                        smgr.setMatchId(match.getString("matchId"));
-
-                        //TODO: GET RID OF THIS UGLY BUTTON
-                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
-                        params.weight = 0.25f;
-                        quitMatchButton.setLayoutParams(params);
+                    final String match_status = response.getString("match_status");
+                    // Case 1: 대기중인 시합이 있다.
+                    if (match_status.equals("ready")){
+                        textQStatus.setText("현재 대기중인 시합이 없습니다. \n시합을 찾아보세요!");
+                        smgr.changeMatchStatus(false);
+                        smgr.setMatchId("null");
+                        matching.setText("전투체육 같이 할 사람 찾기");
+                        matching.setBackgroundColor(getColor(android.R.color.holo_blue_light));
                     }
+                    // Case 2: 대기중인 매치가 있다. (수락 여부는 밑에서)
                     else {
-                        String reason = response.getString("reason");
-                        if (reason.equals("NoSuchMatchException")) {
-                            textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
-                            smgr.changeMatchStatus(false);
-                            smgr.setMatchId("null");
-                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
-                            params.weight = 0f;
-                            quitMatchButton.setLayoutParams(params);
-                        }
-                        else {
-                            textQStatus.setText("오류: " + reason);
-                        }
+                        matching.setText("큐 상태 보기");
+                        int colorCode = Color.parseColor("#000099") ;
+                        matching.setBackgroundColor(colorCode);
+                        proxy.getUserMatch(new JsonHttpResponseHandler(){
+                            @Override
+                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                try {
+                                    boolean success = response.getBoolean("result");
+                                    if (success) {
+                                        JSONObject match = response.getJSONObject("match");
+                                        // set match status and match id on session manager.
+                                        smgr.changeMatchStatus(true);
+                                        smgr.setMatchId(match.getString("matchId"));
+                                        JSONArray acceptPlayers = match.getJSONArray("players");
+                                        JSONArray pendingPlayers = match.getJSONArray("pendingPlayers");
+                                        int accnum = acceptPlayers.length();
+                                        int pendnum = pendingPlayers.length();
+
+                                        // Case 2-1. 매치 수락 대기중이다.
+                                        if (match_status.equals("pending")){
+                                            textQStatus.setText("큐 초대가 있습니다. \n큐 상태를 확인하고 수락/거절 여부를 선택해주세요.");
+                                        }
+                                        // Case 2-2. 매치를 수락했고 수락 대기인원이 있다.
+                                        else if (pendnum > 0){
+                                            textQStatus.setText(String.valueOf(accnum + pendnum) + "명 중 " + String.valueOf(pendnum) + "명이 수락 대기중입니다. \n큐 상태를 확인하세요.");
+                                        }
+                                        // Case 2-3. 매치를 수락했고 수락 대기인원이 없다 => 경기 찾는 중이다.
+                                        else {
+                                            textQStatus.setText("경기를 찾는 중입니다. \n큐 상태를 확인하세요.");
+                                        }
+
+                                    }
+                                    else {
+                                        Log.e("TAG", "DATA CORRUPT; match not ready but no match");
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(getApplicationContext(), "데이터 오류입니다.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                                textQStatus.setText("매치 정보를 가져오지 못했습니다. 다시 접속해주세요.");
+                            }
+
+                            @Override
+                            public void onPostProcessResponse(ResponseHandlerInterface instance, HttpResponse response) {
+                                super.onPostProcessResponse(instance, response);
+                            }
+                        });
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), "데이터 오류입니다.", Toast.LENGTH_SHORT).show();
                 }
             }
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                textQStatus.setText("매치 정보를 가져오지 못했습니다. 다시 접속해주세요.");
-            }
         });
-
-
     }
 
     @Override
-    // 회원정보 수정후 돌아옴.
+    // 다시 홈으로 돌아온 경우.
     protected void onResume() {
         super.onResume();
         smgr.checkSession();
         updateTextWelcome();
         updateProfileImage();
+        displayMatchStatus();
     }
 
     private void updateTextWelcome(){
         prof = smgr.getProfile();
         String user_name = prof.get(SessionManager.NAME);
         String user_rank = prof.get(SessionManager.RANK);
-        textWelcome.setText("환영합니다, " + user_name + " " + user_rank + "님");
+        textWelcome.setText("환영합니다, " + user_name + " " + user_rank + "님.\n오늘도 즐거운 하루 되세요!");
     }
 
     private void updateProfileImage(){

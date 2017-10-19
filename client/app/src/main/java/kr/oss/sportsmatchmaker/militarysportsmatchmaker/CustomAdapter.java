@@ -150,8 +150,10 @@ import cz.msebera.android.httpclient.Header;
                         final String queryid = search.getText().toString();
                         // 검색어와 중복된 아이디가 있으면
                         for (ListData i : listData){
-                            Toast.makeText(context, "이미 등록된 사람을 검색할 수 없습니다.", Toast.LENGTH_SHORT).show();
-                            return;
+                            if (queryid.equals(i.getId())) {
+                                Toast.makeText(context, "이미 등록된 사람을 검색할 수 없습니다.", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
                         }
                         //프사 받아와서 보여준다.
                         proxy.searchUser(queryid, new JsonHttpResponseHandler() {
