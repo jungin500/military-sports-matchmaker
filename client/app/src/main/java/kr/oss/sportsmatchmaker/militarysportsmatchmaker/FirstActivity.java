@@ -1,13 +1,13 @@
 package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.WindowManager;
 
-public class MainActivity extends AppCompatActivity {
+public class FirstActivity extends AppCompatActivity {
 
-    private SessionManager smgr;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -15,17 +15,14 @@ public class MainActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
-        smgr = new SessionManager(getApplicationContext());
+        Handler mHandler = new Handler();
+        mHandler.postDelayed(new Runnable()  {
+            public void run() {
+                FirstActivity.this.finish();
 
-        if (smgr.isLoggedIn()) {
-            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-            startActivity(intent);
-        }
-        // goto sign in screen.
-        else {
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-        }
-        finish();
+                Intent myIntent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(myIntent);
+            }
+        }, 1800);
     }
 }

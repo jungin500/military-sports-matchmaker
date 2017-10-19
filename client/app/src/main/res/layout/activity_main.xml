@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@color/colorPrimary"
+    android:gravity="center"
+    android:orientation="vertical"
     tools:context="kr.oss.sportsmatchmaker.militarysportsmatchmaker.MainActivity">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/img_home"
-        tools:layout_editor_absoluteX="96dp"
-        tools:layout_editor_absoluteY="106dp" />
-
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/titletext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="로딩중.."
-
-        tools:layout_editor_absoluteY="401dp"
-        tools:layout_editor_absoluteX="180dp" />
-</android.support.constraint.ConstraintLayout>
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:shadowColor="@color/colorPrimary"
+        android:shadowDx="5.0"
+        android:shadowDy="5.0"
+        android:shadowRadius="5.0"
+        android:text="앱이름"
+        android:textColor="?android:attr/textColorLinkInverse"
+        android:textSize="100sp"
+        android:textStyle="bold"
+        tools:layout_editor_absoluteX="180dp"
+        tools:layout_editor_absoluteY="401dp" />
+</LinearLayout>
