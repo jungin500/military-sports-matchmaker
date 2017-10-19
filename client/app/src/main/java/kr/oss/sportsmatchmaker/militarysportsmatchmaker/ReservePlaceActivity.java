@@ -1,6 +1,7 @@
 package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -86,7 +87,8 @@ public class ReservePlaceActivity extends AppCompatActivity implements OnClickLi
 
                 //case R.id.basketball:
                 //case R.id.footwear:
-                //case R.id.free:
+                case R.id.free:
+                    Intent intent3 = new Intent(getApplicationContext(), NotificationExamActivity.class);
             }
     }
 }

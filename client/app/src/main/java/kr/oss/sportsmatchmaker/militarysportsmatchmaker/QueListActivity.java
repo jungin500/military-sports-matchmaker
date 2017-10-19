@@ -38,7 +38,7 @@ public class QueListActivity extends AppCompatActivity {
     private Button acceptMatchButton;
     private Button rejectMatchButton;
 
-    private ArrayList<ListData> QueDataArray;
+    private ArrayList<ListData2> QueDataArray;
     private boolean[] Que_Yes_or_No = {true,false,true,true,false};
 
 
@@ -63,24 +63,35 @@ public class QueListActivity extends AppCompatActivity {
         acceptMatchButton = (Button) findViewById(R.id.acceptMatch);
         rejectMatchButton = (Button) findViewById(R.id.rejectMatch);
 
-        QueDataArray = new ArrayList<ListData>();
+        QueDataArray = new ArrayList<ListData2>();
         ListView listview = (ListView) findViewById(R.id.quelist);
         final CustomAdapter2 customAdapter = new CustomAdapter2(this, R.layout.list_btn_sty, QueDataArray);
         listview.setAdapter(customAdapter);
 
-        //TODO: get stuff in QueList
         proxy.getUserInfo(new JsonHttpResponseHandler(){
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
                     final String match_status = response.getString("match_status");
                     // if not in match and waiting for match
                     if (match_status.equals("ready")){
-                        textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
+<<<<<<< HEAD
                         smgr.changeMatchStatus(false);
                         smgr.setMatchId("null");
+
+
+                        // Dialog 띄워서
+                        // 큐가 사라졌습니다. 메인 화면으로 돌아갑니다.
+                        // 확인 버튼을 누르면
+                        // HomeActivity를 시작하고 얘를 finish()
+=======
+                        smgr.changeMatchStatus(false, null);
+                        smgr.changeStadiumName(null);
+
+                        textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
                         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                         params.weight = 0f;
                         quitMatchButton.setLayoutParams(params);
+>>>>>>> 5929a964e7fd9ed18d48c8a631807bb039d255c3
                     }
                     // if match, get match and....
                     else {
@@ -92,8 +103,9 @@ public class QueListActivity extends AppCompatActivity {
                                     if (success) {
                                         JSONObject match = response.getJSONObject("match");
                                         // set match status and match id on session manager.
-                                        smgr.changeMatchStatus(true);
-                                        smgr.setMatchId(match.getString("matchId"));
+                                        smgr.changeMatchStatus(true, match.getString("matchId"));
+                                        smgr.changeStadiumName(match.getString("stadium"));
+
                                         String gameTypeEng = match.getString("activityType");
                                         String gameTypeKor = "족구";
                                         if (gameTypeEng.equals("football"))
@@ -101,58 +113,110 @@ public class QueListActivity extends AppCompatActivity {
                                         else if (gameTypeEng.equals("basketball"))
                                             gameTypeKor = "농구";
 
-                                        // if i am initiator, show quit button.
-                                        String initiatorId = match.getString("initiatorId");
+                                        // i am initiator <=> show quit button.
+                                        // TODO: disable button
+                                        final String initiatorId = match.getString("initiatorId");
                                         if (id.equals(initiatorId)) {
                                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                                             params.weight = 0.25f;
                                             quitMatchButton.setLayoutParams(params);
                                         }
-                                        // if i am pending, show accept/reject button.
+                                        else {
+                                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
+                                            params.weight = 0.0f;
+                                            quitMatchButton.setLayoutParams(params);
+                                        }
+                                        // i am pending <=> show accept/reject button.
                                         if (match_status.equals("pending")){
                                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
                                             params.weight = 0.2f;
                                             acceptMatchButton.setLayoutParams(params);
-
                                             LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
                                             params.weight = 0.2f;
+                                            rejectMatchButton.setLayoutParams(params);
+                                        }
+                                        else{
+                                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
+                                            params.weight = 0.0f;
+                                            acceptMatchButton.setLayoutParams(params);
+                                            LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
+                                            params.weight = 0.0f;
                                             rejectMatchButton.setLayoutParams(params);
                                         }
                                         JSONArray acceptPlayers = match.getJSONArray("players");
                                         JSONArray pendingPlayers = match.getJSONArray("pendingPlayers");
                                         JSONArray rejectedPlayers = match.getJSONArray("rejectedPlayers");
-                                        int accnum = acceptPlayers.length();
-                                        int pendnum = pendingPlayers.length();
-                                        int rejnum = rejectedPlayers.length();
+                                        final int accnum = acceptPlayers.length();
+                                        final int pendnum = pendingPlayers.length();
+                                        final int rejnum = rejectedPlayers.length();
                                         textQStatus.setText("현재 큐 정보입니다.");
 
-                                        //do i want.. TODO: set profile pic for each player
-                                        // add players to list
-                                        // add initiator separately
-                                        ListData initData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), acceptPlayers.get(0).toString(), acceptPlayers.get(0).toString(), "방장");
-                                        QueDataArray.add(initData);
-                                        for (int i = 1; i < accnum; i++) {
-                                            String id = acceptPlayers.get(i).toString();
-                                            ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), acceptPlayers.get(i).toString(), acceptPlayers.get(i).toString(), "수락함");
-                                            QueDataArray.add(data);
+                                        int anoncount = 0;
+                                        final ArrayList<String> players = new ArrayList<String>();
+                                        for (int i = 0; i < accnum; i++){
+                                            String player = acceptPlayers.get(i).toString();
+                                            if (player.equals("anon")) {
+                                                anoncount++;
+                                            }
+                                            else {
+                                                players.add(player);
+                                            }
                                         }
-                                        for (int i = 0; i < pendnum; i++) {
-                                            ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), pendingPlayers.get(i).toString(), pendingPlayers.get(i).toString(), "대기중");
-                                            QueDataArray.add(data);
+                                        for (int i = 0; i < pendnum; i++){
+                                            players.add(pendingPlayers.get(i).toString());
                                         }
-                                        for (int i = 0; i < rejnum; i++) {
-                                            ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rejectedPlayers.get(i).toString(), rejectedPlayers.get(i).toString(), "거절함");
-                                            QueDataArray.add(data);
+                                        for (int i = 0; i < rejnum; i++){
+                                            players.add(rejectedPlayers.get(i).toString());
                                         }
-
-                                        customAdapter.notifyDataSetChanged();
+                                        final String[] pArray = players.toArray(new String[players.size()]);
+                                        final int finalAnoncount = anoncount;
+                                        proxy.getUsersDetails(pArray, new JsonHttpResponseHandler(){
+                                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                                try {
+                                                    if (response.getBoolean("result")){
+                                                        if (!response.getBoolean("complete")){
+                                                            Log.e("TAG", "data corrupt: complete gives false on existing ids");
+                                                        }
+                                                        JSONArray userData = response.getJSONArray("data");
+                                                        String initrankname = initiatorId;
+                                                        for (int i=0; i < pArray.length; i++){
+                                                            String currid = userData.getJSONObject(i).getString("id");
+                                                            String currrankname = RankHelper.intToRank(userData.getJSONObject(i).getInt("rank")) + " " + userData.getJSONObject(i).getString("name");
+                                                            boolean existProfPic = userData.getJSONObject(i).getBoolean("profile_image");
+                                                            String userStatus = userData.getJSONObject(i).getString("match_status");
+                                                            String buttonInput = "수락함";
+                                                            if (currid.equals(initiatorId)) {
+                                                                buttonInput = "방장";
+                                                                initrankname = currrankname;
+                                                            }
+                                                            else if (userStatus.equals("pending")) buttonInput = "대기중";
+                                                            else if (userStatus.equals("ready")) buttonInput = "거절함";
+                                                            ListData2 listData = new ListData2(existProfPic, currrankname, currid, buttonInput);
+                                                            QueDataArray.add(listData);
+                                                        }
+                                                        for (int j=0;j<finalAnoncount;j++){
+                                                            String anonName = initrankname + " 의 동료";
+                                                            ListData2 listData = new ListData2(false, anonName, "anon", "수락함");
+                                                            QueDataArray.add(listData);
+                                                        }
+                                                        Collections.sort(QueDataArray, new ListData2.data2Comparator());
+                                                        customAdapter.notifyDataSetChanged();
+                                                    }
+                                                    else {
+                                                        Log.e("TAG", "getUsersDetails failed");
+                                                    }
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
                                     }
                                     else {
-                                        Log.e("TAG", "DATA CORRUPT; match not ready but no match");
+                                        Log.e("TAG", "DATA CORRUPT; user status not *ready* but no match");
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();
-                                    Toast.makeText(getApplicationContext(), "데이터 오류입니다.", Toast.LENGTH_SHORT).show();
+                                    Log.e("TAG", "JSON error");
                                 }
                             }
                             @Override
@@ -189,8 +253,8 @@ public class QueListActivity extends AppCompatActivity {
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
                             if(response.getBoolean("result")){
-                                smgr.changeMatchStatus(false);
-                                smgr.setMatchId("null");
+                                smgr.changeMatchStatus(false, null);
+                                smgr.changeStadiumName(null);
                                 Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                                 startActivity(intent);
                                 finish();
@@ -220,33 +284,20 @@ public class QueListActivity extends AppCompatActivity {
             }
         });
 
-        //TODO: onSuccess and onFailure
+        // 수락 혹은 거절 버튼 누를시 하는 일
         acceptMatchButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 proxy.decideMatch("true", new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        for (ListData i : QueDataArray){
+                        for (ListData2 i : QueDataArray){
                             if (id.equals(i.getId())){
                                 i.setButton("수락함");
                             }
                         }
                         // sort dataset.
-                        Collections.sort(QueDataArray, new Comparator<ListData>() {
-                            @Override
-                            public int compare(ListData o1, ListData o2) {
-                                return help(o1.getButton()) - help(o2.getButton());
-                            }
-
-                            private int help(String str){
-                                if (str.equals("방장")) return 0;
-                                if (str.equals("수락함")) return 1;
-                                if (str.equals("대기중")) return 2;
-                                if (str.equals("거절함")) return 3;
-                                return 4;
-                            }
-                        });
+                        Collections.sort(QueDataArray, new ListData2.data2Comparator());
 
 
                         // remove 수락/거절 버튼
@@ -270,15 +321,14 @@ public class QueListActivity extends AppCompatActivity {
                 proxy.decideMatch("", new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        for (ListData i : QueDataArray){
+                        for (ListData2 i : QueDataArray){
                             if (id.equals(i.getId())){
                                 i.setButton("거절함");
                             }
                         }
                         customAdapter.notifyDataSetChanged();
-
-                        smgr.setMatchId("null");
-                        smgr.changeMatchStatus(false);
+                        smgr.changeMatchStatus(false, null);
+                        smgr.changeStadiumName(null);
                         Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                         startActivity(intent);
                         finish();

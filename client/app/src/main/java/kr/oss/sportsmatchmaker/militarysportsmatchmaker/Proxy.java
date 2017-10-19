@@ -4,8 +4,6 @@ import android.content.Context;
 import com.loopj.android.http.*;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
 
 public class Proxy {
     public static final String SERVER_URL = "http://10.53.128.122:14402";
@@ -19,7 +17,12 @@ public class Proxy {
         smgr = new SessionManager(context);
     }
 
-    //POST login
+    /* POST loginUser
+     * input - "id" : id, "pw" : pw
+     * output
+     * "result" : bool
+     * "reason" : String containing reason: PasswordMismatch, NoSuchUserException, MultipleUserException
+     */
     public void login(String id, String pw, JsonHttpResponseHandler handler){
         RequestParams params = new RequestParams();
         params.put("id", id);
@@ -53,36 +56,53 @@ public class Proxy {
         if (byteImage != null) {
             params.put("profPic", new ByteArrayInputStream(byteImage), "profPic.PNG");
         }
-        /*
-        try {
-            params.put("profPic", new File(filePath));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        */
 
         String registerURL = SERVER_URL + "/process/registerUser";
         client.post(registerURL, params, handler);
     }
 
-    //GET getUserInfo, using only cookies
+    /* GET getUserInfo
+     * uses current session data (no param), returns user details (minus password).
+     */
     public void getUserInfo(JsonHttpResponseHandler handler){
         String getInfoURL = SERVER_URL + "/process/getUserInfo";
         client.setCookieStore(smgr.myCookies);
         client.get(getInfoURL, handler);
     }
 
-    //POST searchUser
-    public void searchUser(String queryid, JsonHttpResponseHandler handler){
+    /* POST getUserDetails
+     * input - "id" : user_id (String)
+     * output - JSONObject with the following parameters:
+     * "results" : 성공 여부 (bool, 성공시 true)
+     * "name" : 사용자 이름 (String)
+     * "rank" : 사용자 계급 (int)
+     * "profile_picture" : 프로필 사진 여부 (bool)
+     * "reason" (실패시에) : 실패 이유 (String)
+     */
+    public void getUserDetail(String queryid, JsonHttpResponseHandler handler){
         RequestParams params = new RequestParams();
         params.put("id", queryid);
         client.setCookieStore(smgr.myCookies);
-        String searchURL = SERVER_URL + "/process/searchUserDetails";
+        String searchURL = SERVER_URL + "/process/getUserDetails";
         client.post(searchURL, params, handler);
     }
 
+    /*
+     * POST getUsersDetails
+     * output:
+     * "result", "data" (JSONArray of users), "complete", "omittedUsers" (JSONArray of strings)
+     */
+    public void getUsersDetails(String[] users, JsonHttpResponseHandler handler){
+        RequestParams params = new RequestParams();
+        params.put("users", users);
+        client.setCookieStore(smgr.myCookies);
+        String searchURL = SERVER_URL + "/process/getUsersDetails";
+        client.post(searchURL, params, handler);
+    }
 
-    //POST updateUserInfo with Profile Picture
+    /*
+     * POST updateUserInfo
+     */
     public void updateUserInfo(String id, String pw, String name, int rankid, String unit,
                                int sexid, String fav, String desc, byte[] byteImage,
                                        JsonHttpResponseHandler handler){
@@ -107,7 +127,11 @@ public class Proxy {
      * Match related proxy functions
      */
 
-    //POST requestMatch
+    /*
+     * POST requestMatch
+     * creates a new match with gameType and participants.
+     */
+
     public void requestMatch(String gameType, String participants, JsonHttpResponseHandler handler){
         RequestParams params = new RequestParams();
         params.put("activityType", gameType);
@@ -117,7 +141,23 @@ public class Proxy {
         client.post(requestURL, params, handler);
     }
 
-    //GET get match that user is in (using session id)
+    /*
+     * GET getUserMatch. TODO: get or post?
+     * grabs current session and returns user's match information.
+     * output parameters
+     * "result": 결과 (true/false)
+     * "match": 성공시 Match 정보를 담은 JSONObject.
+        - activityType: 경기 종류
+        - players: 플레이어 목록 (배열)
+        - stadium: 경기장 이름
+        - start_at: 매치 생성 시간
+        - matchId: 매치 고유 ID
+        - initiatorId: 매치 생성자 ID
+        - is_pending: 사용자가 대기중인지 수락했는지 여부.
+     * "reason": 실패 시 사유 (result = false)
+        - NoSuchMatchException
+        - NotLoggedInException
+     */
     public void getUserMatch(JsonHttpResponseHandler handler){
         RequestParams params = new RequestParams();
         String getMatchURL = SERVER_URL + "/process/getUserMatch";
@@ -157,6 +197,10 @@ public class Proxy {
         client.setCookieStore(smgr.myCookies);
         client.get(getProfPicURL, params, handler);
     }
+
+    /*
+     * Stadium related funtions
+     */
 
 
 

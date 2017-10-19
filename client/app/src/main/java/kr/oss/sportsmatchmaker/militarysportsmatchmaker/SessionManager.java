@@ -42,6 +42,7 @@ public class SessionManager {
     public static final String RANK = "rank";
     public static final String IN_MATCH = "inMatch";
     public static final String MATCH_ID = "matchId";
+    public static final String STADIUM_NAME = "stadium";
 
     // Session manager constructor. get application context as input.
     public SessionManager(Context context){
@@ -111,24 +112,24 @@ public class SessionManager {
         }
     }
 
-    public void changeMatchStatus(boolean inMatch){
+    public void changeMatchStatus(boolean inMatch, String id){
         editor.putBoolean(IN_MATCH, inMatch);
-        editor.apply();
-    }
-
-    public void setMatchId(String id){
         editor.putString(MATCH_ID, id);
         editor.apply();
     }
 
+    public void changeStadiumName(String stadiumName){
+        editor.putString(STADIUM_NAME, stadiumName);
+        editor.apply();
+    }
+
     public boolean getMatchStatus(){
-        return (pref != null) && pref.getBoolean(IN_MATCH, false);
+        return pref.getBoolean(IN_MATCH, false);
     }
+    public String getMatchId() { return pref.getString(MATCH_ID, null); }
+    public String getStadiumName() { return pref.getString(STADIUM_NAME, null); }
 
 
-    public String getMatchId(){
-        return pref.getString(MATCH_ID, null);
-    }
 
     // from time to time, check login status and if not logged in, clear editor and logout.
     public void checkLogin(){

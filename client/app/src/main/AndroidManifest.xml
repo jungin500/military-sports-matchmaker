@@ -34,7 +34,8 @@
         <activity android:name=".MatchSettingActivity" />
         <activity android:name=".ReservePlaceActivity" />
         <activity android:name=".EditProfileActivity" />
-        <activity android:name=".QueListActivity"></activity>
+        <activity android:name=".QueListActivity" />
+        <activity android:name=".NotificationExamActivity"></activity>
     </application>
 
 </manifest>
