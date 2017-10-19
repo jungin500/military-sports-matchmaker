@@ -6,6 +6,7 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +57,16 @@ public class CustomAdapter2 extends ArrayAdapter<ListData>{
             idView.setText("");
         }
 
+        if (button.getText().equals("대기중")){
+            button.setBackgroundColor(context.getColor(android.R.color.holo_orange_dark));
+        }
+        else if (button.getText().equals("거절함")){
+            button.setBackgroundColor(context.getColor(android.R.color.holo_red_dark));
+        }
+        else button.setBackgroundColor(context.getColor(android.R.color.holo_green_dark));
+
         return row;
     }
+
+
 }

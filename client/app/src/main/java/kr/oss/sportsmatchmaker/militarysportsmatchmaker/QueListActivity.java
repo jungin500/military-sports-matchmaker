@@ -22,6 +22,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.HttpResponse;
@@ -127,7 +129,7 @@ public class QueListActivity extends AppCompatActivity {
                                         //do i want.. TODO: set profile pic for each player
                                         // add players to list
                                         // add initiator separately
-                                        ListData initData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), acceptPlayers.get(0).toString(), acceptPlayers.get(0).toString(), "리더");
+                                        ListData initData = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), acceptPlayers.get(0).toString(), acceptPlayers.get(0).toString(), "방장");
                                         QueDataArray.add(initData);
                                         for (int i = 1; i < accnum; i++) {
                                             String id = acceptPlayers.get(i).toString();
@@ -222,7 +224,7 @@ public class QueListActivity extends AppCompatActivity {
         acceptMatchButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                proxy.decideMatch(true, new JsonHttpResponseHandler(){
+                proxy.decideMatch("true", new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         for (ListData i : QueDataArray){
@@ -230,17 +232,42 @@ public class QueListActivity extends AppCompatActivity {
                                 i.setButton("수락함");
                             }
                         }
+                        // sort dataset.
+                        Collections.sort(QueDataArray, new Comparator<ListData>() {
+                            @Override
+                            public int compare(ListData o1, ListData o2) {
+                                return help(o1.getButton()) - help(o2.getButton());
+                            }
+
+                            private int help(String str){
+                                if (str.equals("방장")) return 0;
+                                if (str.equals("수락함")) return 1;
+                                if (str.equals("대기중")) return 2;
+                                if (str.equals("거절함")) return 3;
+                                return 4;
+                            }
+                        });
+
+
+                        // remove 수락/거절 버튼
+                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
+                        params.weight = 0f;
+                        acceptMatchButton.setLayoutParams(params);
+                        LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
+                        params.weight = 0f;
+                        rejectMatchButton.setLayoutParams(params);
+
                         customAdapter.notifyDataSetChanged();
                     }
                 });
             }
         });
 
-        //TODO: reject시 reject에 남아있도록 설정.
+        //reject Match 버튼 구현
         rejectMatchButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                proxy.decideMatch(false, new JsonHttpResponseHandler(){
+                proxy.decideMatch("", new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         for (ListData i : QueDataArray){
@@ -249,6 +276,12 @@ public class QueListActivity extends AppCompatActivity {
                             }
                         }
                         customAdapter.notifyDataSetChanged();
+
+                        smgr.setMatchId("null");
+                        smgr.changeMatchStatus(false);
+                        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
                 });
             }

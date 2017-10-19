@@ -101,7 +101,7 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         switch(v.getId()){
             case R.id.searchmatching:
                 if (smgr.getMatchStatus()){
-                    Toast.makeText(getApplicationContext(), "현재 큐의 승낙상태를 확인합니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "현재 큐의 승락상태를 확인합니다.", Toast.LENGTH_SHORT).show();
                     Intent intent4 = new Intent(getApplicationContext(), QueListActivity.class);
                     startActivity(intent4);
                     return;
@@ -123,6 +123,9 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                 break;
             //장소 고르기
             default:
+                Toast.makeText(getApplicationContext(), "임시..", Toast.LENGTH_SHORT).show();
+                Intent intent5 = new Intent(getApplicationContext(), MatchCompleteActivity.class);
+                startActivity(intent5);
                 break;
             //임시 사진 선택
         }
@@ -256,65 +259,6 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
             }
         });
     }
-/*
-    private void setHomeMenu(ListView homeMenu){
-        ArrayList<HashMap<String, String>> hashMapMenuList = new ArrayList<HashMap<String,String>>();
-        HashMap<String, String> menu1 = new HashMap<String, String>();
-        menu1.put("line1", "전투체육 같이 할 사람 찾기");
-        menu1.put("line2", "종목을 고르시면 자동으로 팀원과 상대방을 찾아드립니다.");
-        hashMapMenuList.add(menu1);
-        HashMap<String, String> menu2 = new HashMap<String, String>();
-        menu2.put("line1", "전투체육 활동 등록 및 장소 예약");
-        menu2.put("line2", "이미 사람을 다 모으셨나요? 장소를 잡아드립니다.");
-        hashMapMenuList.add(menu2);
-        HashMap<String, String> menu3 = new HashMap<String, String>();
-        menu3.put("line1", "전투체육 일지");
-        menu3.put("line2", "전우님의 전투체육 참여 현황을 편리하게 볼 수 있습니다.");
-        hashMapMenuList.add(menu3);
-        HashMap<String, String> menu4 = new HashMap<String, String>();
-        menu4.put("line1", "프로필 수정");
-        menu4.put("line2", "개인 프로필 정보를 변경합니다.");
-        hashMapMenuList.add(menu4);
-        String[] from = {"line1", "line2"};
-        int[] to = {android.R.id.text1, android.R.id.text2};
-        menuAdapter = new SimpleAdapter(this, hashMapMenuList, android.R.layout.simple_list_item_2, from, to);
-        homeMenu.setAdapter(menuAdapter);
-    }
-*/
-/*
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        switch (parent.getId()){
-            case R.id.home_menu:
-                switch(position){
-                    case 0:
-                        if (smgr.getMatchStatus()){
-                            Toast.makeText(getApplicationContext(), "이미 시합 대기중이십니다.", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        Intent intent = new Intent(getApplicationContext(), ChooseSportActivity.class);
-                        startActivity(intent);
-                        break;
-                    //TODO: 구현
-                    case 1:
-                        Intent intent1 = new Intent(getApplicationContext(), ReservePlaceActivity.class);
-                        startActivity(intent1);
-                        break;
-                    //프로필 수정
-                    case 3:
-                        Intent intent3 = new Intent(getApplicationContext(), EditProfileActivity.class);
-                        startActivity(intent3);
-                        break;
-                    //장소 고르기
-                    default:
-                        Intent intent4 = new Intent(getApplicationContext(), SelectProfileActivity.class);
-                        startActivity(intent4);
-                        break;
-                    //임시 사진 선택
-                }
-                break;
-        }
-    }
-    */
+
 
 }

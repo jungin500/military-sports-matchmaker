@@ -161,7 +161,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="1.8"
                 android:background="@android:color/holo_blue_light"
-                android:text="무슨 기능을 넣을까?"
+                android:text="임시 버튼"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
                 android:textStyle="bold" />
