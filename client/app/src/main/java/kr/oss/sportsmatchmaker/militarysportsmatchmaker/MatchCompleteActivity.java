@@ -1,5 +1,6 @@
 package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -7,6 +8,8 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -43,6 +46,10 @@ public class MatchCompleteActivity extends AppCompatActivity{
     ArrayList<ListData2> leftTeamUsers;
     ArrayList<ListData2> rightTeamUsers;
 
+
+    // flag
+    boolean numdiff;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +59,7 @@ public class MatchCompleteActivity extends AppCompatActivity{
 
         smgr = new SessionManager(getApplicationContext());
         proxy = new Proxy(getApplicationContext());
+        numdiff = false;
 
         final TextView stadium = (TextView) findViewById(R.id.stadium);
         final TextView teamName1 = (TextView) findViewById(R.id.teamname1);
@@ -83,11 +91,10 @@ public class MatchCompleteActivity extends AppCompatActivity{
                     if (result) {
                         stadium.setText("장소: " + smgr.getStadiumName() + ", 시간: 2017년 10월 20일 16시 00분");
 
-                        //TODO: size 여러개의 team. 일단은 size 1들만 있다고 하자.
                         JSONArray leftTeam = response.getJSONArray("leftTeam");
                         JSONArray rightTeam = response.getJSONArray("rightTeam");
 
-                        String myid = smgr.getProfile().get(smgr.ID);
+                        String myid = smgr.getProfile().get(SessionManager.ID);
                         boolean myTeamisLeft = false;
                         for (int i = 0; i < leftTeam.length(); i++){
                             JSONArray leftTeami = leftTeam.getJSONObject(i).getJSONArray("players");
@@ -137,7 +144,10 @@ public class MatchCompleteActivity extends AppCompatActivity{
                         final String[] leftArray = leftTeamPlayers.toArray(new String[leftTeamPlayers.size()]);
                         final String[] rightArray = rightTeamPlayers.toArray(new String[rightTeamPlayers.size()]);
 
+                        final int leftTotalNum = leftArray.length + leftTeamAnons.size();
+                        final int rightTotalNum = rightArray.length + rightTeamAnons.size();
 
+                        numdiff = (leftTotalNum != rightTotalNum);
                         // leftTeam UI 불러오기
                         proxy.getUsersDetails(leftArray, new JsonHttpResponseHandler(){
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -162,7 +172,7 @@ public class MatchCompleteActivity extends AppCompatActivity{
                                             leftTeamUsers.add(listData);
                                         }
 
-                                        Collections.sort(leftTeamUsers, new ListData2.data2Comparator());
+                                        Collections.sort(leftTeamUsers, new ListData2.data2RankComparator());
                                         leftAdapter.notifyDataSetChanged();
                                         // 리더 UI 초기화.
 
@@ -179,7 +189,7 @@ public class MatchCompleteActivity extends AppCompatActivity{
                                                         String leaderName = response.getString("name");
 
                                                         teamName1.setText("주장: " + leaderRank + " " + leaderName);
-                                                        teamProfile1.setText("총원: " + String.valueOf(leftArray.length) + "명");
+                                                        teamProfile1.setText("총원: " + String.valueOf(leftTotalNum) + "명");
 
                                                         // add picture and notifyDataSetChanged();
                                                         if (response.getBoolean("profile_image")){
@@ -251,7 +261,7 @@ public class MatchCompleteActivity extends AppCompatActivity{
                                             rightTeamUsers.add(listData);
                                         }
 
-                                        Collections.sort(rightTeamUsers, new ListData2.data2Comparator());
+                                        Collections.sort(rightTeamUsers, new ListData2.data2RankComparator());
                                         rightAdapter.notifyDataSetChanged();
                                         // 리더 UI 초기화.
 
@@ -268,7 +278,7 @@ public class MatchCompleteActivity extends AppCompatActivity{
                                                         String leaderName = response.getString("name");
 
                                                         teamName2.setText("주장: " + leaderRank + " " + leaderName);
-                                                        teamProfile2.setText("총원: " + String.valueOf(rightArray.length) + "명");
+                                                        teamProfile2.setText("총원: " + String.valueOf(rightTotalNum) + "명");
 
                                                         // add picture and notifyDataSetChanged();
                                                         if (response.getBoolean("profile_image")){
@@ -309,14 +319,23 @@ public class MatchCompleteActivity extends AppCompatActivity{
                                     }
                                     else {
                                         Log.e("TAG", "getUsersDetails failed");
+                                        // run if all of right team are anons
+                                        if (rightTeamAnons.size() > 0) {
+                                            for (int j = 0; j < rightTeamAnons.size(); j++) {
+                                                String currAnon = rightTeamAnons.get(j);
+                                                ListData2 listData = new ListData2(false, currAnon.split("_")[1] + " 의 동료", currAnon, "");
+                                                rightTeamUsers.add(listData);
+                                            }
+                                            rightAdapter.notifyDataSetChanged();
+                                            teamName2.setText("주장: " + rightTeamAnons.get(0).split("_")[1] + "의 동료");
+                                            teamProfile2.setText("총원: " + String.valueOf(rightTeamAnons.size()) + "명");
+                                        }
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
                             }
                         });
-
-
                         // UI 초기화 끝
 
                     }
@@ -326,21 +345,18 @@ public class MatchCompleteActivity extends AppCompatActivity{
                         String reason = response.getString("reason");
                         if (reason.equals("NoSuchStadiumException")){
                             Log.e("SMGR_ERROR", "Data corrupt, smgr stadium does not exist");
-                            return;
                         }
                         else if (reason.equals("PreparingNotReadyException")){
                             Toast.makeText(getApplicationContext(), "아직 경기를 찾지 못했습니다.", Toast.LENGTH_SHORT).show();
-                            return;
                         }
                         else {
                             Log.e("Unidentified error:", reason);
-                            return;
                         }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            }
+                }
         });
     }
 }

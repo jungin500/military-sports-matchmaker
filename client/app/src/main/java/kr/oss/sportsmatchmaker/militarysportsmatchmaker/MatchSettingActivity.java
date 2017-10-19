@@ -154,14 +154,31 @@ public class MatchSettingActivity extends AppCompatActivity {
                     boolean success = response.getBoolean("result");
                     if (success) {
                         Toast.makeText(getApplicationContext(), "큐 진입 성공!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                        finish();
                     }
                     else {
-                        Toast.makeText(getApplicationContext(), response.getString("reason"), Toast.LENGTH_SHORT).show();
+                        String failReason = response.getString("reason");
+                        if (failReason.equals("MatchAlreadyExistsException")){
+                            Toast.makeText(getApplicationContext(), "이미 큐에 들어가있습니다.", Toast.LENGTH_SHORT).show();
+                        }
+                        else if (failReason.equals("SubuserAlreadyInMatchException")){
+                            Toast.makeText(getApplicationContext(), "초대받은 멤버중 이미 큐에 들어간 멤버가 있습니다.", Toast.LENGTH_SHORT).show();
+                        }
+
+                        else if (failReason.equals("NoMatchingStadiumException")){
+                            Toast.makeText(getApplicationContext(), "운동에 해당하는 경기장이 소속대에 없습니다.", Toast.LENGTH_SHORT).show();
+                        }
+                        else if (failReason.equals("FailedAssigningStadiumException")){
+                            Toast.makeText(getApplicationContext(), "들어갈 수 있는 경기장이 없습니다.", Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "매치 생성에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                        }
+                        Log.e("requestMatch Error:", response.getString("reason"));
                     }
+                    Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                    finish();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

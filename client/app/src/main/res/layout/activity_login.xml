@@ -63,7 +63,6 @@
                     android:hint="@string/prompt_goonbun"
                     android:inputType="numberSigned"
                     android:maxLines="1"
-                    android:singleLine="true"
                     android:textColorLink="@android:color/holo_blue_light" />
             </android.support.design.widget.TextInputLayout>
 
@@ -81,7 +80,6 @@
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:singleLine="true"
                     android:textColorLink="@android:color/holo_blue_light" />
 
             </android.support.design.widget.TextInputLayout>

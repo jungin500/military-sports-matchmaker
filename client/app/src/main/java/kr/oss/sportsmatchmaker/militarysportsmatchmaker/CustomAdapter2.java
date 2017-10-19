@@ -32,7 +32,6 @@ public class CustomAdapter2 extends ArrayAdapter<ListData2>{
     private Context context;
     private int layoutResource;
     private ArrayList<ListData2> listData;
-    private SessionManager smgr;
     private Proxy proxy;
 
     public CustomAdapter2(Context context, int layoutResource, ArrayList<ListData2> listData) {
@@ -45,7 +44,6 @@ public class CustomAdapter2 extends ArrayAdapter<ListData2>{
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent){
-        smgr = new SessionManager(context);
         proxy = new Proxy(context);
 
         View row = convertView;
@@ -83,7 +81,6 @@ public class CustomAdapter2 extends ArrayAdapter<ListData2>{
             button.setVisibility(View.GONE);
         }
 
-        //TODO: show picture
         if (listData.get(position).getExistPic()){
             proxy.getProfPic(listData.get(position).getId(), new FileAsyncHttpResponseHandler(context) {
                 public void onSuccess(int i, Header[] headers, File file){

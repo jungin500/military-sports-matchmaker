@@ -48,7 +48,7 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
     private TextView textQStatus;
     private Button matching;
     private Button reserve;
-    private Button note;
+    private Button viewGame;
     private Button edit;
     private ImageView homepro;
 
@@ -78,33 +78,35 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
 
         smgr = new SessionManager(getApplicationContext());
         proxy = new Proxy(getApplicationContext());
+        smgr.checkSession();
 
         // 위젯들 사용하기 위한 코드
         logoutButton = (Button) findViewById(R.id.logout);
         textWelcome = (TextView) findViewById(R.id.home_welcome);
         matching = (Button) findViewById(R.id.searchmatching);
         reserve = (Button) findViewById(R.id.reserveplace);
-        note = (Button) findViewById(R.id.notepad);
+        reserve.setOnClickListener(this);
+
+        viewGame = (Button) findViewById(R.id.viewGame);
+        viewGame.setOnClickListener(this);
         edit = (Button) findViewById(R.id.profileedit);
         homepro = (ImageView) findViewById(R.id.homeprofile);
 
 
         matching.setOnClickListener(this);
         reserve.setOnClickListener(this);
-        note.setOnClickListener(this);
         edit.setOnClickListener(this);
         homepro.setImageResource(R.drawable.img_defaultface);
 
 
         final String id = smgr.getProfile().get(SessionManager.ID);
 
-
-
         /*
          사용자 이미지를 불러오는데 없을경우 DefaultImage를 불러온다
          */
         updateTextWelcome();
         updateProfileImage();
+        displayMatchStatus();
 
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,7 +115,6 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                 finish();
             }
         });
-
         /*
          큐 상태 메세지
          */
@@ -149,10 +150,11 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                 startActivity(intent3);
                 break;
             //장소 고르기
-            case R.id.notepad:
-                Toast.makeText(getApplicationContext(), "임시..", Toast.LENGTH_SHORT).show();
-                Intent intent5 = new Intent(getApplicationContext(), MatchCompleteActivity.class);
-                startActivity(intent5);
+            case R.id.viewGame:
+                if (viewGame.getText().equals("경기 정보")){
+                    Intent intent5 = new Intent(getApplicationContext(), MatchCompleteActivity.class);
+                    startActivity(intent5);
+                }
                 break;
             default:
                 break;//임시 사진 선택
@@ -163,6 +165,8 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
      매치상태에 따라 버튼의 내용를 바꾼다. 그리고 그에 대한 기능들도 바뀐다
      */
     private void displayMatchStatus(){
+        viewGame.setBackgroundColor(getColor(android.R.color.darker_gray));
+        viewGame.setText("경기 찾는 중...");
         textQStatus = (TextView) findViewById(R.id.home_qstatus);
         final String id = smgr.getProfile().get(SessionManager.ID);
 
@@ -222,6 +226,8 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                                                     // Case 3. 경기를 찾았다!!!
                                                     if (result) {
                                                         textQStatus.setText("경기를 찾았습니다!\n경기 정보를 확인하세요.");
+                                                        viewGame.setBackgroundColor(getColor(android.R.color.holo_blue_dark));
+                                                        viewGame.setText("경기 정보");
                                                     }
                                                 } catch (JSONException e) {
                                                     e.printStackTrace();

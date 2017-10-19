@@ -111,19 +111,14 @@
             android:layout_weight="0.2"
             android:background="#00FF0000" />
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="5"
-            android:fillViewport="true">
 
             <ListView
                 android:id="@+id/quelist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:divider="#00FF0000"
-                android:dividerHeight="16dp" />
-        </ScrollView>
+                android:dividerHeight="16dp"
+                android:fillViewport="true"/>
     </LinearLayout>
     </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>

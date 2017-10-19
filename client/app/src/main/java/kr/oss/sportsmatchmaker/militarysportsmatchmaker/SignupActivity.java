@@ -115,8 +115,6 @@ public class SignupActivity extends AppCompatActivity {
         unitView.setSelection(0);
 
         idCheckButton = (Button) findViewById(R.id.signup_idcheck);
-        // TODO: FIX SPAGHETTI
-        Log.e("TAG", "0");
         idCheckButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,7 +123,6 @@ public class SignupActivity extends AppCompatActivity {
                 proxy.idCheck(id, new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        Log.e("TAG", "1");
                         try {
                             if (response.getBoolean("result")){
                                 Toast.makeText(getApplicationContext(), "이미 사용된 군번입니다.", Toast.LENGTH_SHORT).show();
@@ -135,19 +132,16 @@ public class SignupActivity extends AppCompatActivity {
                                 idFlag = true;
                             }
                         } catch (JSONException e) {
-                            Log.e("TAG", "2");
                             e.printStackTrace();
                         }
                     }
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                        Log.e("TAG", "3");
                         Toast.makeText(getApplicationContext(), "서버 접속 실패", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onFinish() {
-                        Log.e("TAG", "4");
                         idCheckButton.setVisibility(View.VISIBLE);
                     }
                 });
@@ -162,12 +156,10 @@ public class SignupActivity extends AppCompatActivity {
         profPic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("TAG", "5");
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
                 intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), GET_PICTURE_URI);
-                Log.e("TAG", "6");
             }
         });
 
@@ -175,7 +167,6 @@ public class SignupActivity extends AppCompatActivity {
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.e("TAG", "7");
                 final String id = idView.getText().toString();
                 final String pw = pwView.getText().toString();
                 String pw2 = pwView2.getText().toString();
@@ -212,7 +203,7 @@ public class SignupActivity extends AppCompatActivity {
                     pwView2.requestFocus();
                     return;
                 }
-                /*TODO: 이거 다시 만들기
+                /*
                 if (pw.length() < 6){
                     pwView.setError("비밀번호가 너무 짧습니다.");
                     pwView.requestFocus();

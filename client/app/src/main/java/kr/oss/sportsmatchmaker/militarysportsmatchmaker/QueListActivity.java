@@ -122,45 +122,103 @@ public class QueListActivity extends AppCompatActivity {
                                             gameTypeKor = "농구";
 
 
-                                        // Choose which buttons to show.
-                                        // TODO: disable button
-
-
+                                        // Choose which buttons to show and activate.
                                         // Case 1. Initiator => show quitMatch button.
                                         final String initiatorId = match.getString("initiatorId");
                                         if (id.equals(initiatorId)) {
                                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                                             params.weight = 0.3f;
                                             quitMatchButton.setLayoutParams(params);
+                                            quitMatchButton.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    onClickDelete(v);
+                                                }
+                                            });
+
                                             LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
                                             params2.weight = 0.0f;
                                             acceptMatchButton.setLayoutParams(params2);
+                                            acceptMatchButton.setOnClickListener(new OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    onClickDefault(v);
+                                                }
+                                            });
+
                                             LinearLayout.LayoutParams params3 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
                                             params3.weight = 0.0f;
                                             rejectMatchButton.setLayoutParams(params3);
+                                            rejectMatchButton.setOnClickListener(new OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    onClickDefault(v);
+                                                }
+                                            });
                                         }
                                         else if (match_status.equals("pending")){
                                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                                             params.weight = 0.0f;
                                             quitMatchButton.setLayoutParams(params);
+                                            quitMatchButton.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    onClickDefault(v);
+                                                }
+                                            });
+
                                             LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
                                             params2.weight = 0.2f;
                                             acceptMatchButton.setLayoutParams(params2);
+                                            acceptMatchButton.setOnClickListener(new OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    onClickAccept(v);
+                                                    customAdapter.notifyDataSetChanged();
+                                                }
+                                            });
+
                                             LinearLayout.LayoutParams params3 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
                                             params3.weight = 0.2f;
                                             rejectMatchButton.setLayoutParams(params3);
+                                            rejectMatchButton.setOnClickListener(new OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    onClickReject(v);
+                                                }
+                                            });
                                         }
                                         // i accepted => show reject button.
                                         else if (match_status.equals("matching")){
                                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                                             params.weight = 0.0f;
                                             quitMatchButton.setLayoutParams(params);
+                                            quitMatchButton.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    onClickDefault(v);
+                                                }
+                                            });
+
                                             LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
                                             params2.weight = 0.0f;
                                             acceptMatchButton.setLayoutParams(params2);
+                                            acceptMatchButton.setOnClickListener(new OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    onClickDefault(v);
+                                                }
+                                            });
+
                                             LinearLayout.LayoutParams params3 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
                                             params3.weight = 0.3f;
                                             rejectMatchButton.setLayoutParams(params3);
+                                            rejectMatchButton.setOnClickListener(new OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    onClickReject(v);
+                                                }
+                                            });
                                         }
                                         JSONArray acceptPlayers = match.getJSONArray("players");
                                         JSONArray pendingPlayers = match.getJSONArray("pendingPlayers");
@@ -242,11 +300,6 @@ public class QueListActivity extends AppCompatActivity {
                             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                                 textQStatus.setText("매치 정보를 가져오지 못했습니다. 다시 접속해주세요.");
                             }
-
-                            @Override
-                            public void onPostProcessResponse(ResponseHandlerInterface instance, HttpResponse response) {
-                                super.onPostProcessResponse(instance, response);
-                            }
                         });
                     }
 
@@ -257,49 +310,13 @@ public class QueListActivity extends AppCompatActivity {
         });
 
 
+
+
         // set quitMatch listener
         quitMatchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // do nothing if not in match
-                if (!smgr.getMatchStatus()){
-                    return;
-                }
-                String matchId = smgr.getMatchId();
-
-                proxy.deleteMatch(matchId, new JsonHttpResponseHandler(){
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        try {
-                            if(response.getBoolean("result")){
-                                smgr.changeMatchStatus(false, null);
-                                smgr.changeStadiumName(null);
-                                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }
-                            else{
-                                String reason = response.getString("reason");
-                                if (reason.equals("ForbiddenOperationException")){
-                                    Toast.makeText(getApplicationContext(), "삭제 권한이 없습니다.", Toast.LENGTH_SHORT).show();
-                                }
-                                else if (reason.equals("NoSuchMatchException")){
-                                    Toast.makeText(getApplicationContext(), "진행중인 큐가 없습니다..", Toast.LENGTH_SHORT).show();
-                                }
-                                else if (reason.equals("NotLoggedInException")){
-                                    Toast.makeText(getApplicationContext(), "로그인되어있지 않습니다.", Toast.LENGTH_SHORT).show();
-                                    smgr.checkSession();
-                                }
-                                else {
-                                    Toast.makeText(getApplicationContext(), "실패했습니다. 오류 종류: " + reason, Toast.LENGTH_SHORT).show();
-                                    Log.e("deleteMatch error", reason);
-                                }
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+                onClickDelete(v);
             }
         });
 
@@ -307,29 +324,8 @@ public class QueListActivity extends AppCompatActivity {
         acceptMatchButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                proxy.decideMatch("true", new JsonHttpResponseHandler(){
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        for (ListData2 i : QueDataArray){
-                            if (id.equals(i.getId())){
-                                i.setButton("수락함");
-                            }
-                        }
-                        // sort dataset.
-                        Collections.sort(QueDataArray, new ListData2.data2Comparator());
-
-
-                        // remove 수락/거절 버튼
-                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
-                        params.weight = 0f;
-                        acceptMatchButton.setLayoutParams(params);
-                        LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
-                        params.weight = 0f;
-                        rejectMatchButton.setLayoutParams(params);
-
-                        customAdapter.notifyDataSetChanged();
-                    }
-                });
+                onClickAccept(v);
+                customAdapter.notifyDataSetChanged();
             }
         });
 
@@ -337,29 +333,95 @@ public class QueListActivity extends AppCompatActivity {
         rejectMatchButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                proxy.decideMatch("", new JsonHttpResponseHandler(){
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        for (ListData2 i : QueDataArray){
-                            if (id.equals(i.getId())){
-                                i.setButton("거절함");
-                            }
-                        }
-                        customAdapter.notifyDataSetChanged();
+                onClickReject(v);
+            }
+        });
+
+        customAdapter.notifyDataSetChanged();
+    }
+
+    // Three different "onclick"s here that we will employ.
+    private void onClickDefault(View v){
+    }
+
+    private void onClickDelete(View v){
+        // do nothing if not in match
+        if (!smgr.getMatchStatus()){
+            return;
+        }
+        String matchId = smgr.getMatchId();
+
+        proxy.deleteMatch(matchId, new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    if(response.getBoolean("result")){
                         smgr.changeMatchStatus(false, null);
                         smgr.changeStadiumName(null);
                         Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                         startActivity(intent);
                         finish();
                     }
-                });
+                    else{
+                        String reason = response.getString("reason");
+                        if (reason.equals("ForbiddenOperationException")){
+                            Toast.makeText(getApplicationContext(), "삭제 권한이 없습니다.", Toast.LENGTH_SHORT).show();
+                        }
+                        else if (reason.equals("NoSuchMatchException")){
+                            Toast.makeText(getApplicationContext(), "진행중인 큐가 없습니다..", Toast.LENGTH_SHORT).show();
+                        }
+                        else if (reason.equals("NotLoggedInException")){
+                            Toast.makeText(getApplicationContext(), "로그인되어있지 않습니다.", Toast.LENGTH_SHORT).show();
+                            smgr.checkSession();
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "실패했습니다. 오류 종류: " + reason, Toast.LENGTH_SHORT).show();
+                            Log.e("deleteMatch error", reason);
+                            smgr.checkSession();
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
+    }
+
+    private void onClickAccept(View v){
+        proxy.decideMatch("true", new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                String id = smgr.getProfile().get(SessionManager.ID);
+                for (ListData2 i : QueDataArray){
+                    if (id.equals(i.getId())){
+                        i.setButton("수락함");
+                    }
+                }
+                // sort dataset.
+                Collections.sort(QueDataArray, new ListData2.data2Comparator());
 
 
+                // remove 수락/거절 버튼
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
+                params.weight = 0f;
+                acceptMatchButton.setLayoutParams(params);
+                LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
+                params.weight = 0f;
+                rejectMatchButton.setLayoutParams(params);
+            }
+        });
+    }
 
-
-
-        customAdapter.notifyDataSetChanged();
+    private void onClickReject(View v){
+        proxy.decideMatch("", new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                smgr.changeMatchStatus(false, null);
+                smgr.changeStadiumName(null);
+                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 }
