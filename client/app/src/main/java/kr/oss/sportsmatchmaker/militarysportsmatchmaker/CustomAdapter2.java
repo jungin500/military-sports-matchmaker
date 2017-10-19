@@ -80,7 +80,6 @@ public class CustomAdapter2 extends ArrayAdapter<ListData2>{
         if (listData.get(position).getExistPic()){
             proxy.getProfPic(listData.get(position).getId(), new FileAsyncHttpResponseHandler(context) {
                 public void onSuccess(int i, Header[] headers, File file){
-                    Log.e("TAG", "Passed "+ listData.get(position).getId());
                     String filePath = file.getAbsolutePath();
                     Bitmap bitmap = BitmapFactory.decodeFile(filePath);
                     RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(context.getResources(), bitmap);

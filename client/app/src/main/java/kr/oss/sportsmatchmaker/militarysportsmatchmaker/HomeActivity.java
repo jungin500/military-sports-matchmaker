@@ -164,7 +164,9 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                                         JSONObject match = response.getJSONObject("match");
                                         // set match status and match id on session manager.
                                         smgr.changeMatchStatus(true, match.getString("matchId"));
-                                        smgr.changeStadiumName(match.getString("stadium"));
+                                        JSONObject stadium = match.getJSONObject("stadium");
+                                        String stadium_name = stadium.getString("name");
+                                        smgr.changeStadiumName(stadium_name);
 
                                         // Case 2의 코드 부분.
                                         JSONArray acceptPlayers = match.getJSONArray("players");
@@ -174,16 +176,31 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
 
                                         // Case 2-1. 매치 수락 대기중이다.
                                         if (match_status.equals("pending")){
-                                            textQStatus.setText("큐 초대가 있습니다. \n큐 상태를 확인하고 수락/거절 여부를 선택해주세요.");
+                                            textQStatus.setText("큐 초대가 있습니다.\n큐 상태를 확인하고 수락/거절 여부를 선택해주세요.");
                                         }
                                         // Case 2-2. 매치를 수락했고 수락 대기인원이 있다.
                                         else if (pendnum > 0){
-                                            textQStatus.setText(String.valueOf(accnum + pendnum) + "명 중 " + String.valueOf(pendnum) + "명이 수락 대기중입니다. \n큐 상태를 확인하세요.");
+                                            textQStatus.setText(String.valueOf(accnum + pendnum) + "명 중 " + String.valueOf(pendnum) + "명이 수락 대기중입니다.\n큐 상태를 확인하세요.");
                                         }
                                         // Case 2-3. 매치를 수락했고 수락 대기인원이 없다 => 경기 찾는 중이다.
                                         else {
-                                            textQStatus.setText("경기를 찾는 중입니다. \n큐 상태를 확인하세요.");
+                                            textQStatus.setText("경기를 찾는 중입니다.\n큐 상태를 확인하세요.");
                                         }
+                                        // Case 3. 경기를 찾았다!!!
+                                        proxy.prepareMatchingTeamStadium(smgr.getStadiumName(), new JsonHttpResponseHandler() {
+                                            @Override
+                                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                                try {
+                                                    boolean result = response.getBoolean("result");
+                                                    // 매칭 성공
+                                                    if (result) {
+                                                        textQStatus.setText("경기를 찾았습니다!\n경기 정보를 확인하세요.");
+                                                    }
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
 
                                     }
                                     else {
@@ -199,10 +216,6 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                                 textQStatus.setText("매치 정보를 가져오지 못했습니다. 다시 접속해주세요.");
                             }
 
-                            @Override
-                            public void onPostProcessResponse(ResponseHandlerInterface instance, HttpResponse response) {
-                                super.onPostProcessResponse(instance, response);
-                            }
                         });
                     }
                 } catch (JSONException e) {
