@@ -8,46 +8,102 @@
     tools:context="kr.oss.sportsmatchmaker.militarysportsmatchmaker.MatchSettingActivity">
 
 
+    <TextView
+        android:id="@+id/blacnk1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFD3D9FD" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#FFD3D9FD"
         android:orientation="horizontal">
 
         <EditText
             android:id="@+id/playerNumber"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.3"
+            android:layout_weight="0.2"
             android:ems="10"
+            android:gravity="center"
             android:hint="참가 인원"
-            android:inputType="number" />
+            android:inputType="number"
+            android:textColor="#FF423E3E"
+            android:textColorHint="#FF423E3E" />
+
+        <TextView
+            android:id="@+id/blank5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.01" />
 
         <Button
             android:id="@+id/player_show"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.2"
-            android:text="새로고침" />
+            android:layout_weight="0.15"
+            android:background="@drawable/border2"
+            android:text="새로고침"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textView11"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.01" />
 
         <CheckBox
             android:id="@+id/sameTeam"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.3"
-            android:text="같은 팀으로" />
+            android:layout_weight="0.2"
+            android:buttonTint="#FF423E3E"
+            android:text="같은 팀으로"
+            android:textColor="#FF423E3E"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/enterQueue"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.2"
-            android:text="큐 진입" />
+            android:layout_weight="0.15"
+            android:background="@drawable/border2"
+            android:text="큐 진입"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textView12"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.01" />
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/listview1"
+    <TextView
+        android:id="@+id/blank2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        android:background="#FFD3D9FD" />
+
+    <TextView
+        android:id="@+id/blank"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#00FF0000" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <ListView
+            android:id="@+id/listview1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:dividerHeight="16dp"
+            android:divider="#00FF0000"
+            android:layout_gravity="center" />
+    </ScrollView>
 
 </LinearLayout>
