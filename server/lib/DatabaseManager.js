@@ -33,11 +33,13 @@ var Model = {
 * @param {express} app Express Application
 */
 var connectDB = function (app) {
-    var databaseUrl = 'mongodb://military-sports-matchmaker:622dfe4f39c220a76ec78eabd75e609b@ds125335.mlab.com:25335/heroku_w2n7bnmn';
+    // var databaseUrl = 'mongodb://military-sports-matchmaker:622dfe4f39c220a76ec78eabd75e609b@ds125335.mlab.com:25335/heroku_w2n7bnmn';
+    var databaseUrl = 'mongodb://localhost:27017/matching';
     mongoose.Promise = global.Promise;
     mongoose.connect(databaseUrl, { useMongoClient: true });
     database = mongoose.connection;
 
+    database.on('unhandledException', function() { console.log('123a'); });
     database.on('error', console.error.bind(console, '[심각] MongoDB 연결 오류'));
     database.on('open', function () {
         console.log('[정보] MongoDB 연결 성공');
@@ -206,6 +208,7 @@ var createSchema = function () {
     };
 
     var getUsersDetails = function (userIdList, callback) {
+
         this.find({ id: { $in: userIdList } }, function (err, result) {
             if (!mongoErrorCallbackCheck(err, callback)) return;
 
@@ -216,15 +219,13 @@ var createSchema = function () {
                 data: resultSet
             };
 
-            // 모두 받아와졌는지 확인
             var resultUsersList = [];
             if (!(resultObj.complete = (userIdList.length > result.length) ? false : true)) {
                 // 만약 하나라도 없으면?
-                for (var resultIdx in result)
-                    resultUsersList.push(result[resultIdx].id);
+                for (var resIdx = 0; resIdx < result.length; resIdx++)
+                    resultUsersList.push(result[resIdx].id);
 
-                var omittedUsers = at.without(userIdList, resultUsersList)._data;
-                resultObj.omittedUsers = omittedUsers;
+                resultObj.omittedUsers = at(userIdList).without(resultUsersList).val();
             }
             for (var i = 0; i < result.length; i++) {
                 // 민감한 정보 제거
@@ -297,7 +298,7 @@ var createSchema = function () {
             callback({
                 result: true,
                 existingUser: data,
-                notFoundUser: at(ids).without(data)._data
+                notFoundUser: at(ids).without(data).val()
             });
         });
     };
@@ -427,6 +428,8 @@ var createSchema = function () {
                             return leftStadiumLeft == rightStadiumLeft ? 0 :
                                 leftStadiumLeft < rightStadiumLeft ? -1 : 1;
                         });
+
+                        console.dir(result);    
 
                         // 있는 것들중에서 가장 낮은수의 남은 Player의 Stadium부터 Assign.
                         for (var i = 0; i < result.length; i++) {
