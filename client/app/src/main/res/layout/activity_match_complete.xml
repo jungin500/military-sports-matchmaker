@@ -80,8 +80,7 @@
         android:layout_weight="0.4"
         android:background="@drawable/border"
         android:gravity="center"
-        android:text="정보통신학교 연병장
-2017-10-20 16:00" />
+        android:text="정보통신학교 연병장 2017-10-20 16:00" />
 
 
     <LinearLayout

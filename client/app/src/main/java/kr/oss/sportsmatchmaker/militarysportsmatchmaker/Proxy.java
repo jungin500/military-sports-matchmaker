@@ -214,7 +214,7 @@ public class Proxy {
     public void getUserStadium(JsonHttpResponseHandler handler){
         String getUserStadiumURL = SERVER_URL + "/process/getUserStadium";
         client.setCookieStore(smgr.myCookies);
-        client.post(getUserStadiumURL, handler);
+        client.get(getUserStadiumURL, handler);
     }
 
 }
