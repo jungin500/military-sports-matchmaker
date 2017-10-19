@@ -397,7 +397,7 @@ router.route('/process/decideMatch').post(function (req, res) {
                 result: false,
                 reason: 'NotInMatchException'
             });
-        else if (result.match_status == 'matching')
+        else if (result.match_status == 'matching' && isParticipating)
             res.json({
                 result: false,
                 reason: 'AleradyInMatchException'
