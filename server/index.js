@@ -79,7 +79,7 @@ var storage = multer.diskStorage({
     filename: function (req, file, callback) {
         var split = file.originalname.split('.');
         var extension = split[split.length - 1];
-        var randomId = crypto.randomBytes(size).toString('hex');
+        var randomId = crypto.randomBytes(24).toString('hex');
 
         callback(null, randomId + '.' + extension);
     }
@@ -193,9 +193,9 @@ router.route('/process/logoutUser').get(function (req, res) {
 
 router.route('/process/checkExistingUser').post(function (req, res) {
     // 기존 회원 ID를 확인한다.
-    var userInfo = {
-        id: req.body.id
-    };
+
+    var id = req.body.id;
+    if (!id) { sendIllegalParameters(req, res); return; }
 
     DatabaseManager.Model.user.findId(userInfo, function (result) {
         if (result.result)
@@ -211,7 +211,10 @@ router.route('/process/checkExistingUser').post(function (req, res) {
 router.route('/process/getUserDetails').post(function (req, res) {
     if (!checkAndSendLoggedIn(req, res)) return;
 
-    DatabaseManager.Model.user.findId({ id: req.body.id }, function (result) {
+    var id = req.body.id;
+    if (!id) { sendIllegalParameters(req, res); return; }
+
+    DatabaseManager.Model.user.findId({ id: id }, function (result) {
         if (result.result)
             res.json({
                 result: true,
@@ -231,15 +234,8 @@ router.route('/process/getUserDetails').post(function (req, res) {
 router.route('/process/getUsersDetails').post(function (req, res) {
     if (!checkAndSendLoggedIn(req, res)) return;
 
-    var users;
-    if (!(users = req.body.users)) {
-        res.json({
-            result: false,
-            reason: 'NoUserSpecifiedException'
-        });
-        res.end();
-        return;
-    }
+    var users = req.body.users;
+    if (!users) { sendIllegalParameters(req, res); return; }
 
     DatabaseManager.Model.user.getUsersDetails(users, function (result) {
         res.json(result);
@@ -276,10 +272,6 @@ router.route('/process/updateUserInfo').post(upload.single('profPic'), function 
     for (var key in userInfo)
         if (!userInfo[key])
             delete userInfo[key];
-
-
-    console.dir(userInfo);
-    console.dir(req.file);
 
     DatabaseManager.Model.user.updateUserInfo(targetId, userInfo, function (result) {
         res.json(result);
@@ -334,13 +326,10 @@ router.route('/process/getUserMatch').get(function (req, res) {
 router.route('/process/requestMatch').post(function (req, res) {
     if (!checkAndSendLoggedIn(req, res)) return;
 
-    if (!(req.body.activityType && req.body.players)) {
-        sendIllegalParameters(req, res); return;
-    }
+    if (!(req.body.activityType && req.body.players)) { sendIllegalParameters(req, res); return; }
 
     var initiatorId = req.session.userInfo.id;
     var players = req.body.players.split('|');
-
 
     // TODO: initiator 플레이어가 중앙에 있으면 큰 문제가 된다.
     // 그럴 일은 일단 없으므로 Pass.
@@ -385,9 +374,7 @@ router.route('/process/requestMatch').post(function (req, res) {
 router.route('/process/deleteMatch').post(function (req, res) {
     if (!checkAndSendLoggedIn(req, res)) return;
 
-    if (!req.body.matchId) {
-        sendIllegalParameters(req, res); return;
-    }
+    if (!req.body.matchId) { sendIllegalParameters(req, res); return; }
 
     var initiatorId = req.session.userInfo.id;
     var matchId = req.body.matchId;
@@ -490,9 +477,8 @@ router.route('/process/createStadium').post(function (req, res) {
 router.route('/process/prepareMatchingTeamStadium').post(function (req, res) {
     if (!checkAndSendLoggedIn(req, res)) return;
 
-    var stadiumInfo = {
-        name: req.body.name
-    };
+    var stadiumInfo = { name: req.body.name };
+    if (!stadiumInfo.name) { sendIllegalParameters(req, res); return; }
 
     DatabaseManager.Model.stadium.prepareMatchingTeamStadium(stadiumInfo, function (result) {
         res.json(result);

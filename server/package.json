@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/jungin500/armyportal-k#readme",
   "dependencies": {
-    "array-tools": "^2.0.9"
+    "array-tools": "^2.0.9",
+    "winston": "^2.4.0"
   }
 }
