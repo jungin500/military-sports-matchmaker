@@ -36,16 +36,14 @@ var http = require('http'),
     DatabaseManager = require('./lib/DatabaseManager'),
     UserManager = require('./lib/UserManager');
 
+process.on('uncaughtException', function (err) {
+    console.log('[심각] 치명적 오류 발생: ' + err);
+});
+
 // express 이용 HTTP 서버 설정
 var app = express();
 app.set('port', process.env.PORT || 14402);
 app.set('mongoose-reconnect-max', 5);
-
-/* app.configure(function() {
-   app.use(express.limit('10mb'));
-   app.use(bodyParser({ uploadDir: __dirname + '/files/images/' }));
-
-}); */
 
 // express Router 이용 Request routing
 var router = express.Router();
@@ -506,13 +504,13 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-/* app.use(function (req, res, next) {
+router.use(function (req, res, next) {
     var connectionInfo = {
         timestamp: Date.now(),
         location: (req.connection.remoteAddress == '::1') ? '로컬' : req.connection.remoteAddress.toString().split('::ffff:')[1],
         requestUrl: req.url,
         requests: req.body,
-        session: req.session.userInfo || '사용자 정보 없음'
+        session: req.session
     }
 
     if (connectionInfo.requestUrl.indexOf('favicon.ico') == -1) {
@@ -522,7 +520,7 @@ app.use(cors());
     }
 
     next();
-}); */
+});
 
 app.use(static(path.join(__dirname, 'public')));
 app.use(static(path.join(__dirname, 'files')));
@@ -541,3 +539,4 @@ var server = http.createServer(app).listen(app.get('port'), function () {
     DatabaseManager.connectDB(app);
     console.log('[정보] 서버 시작됨. %d번 Port에서 listen 중', app.get('port'));
 });
+
