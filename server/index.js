@@ -27,6 +27,7 @@ var http = require('http'),
 
     formidable = require('formidable'),
     crypto = require('crypto'),
+    md5 = require('md5'),
 
     at = require('array-tools'),
 
@@ -35,16 +36,14 @@ var http = require('http'),
     DatabaseManager = require('./lib/DatabaseManager'),
     UserManager = require('./lib/UserManager');
 
+process.on('uncaughtException', function (err) {
+    console.log('[심각] 치명적 오류 발생: ' + err);
+});
+
 // express 이용 HTTP 서버 설정
 var app = express();
 app.set('port', process.env.PORT || 14402);
 app.set('mongoose-reconnect-max', 5);
-
-/* app.configure(function() {
-   app.use(express.limit('10mb'));
-   app.use(bodyParser({ uploadDir: __dirname + '/files/images/' }));
-
-}); */
 
 // express Router 이용 Request routing
 var router = express.Router();
@@ -110,7 +109,6 @@ router.route('/process/registerUser').post(upload.single('profPic'), function (r
     };
 
     // 정보 중 하나라도 빠졌을 시 오류
-    console.dir(userInfo);
     for (var key in userInfo)
         if (!userInfo[key]) {
             sendIllegalParameters(req, res);
@@ -197,7 +195,7 @@ router.route('/process/checkExistingUser').post(function (req, res) {
     var id = req.body.id;
     if (!id) { sendIllegalParameters(req, res); return; }
 
-    DatabaseManager.Model.user.findId(userInfo, function (result) {
+    DatabaseManager.Model.user.findId({ id: id }, function (result) {
         if (result.result)
             res.json({
                 result: true
@@ -481,6 +479,7 @@ router.route('/process/prepareMatchingTeamStadium').post(function (req, res) {
     if (!stadiumInfo.name) { sendIllegalParameters(req, res); return; }
 
     DatabaseManager.Model.stadium.prepareMatchingTeamStadium(stadiumInfo, function (result) {
+        console.log('{Object} => %s', md5(JSON.stringify(result)));
         res.json(result);
         res.end();
     });
@@ -511,20 +510,23 @@ app.use(function (req, res, next) {
         location: (req.connection.remoteAddress == '::1') ? '로컬' : req.connection.remoteAddress.toString().split('::ffff:')[1],
         requestUrl: req.url,
         requests: req.body,
-        session: req.session.userInfo || '사용자 정보 없음'
+        session: req.session
     }
 
-    if (connectionInfo.requestUrl.indexOf('favicon.ico') == -1) {
+    if (connectionInfo.requestUrl.indexOf('favicon.ico') == -1 && connectionInfo.requestUrl.indexOf('semantic') == -1) {
         console.log('[정보] 연결 정보');
         console.dir(connectionInfo);
         console.log('');
     }
 
+    if(connectionInfo.requestUrl == '/')
+        res.redirect('/public/index.html');
+
     next();
 });
 
-app.use(static(path.join(__dirname, 'public')));
-app.use(static(path.join(__dirname, 'files')));
+app.use('/public', static(path.join(__dirname, 'public')));
+app.use('/files', static(path.join(__dirname, 'files')));
 
 app.use('/', router);
 
@@ -540,3 +542,4 @@ var server = http.createServer(app).listen(app.get('port'), function () {
     DatabaseManager.connectDB(app);
     console.log('[정보] 서버 시작됨. %d번 Port에서 listen 중', app.get('port'));
 });
+
