@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,6 +40,7 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
     private Proxy proxy;
     private HashMap<String, String> prof;
     private SimpleAdapter menuAdapter;
+    private SwipeRefreshLayout mSwipeRefresh;
 
     //Widgets
     private TextView textWelcome;
@@ -57,7 +59,17 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_home);
 
-        // initialize session on create
+        mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
+
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override public void onRefresh() {
+                Intent intent = new Intent(HomeActivity.this, HomeActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                mSwipeRefresh.setRefreshing(false);
+            }
+        });
+
         smgr = new SessionManager(getApplicationContext());
         proxy = new Proxy(getApplicationContext());
 
