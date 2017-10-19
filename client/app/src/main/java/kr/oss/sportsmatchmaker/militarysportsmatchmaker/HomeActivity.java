@@ -125,7 +125,8 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
             //장소 고르기
             default:
                 Toast.makeText(getApplicationContext(), "임시..", Toast.LENGTH_SHORT).show();
-                Intent intent5 = new Intent(getApplicationContext(), MatchCompleteActivity.class);
+                Intent intent5 = new Intent(getApplicationContext(), NotificationExamActivity.class);
+                //Intent intent5 = new Intent(getApplicationContext(), MatchCompleteActivity.class);
                 startActivity(intent5);
                 break;
             //임시 사진 선택

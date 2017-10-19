@@ -30,6 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@null"
+                android:scaleType="centerInside"
                 app:srcCompat="@drawable/img_defaultface" />
 
             <TextView
