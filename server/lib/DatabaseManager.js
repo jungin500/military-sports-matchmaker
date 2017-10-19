@@ -207,8 +207,8 @@ var createSchema = function () {
     };
 
     var getUsersDetails = function (userIdList, callback) {
-        this.find({ id: { $in: userIdList }}, function(err, result) {
-            if(!mongoErrorCallbackCheck(err, callback)) return;
+        this.find({ id: { $in: userIdList } }, function (err, result) {
+            if (!mongoErrorCallbackCheck(err, callback)) return;
 
             var sensitive_datas = ['_id', 'salt', '__v', 'hashed_password'];
             var resultSet = [];
@@ -219,23 +219,23 @@ var createSchema = function () {
 
             // 모두 받아와졌는지 확인
             var resultUsersList = [];
-            if(!(resultObj.complete = (userIdList.length > result.length)? false : true)) {
+            if (!(resultObj.complete = (userIdList.length > result.length) ? false : true)) {
                 // 만약 하나라도 없으면?
-                for(var resultIdx in result)
+                for (var resultIdx in result)
                     resultUsersList.push(result[resultIdx].id);
 
                 var omittedUsers = arrayTools.without(userIdList, resultUsersList);
                 resultObj.omittedUsers = omittedUsers;
             }
-            for(var i = 0; i < result.length; i++) {
+            for (var i = 0; i < result.length; i++) {
                 // 민감한 정보 제거
                 var data = JSON.parse(JSON.stringify(result[i]));
-                for(var key in data) 
-                    if(sensitive_datas.includes(key))
+                for (var key in data)
+                    if (sensitive_datas.includes(key))
                         delete data[key];
 
                 // 프로필 사진
-                data.profile_image = result[i].profile_image? true : false;
+                data.profile_image = result[i].profile_image ? true : false;
 
                 // Set에 추가
                 resultSet.push(data);
@@ -301,6 +301,7 @@ var createSchema = function () {
         players: { type: Array, required: true, unique: false, default: [] },
         pendingPlayers: { type: Array, required: false, unique: false, default: [] },
         rejectedPlayers: { type: Array, required: false, unique: false, default: [] },
+        is_team: { type: Boolean, required: false, unique: false, default: false },
         matchId: { type: String, required: true, unique: true },
         stadium: { type: String, required: true, unique: false },
         start_at: { type: Date, required: true, index: { unique: false }, default: Date.now }
@@ -620,11 +621,11 @@ var createSchema = function () {
         });
     };
 
-    var findUserStadium = function(belong_at, callback) {
-        this.find({ belong_at: belong_at }, function(err, result) {
-            if(!mongoErrorCallbackCheck(err, callback)) return;
+    var findUserStadium = function (belong_at, callback) {
+        this.find({ belong_at: belong_at }, function (err, result) {
+            if (!mongoErrorCallbackCheck(err, callback)) return;
 
-            if(result.length == 0)
+            if (result.length == 0)
                 callback({
                     result: false,
                     reason: 'NoSuchStadiumException'
@@ -648,36 +649,44 @@ var createSchema = function () {
         });
     };
 
-    var prepareMatchingTeamStadium = function(stadiumInfo, callback) {
-        this.findOne({ name: stadiumInfo.name }, function(err, result) {
-            if(!mongoErrorCallbackCheck(err, callback)) return;
+    var prepareMatchingTeamStadium = function (stadiumInfo, callback) {
+        this.findOne({ name: stadiumInfo.name }, function (err, result) {
+            if (!mongoErrorCallbackCheck(err, callback)) return;
 
             var stadium = result._doc;
 
-            Model.matching.find({ id: { $in: stadium.matchings }}, function(err, result){
-                if(!mongoErrorCallbackCheck(err, callback)) return;
+            Model.matching.find({ id: { $in: stadium.matchings } }, function (err, result) {
+                if (!mongoErrorCallbackCheck(err, callback)) return;
 
                 // 사용자를 모두 가져온다.
                 var users = [];
-                for(var matchIdx in result) {
-                    if(!result[matchIdx]._doc.isTeam)
-                        for(var playerIdx in result[matchIdx]._doc.players)
+                for (var matchIdx in result) {
+                    var document = result[matchIdx]._doc;
+                    if (!document.is_team)
+                        for (var playerIdx in document.players)
                             users.push({
                                 type: 'player',
-                                user: result[matchIdx]._doc.players[playerIdx]
+                                size: 1,
+                                players: [document.players[playerIdx]]
                             });
                     else
                         users.push({
                             type: 'team',
-                            user: result[matchIdx]._doc
+                            size: document.players.length,
+                            players: document.players
                         });
-                
+                    }
+
                 // 가져온 사용자들을 팀으로 나눈다.
-                    
-                }
+                var teams = checkArrayMatchup(users);
+                callback({
+                    result: true,
+                    leftTeam: teams.left,
+                    rightTeam: teams.right
+                });
             })
 
-            
+
         });
     };
 
@@ -706,7 +715,10 @@ var createUser = function (userInfo, callback) {
     });
 };
 
-var checkArrayMatchup = function(arr) {
+/**
+ * 매치를 확인하는 함수입니다.
+ */
+var checkArrayMatchup = function (arr) {
     function getArraySize(arr) {
         var size = 0;
         for (var key in arr)

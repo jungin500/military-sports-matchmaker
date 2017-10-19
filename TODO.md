@@ -20,3 +20,5 @@
 
 ### 저녁 (~18:00)
 1. 문서 제출 준비
+- github.com/osam2017/{ProjectName}_{Name1}[,_{Name2}, ...]
+- 내일 10시까지 제출

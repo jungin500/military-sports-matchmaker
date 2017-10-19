@@ -364,7 +364,8 @@ router.route('/process/requestMatch').post(function (req, res) {
         initiatorId: players[0],
         activityType: req.body.activityType,
         players: players,
-        pendingPlayers: pendingPlayers
+        pendingPlayers: pendingPlayers,
+        is_team: req.body.is_team
     };
 
     DatabaseManager.Model.matching.getUserMatch(req.session.userInfo.id, function (result) {
@@ -462,6 +463,8 @@ router.route('/process/getUserStadium').get(function (req, res) {
  * 경기장
  */
 router.route('/process/createStadium').post(function (req, res) {
+    // DEBUG
+    //if(!checkAndSendLoggedIn(req, res)) return;
 
     var stadiumInfo = {
         name: req.body.name,
@@ -484,6 +487,10 @@ router.route('/process/createStadium').post(function (req, res) {
         res.json(result);
         res.end();
     });
+});
+
+router.route('/process/prepareMatchingTeamStadium').post(function (req, res) {
+    if(!checkAndSendLoggedIn(req, res)) return;
 });
 
 router.route('/process/heartbeat').get(function (req, res) {
