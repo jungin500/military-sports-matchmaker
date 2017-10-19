@@ -65,13 +65,13 @@
             <Button
                 android:id="@+id/logout"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom"
                 android:layout_margin="8dp"
                 android:layout_weight="0.25"
                 android:background="@drawable/border2"
                 android:text="로그아웃"
-                android:textStyle="bold"
-                android:layout_gravity="bottom"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/blank9"

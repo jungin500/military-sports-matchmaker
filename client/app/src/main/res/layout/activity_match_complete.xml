@@ -88,8 +88,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal"
-        android:background="@drawable/border">
+        android:background="@drawable/border"
+        android:orientation="horizontal">
 
 
         <LinearLayout
@@ -99,20 +99,24 @@
             android:layout_weight="1">
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-                <ImageView
-                android:id="@+id/team1"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/border"
-                app:srcCompat="@drawable/img_defaultface"
-                    android:layout_margin="4dp"/>
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/team1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/border"
+                    android:scaleType="center"
+                    app:srcCompat="@drawable/img_defaultface" />
             </LinearLayout>
-            
+
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="0.7"
                 android:orientation="vertical">
 
                 <TextView
@@ -120,8 +124,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:gravity="center"
                     android:background="@drawable/border"
+                    android:gravity="center"
                     android:text="내 팀" />
 
                 <TextView
@@ -150,21 +154,26 @@
             android:layout_height="match_parent"
             android:layout_weight="1">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center">
-            <ImageView
-                android:id="@+id/team2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/border"
-                app:srcCompat="@drawable/img_defaultface"
-                android:layout_margin="4dp"/>
-            </LinearLayout>
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/team2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/border"
+                    android:scaleType="center"
+                    app:srcCompat="@drawable/img_defaultface" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="0.7"
                 android:orientation="vertical">
 
                 <TextView
@@ -172,8 +181,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:gravity="center"
                     android:background="@drawable/border"
+                    android:gravity="center"
                     android:text="상대 팀" />
 
                 <TextView
@@ -198,7 +207,7 @@
 
     </LinearLayout>
 
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
