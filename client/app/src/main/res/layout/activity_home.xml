@@ -13,12 +13,12 @@
         android:id="@+id/blank10"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFA6AFE7" />
+        android:background="@color/colorPrimaryDark" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFA6AFE7"
+        android:background="@color/colorPrimaryDark"
         android:orientation="horizontal">
 
         <TextView
@@ -48,7 +48,7 @@
                 android:layout_gravity="center"
                 android:layout_margin="4dp"
                 android:gravity="center"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/colorAccent"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -60,8 +60,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_weight="0.25"
-            android:background="@drawable/border"
-            android:text="로그아웃" />
+            android:background="@drawable/border2"
+            android:text="로그아웃"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/blank9"
@@ -75,7 +76,7 @@
         android:id="@+id/textView6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFA6AFE7" />
+        android:background="@color/colorPrimaryDark" />
 
     <LinearLayout
         android:layout_width="match_parent"
