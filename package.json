@@ -1,12 +1,13 @@
 {
-  "name": "matching_backend",
+  "name": "military-sports-matchmaker",
   "version": "1.0.0",
-  "description": "전투체육 매칭 백엔드 (Node.js + MongoDB)",
+  "description": "전투체육 매치메이커 (Node.js + MongoDB)",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js",
-    "start": "pm2 start index.js --name  military-sports-matchmaker",
-    "stop": "pm2 stop military-sports-matchmaker"
+    "test": "./test.sh",
+    "start": "./start.sh",
+    "restart": "./restart.sh",
+    "stop": "./stop.sh"
   },
   "repository": {
     "type": "git",
@@ -41,7 +42,7 @@
     "multer": "^1.3.0",
     "path": "^0.12.7",
     "pm2": "^2.7.2",
-    "semantic": "0.0.1",
+    "semantic-ui": "^2.2.13",
     "serve-static": "^1.13.1",
     "winston": "^2.4.0"
   }

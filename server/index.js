@@ -195,7 +195,7 @@ router.route('/process/checkExistingUser').post(function (req, res) {
     var id = req.body.id;
     if (!id) { sendIllegalParameters(req, res); return; }
 
-    DatabaseManager.Model.user.findId(userInfo, function (result) {
+    DatabaseManager.Model.user.findId({ id: id }, function (result) {
         if (result.result)
             res.json({
                 result: true
@@ -504,7 +504,7 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-router.use(function (req, res, next) {
+app.use(function (req, res, next) {
     var connectionInfo = {
         timestamp: Date.now(),
         location: (req.connection.remoteAddress == '::1') ? '로컬' : req.connection.remoteAddress.toString().split('::ffff:')[1],
@@ -513,17 +513,20 @@ router.use(function (req, res, next) {
         session: req.session
     }
 
-    if (connectionInfo.requestUrl.indexOf('favicon.ico') == -1) {
+    if (connectionInfo.requestUrl.indexOf('favicon.ico') == -1 && connectionInfo.requestUrl.indexOf('semantic') == -1) {
         console.log('[정보] 연결 정보');
         console.dir(connectionInfo);
         console.log('');
     }
 
+    if(connectionInfo.requestUrl == '/')
+        res.redirect('/public/index.html');
+
     next();
 });
 
-app.use(static(path.join(__dirname, 'public')));
-app.use(static(path.join(__dirname, 'files')));
+app.use('/public', static(path.join(__dirname, 'public')));
+app.use('/files', static(path.join(__dirname, 'files')));
 
 app.use('/', router);
 
