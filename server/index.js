@@ -28,6 +28,8 @@ var http = require('http'),
     formidable = require('formidable'),
     crypto = require('crypto'),
 
+    at = require('array-tools'),
+
     static = require('serve-static'),
     path = require('path'),
     DatabaseManager = require('./lib/DatabaseManager'),
@@ -227,10 +229,10 @@ router.route('/process/getUserDetails').post(function (req, res) {
 });
 
 router.route('/process/getUsersDetails').post(function (req, res) {
-    if(!checkAndSendLoggedIn(req, res)) return;
+    if (!checkAndSendLoggedIn(req, res)) return;
 
     var users;
-    if(!(users = req.body.users)) {
+    if (!(users = req.body.users)) {
         res.json({
             result: false,
             reason: 'NoUserSpecifiedException'
@@ -238,9 +240,8 @@ router.route('/process/getUsersDetails').post(function (req, res) {
         res.end();
         return;
     }
-    console.log('받은 정보: ' + users);
 
-    DatabaseManager.Model.user.getUsersDetails(users, function(result) {
+    DatabaseManager.Model.user.getUsersDetails(users, function (result) {
         res.json(result);
         res.end();
     });
@@ -337,50 +338,47 @@ router.route('/process/requestMatch').post(function (req, res) {
         sendIllegalParameters(req, res); return;
     }
 
-    var pendingPlayers = req.body.players.split('|');
-    var players = [pendingPlayers.shift()];
+    var initiatorId = req.session.userInfo.id;
+    var players = req.body.players.split('|');
 
-    if (players[0] != req.session.userInfo.id) {
-        res.json({
-            result: false,
-            reason: 'InternalError',
-            description: 'session상의 User와 request의 User가 다릅니다.'
-        });
-        res.end();
-        return;
-    }
 
-    // anon의 경우 항상 players에 간다.
-    // request에서 항상 뒤쪽을 차지하므로 그 앞쪽까지만 처리.
-    var firstAnonIdx = pendingPlayers.indexOf('anon');
-    var totalSize = pendingPlayers.length;
-    var pendingPlayers = pendingPlayers.slice(0, firstAnonIdx);
-    var anonCount = totalSize - pendingPlayers.length;
+    // TODO: initiator 플레이어가 중앙에 있으면 큰 문제가 된다.
+    // 그럴 일은 일단 없으므로 Pass.
+    if (!players.includes(initiatorId))
+        players.unshift(initiatorId);
 
-    for (var i = 0; i < anonCount; i++)
-        players.push('anon');
-
-    var matchInfo = {
-        initiatorId: players[0],
-        activityType: req.body.activityType,
-        players: players,
-        pendingPlayers: pendingPlayers,
-        is_team: req.body.is_team
-    };
-
-    DatabaseManager.Model.matching.getUserMatch(req.session.userInfo.id, function (result) {
-        if (result.result) {
-            // 사용자가 이미 매치를 가지고 있는 경우
-            res.json({
-                result: false,
-                reason: 'MatchAlreadyExistsException'
-            });
+    // 로그인되지 않은 Player의 경우 항상 players에 간다. (있을 경우만)
+    DatabaseManager.Model.user.checkIdsExistance(players, function (result) {
+        if (!result.result) {
+            res.json(result);
             res.end();
-        } else  // 그렇지 않은 경우
-            DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
-                res.json(result);
+            return;
+        }
+
+        var matchInfo = {
+            initiatorId: initiatorId,
+            activityType: req.body.activityType,
+            players: result.notFoundUser.concat(initiatorId),
+            pendingPlayers: at(result.existingUser).without(initiatorId)._data,
+            is_team: req.body.is_team
+        };
+
+        console.dir(matchInfo);
+
+        DatabaseManager.Model.matching.getUserMatch(req.session.userInfo.id, function (result) {
+            if (result.result) {
+                // 사용자가 이미 매치를 가지고 있는 경우
+                res.json({
+                    result: false,
+                    reason: 'MatchAlreadyExistsException'
+                });
                 res.end();
-            });
+            } else  // 그렇지 않은 경우
+                DatabaseManager.Model.matching.createMatch(matchInfo, function (result) {
+                    res.json(result);
+                    res.end();
+                });
+        });
     });
 });
 
@@ -490,7 +488,16 @@ router.route('/process/createStadium').post(function (req, res) {
 });
 
 router.route('/process/prepareMatchingTeamStadium').post(function (req, res) {
-    if(!checkAndSendLoggedIn(req, res)) return;
+    if (!checkAndSendLoggedIn(req, res)) return;
+
+    var stadiumInfo = {
+        name: req.body.name
+    };
+
+    DatabaseManager.Model.stadium.prepareMatchingTeamStadium(stadiumInfo, function (result) {
+        res.json(result);
+        res.end();
+    });
 });
 
 router.route('/process/heartbeat').get(function (req, res) {
