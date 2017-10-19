@@ -121,8 +121,7 @@ public class MatchCompleteActivity extends AppCompatActivity{
                         final String[] leftArray = leftTeamPlayers.toArray(new String[leftTeamPlayers.size()]);
                         final String[] rightArray = rightTeamPlayers.toArray(new String[rightTeamPlayers.size()]);
 
-
-                        // leftTeam UI 초기화.
+                        // leftTeam 리더 UI 초기화.
                         proxy.getUserDetail(leftTeamLeader, new JsonHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -172,7 +171,7 @@ public class MatchCompleteActivity extends AppCompatActivity{
                             }
                         });
 
-                        // Right Team UI 초기화
+                        // Right Team 리더 UI 초기화
                         proxy.getUserDetail(rightTeamLeader, new JsonHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

@@ -210,4 +210,11 @@ public class Proxy {
         client.post(prepareStadiumURL, params, handler);
     }
 
+    // 사용자의 부대 안에 있는 stadium을 전부 GET함.
+    public void getUserStadium(JsonHttpResponseHandler handler){
+        String getUserStadiumURL = SERVER_URL + "/process/getUserStadium";
+        client.setCookieStore(smgr.myCookies);
+        client.post(getUserStadiumURL, handler);
+    }
+
 }

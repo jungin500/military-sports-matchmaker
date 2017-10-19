@@ -84,7 +84,7 @@ import cz.msebera.android.httpclient.Header;
         nameView.setText(listData.get(position).getName());
         button.setText(listData.get(position).getButton());
         idView.setText(listData.get(position).getId());
-        if (listData.get(position).getId().split("_").equals("anon")){
+        if (listData.get(position).getId().split("_")[0].equals("anon")){
             idView.setText("");
         }
 

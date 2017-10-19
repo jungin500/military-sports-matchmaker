@@ -174,7 +174,7 @@ public class QueListActivity extends AppCompatActivity {
                                         final ArrayList<String> players = new ArrayList<String>();
                                         for (int i = 0; i < accnum; i++){
                                             String player = acceptPlayers.get(i).toString();
-                                            if (player.split("_").equals("anon")) {
+                                            if (player.split("_")[0].equals("anon")) {
                                                 anoncount++;
                                             }
                                             else {
