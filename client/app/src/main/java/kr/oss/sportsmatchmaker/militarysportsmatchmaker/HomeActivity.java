@@ -114,7 +114,7 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         switch(v.getId()){
             case R.id.searchmatching:
                 if (smgr.getMatchStatus()){
-                    Toast.makeText(getApplicationContext(), "현재 큐의 승락상태를 확인합니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "현재 큐의 승낙상태를 확인합니다.", Toast.LENGTH_SHORT).show();
                     Intent intent4 = new Intent(getApplicationContext(), QueListActivity.class);
                     startActivity(intent4);
                     return;

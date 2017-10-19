@@ -2,6 +2,7 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +29,8 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
     public static final int PNUM_BASKETBALL = 5;
     public static final int PNUM_JOKGU = 5;
 
+    private SwipeRefreshLayout mSwipeRefresh;
+
     private Proxy proxy;
 
     private TextView numFootball;
@@ -43,6 +46,16 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
 
         proxy = new Proxy(getApplicationContext());
 
+        mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
+
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override public void onRefresh() {
+                Intent intent = new Intent(ChooseSportActivity.this, ChooseSportActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                mSwipeRefresh.setRefreshing(false);
+            }
+        });
 
         // 현재 들어가있는 큐가 없음을 확인.
         proxy.getUserInfo(new JsonHttpResponseHandler(){
