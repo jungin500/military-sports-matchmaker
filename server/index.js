@@ -511,7 +511,7 @@ app.use(function (req, res, next) {
         location: (req.connection.remoteAddress == '::1') ? '로컬' : req.connection.remoteAddress.toString().split('::ffff:')[1],
         requestUrl: req.url,
         requests: req.body,
-        session: req.session
+        session: req.session.userInfo || '사용자 정보 없음'
     }
 
     if (connectionInfo.requestUrl.indexOf('favicon.ico') == -1) {

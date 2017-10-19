@@ -5,19 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-        crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
-        crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+        crossorigin="anonymous"></script>
+    <script src="semantic/dist/semantic.min.js"></script>
+    <style>
+        .form {
+            margin: 20px;
+        }
+    </style>
     <title>테스트 페이지</title>
 </head>
 
 <body>
-    <div class="container" style="margin-top: 40px">
-        <form action="/process/registerUser" method="post" enctype="multipart/form-data">
-            <div class="panel panel-primary">
-                <div class="panel-heading">가입 (/process/registerUser)</div>
-                <div class="panel-body">
+    <div class="ui container">
+        <form class="ui form" action="/process/registerUser" method="post" enctype="multipart/form-data">
+            <div class="ui segment">
+                <div class="ui dividing header">가입 (/process/registerUser)</div>
+                <div class="field">
                     <label for="id">군번</label>
                     <input class="form-control" type="text" name="id" id="">
                     <label for="password">비밀번호</label>
@@ -37,55 +42,47 @@
                     <label for="profPic">프로필 사진</label>
                     <input type="file" name="profPic" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-primary btn-lg" type="submit">가입하기</button>
+                <div class="field">
+                    <button class="ui primary button" type="submit">가입하기</button>
                 </div>
             </div>
         </form>
-    </div>
-
-    <div class="container">
-        <form action="/process/loginUser" method="post">
-            <div class="panel panel-primary">
-                <div class="panel-heading">로그인 (/process/loginUser)</div>
-                <div class="panel-body">
+        <form class="ui form" action="/process/loginUser" method="post">
+            <div class="ui segment">
+                <div class="ui dividing header">로그인 (/process/loginUser)</div>
+                <div class="field">
                     <label for="id">군번 (=아이디)</label>
                     <input class="form-control" type="text" name="id" id="">
                     <label for="password">비밀번호</label>
                     <input class="form-control" type="password" name="password" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-primary btn-lg" type="submit">로그인하기</button>
-                    <button class="btn btn-primary btn-lg" type="button" onclick='window.location = "/process/getUserInfo"'>현재 사용자 정보 확인하기</button>
-                    <button class="btn btn-primary btn-lg" type="button" onclick='window.location = "/process/logoutUser"'>로그아웃하기</button>
+                <div class="field">
+                    <button class="ui primary button" type="submit">로그인하기</button>
+                    <button class="ui primary button" type="button" onclick='window.location = "/process/getUserInfo"'>현재 사용자 정보 확인하기</button>
+                    <button class="ui primary button" type="button" onclick='window.location = "/process/logoutUser"'>로그아웃하기</button>
                 </div>
             </div>
         </form>
-    </div>
 
-    <div class="container">
-        <form action="/process/getUsersDetails" method="post">
-            <div class="panel panel-primary">
-                <div class="panel-heading">사용자들 정보 보기 (/process/getUsersDetails)</div>
-                <div class="panel-body">
+        <form class="ui form" action="/process/getUsersDetails" method="post">
+            <div class="ui segment">
+                <div class="ui dividing header">사용자들 정보 보기 (/process/getUsersDetails)</div>
+                <div class="field">
                     <label for="users">비밀번호</label>
                     <input class="form-control" type="text" name="users" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-primary btn-lg" type="submit">로그인하기</button>
-                    <button class="btn btn-primary btn-lg" type="button" onclick='window.location = "/process/getUserInfo"'>현재 사용자 정보 확인하기</button>
-                    <button class="btn btn-primary btn-lg" type="button" onclick='window.location = "/process/logoutUser"'>로그아웃하기</button>
+                <div class="field">
+                    <button class="ui primary button" type="submit">로그인하기</button>
+                    <button class="ui primary button" type="button" onclick='window.location = "/process/getUserInfo"'>현재 사용자 정보 확인하기</button>
+                    <button class="ui primary button" type="button" onclick='window.location = "/process/logoutUser"'>로그아웃하기</button>
                 </div>
             </div>
         </form>
-    </div>
 
-
-    <div class="container">
-        <form action="/process/updateUserInfo" method="post" enctype="multipart/form-data">
-            <div class="panel panel-primary">
-                <div class="panel-heading">사용자 정보 변경 (/process/updateUserInfo)</div>
-                <div class="panel-body">
+        <form class="ui form" action="/process/updateUserInfo" method="post" enctype="multipart/form-data">
+            <div class="ui segment">
+                <div class="ui dividing header">사용자 정보 변경 (/process/updateUserInfo)</div>
+                <div class="field">
                     <label for="name">이름</label>
                     <input class="form-control" type="text" name="name" id="">
                     <label for="password">비밀번호</label>
@@ -103,127 +100,111 @@
                     <label for="profPic">프로필 사진</label>
                     <input type="file" name="profPic" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-primary btn-lg" type="submit">정보 변경하기</button>
+                <div class="field">
+                    <button class="ui primary button" type="submit">정보 변경하기</button>
                 </div>
             </div>
         </form>
-    </div>
 
-    <div class="container">
-        <form action="/process/requestMatch" method="post">
-            <div class="panel panel-primary">
-                <div class="panel-heading">큐에 넣기 (/process/requestMatch)</div>
-                <div class="panel-body">
+        <form class="ui form" action="/process/requestMatch" method="post">
+            <div class="ui segment">
+                <div class="ui dividing header">큐에 넣기 (/process/requestMatch)</div>
+                <div class="field">
                     <label for="activityType">종목</label>
                     <input class="form-control" type="text" name="activityType" id="">
                     <label for="players">참여인원 (|로 구분)</label>
                     <input class="form-control" type="text" name="players" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-primary btn-lg" type="submit">큐 신청하기</button>
-                    <button class="btn btn-primary btn-lg" type="button" onclick='window.location = "/process/getMatchList"'>신청된 큐 리스트</button>
-                    <button class="btn btn-primary btn-lg" type="button" onclick='window.location = "/process/getUserMatch"'>현재 사용자의 큐 가져오기</button>
+                <div class="field">
+                    <button class="ui primary button" type="submit">큐 신청하기</button>
+                    <button class="ui primary button" type="button" onclick='window.location = "/process/getMatchList"'>신청된 큐 리스트</button>
+                    <button class="ui primary button" type="button" onclick='window.location = "/process/getUserMatch"'>현재 사용자의 큐 가져오기</button>
                 </div>
             </div>
         </form>
-    </div>
 
-    <div class="container">
-        <form action="/process/decideMatch" method="post">
-            <div class="panel panel-primary">
-                <div class="panel-heading">초대 수락 결정하기 (/process/decideMatch)</div>
-                <div class="panel-body">
+        <form class="ui form" action="/process/decideMatch" method="post">
+            <div class="ui segment">
+                <div class="ui dividing header">초대 수락 결정하기 (/process/decideMatch)</div>
+                <div class="field">
                     <label for="isParticipating">결정 여부 (값 있음 or 없음)</label>
                     <input class="form-control" type="text" name="isParticipating" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-primary btn-lg" type="submit">결정하기</button>
+                <div class="field">
+                    <button class="ui primary button" type="submit">결정하기</button>
                 </div>
             </div>
         </form>
-    </div>
 
-    <div class="container">
-        <form action="/process/deleteMatch" method="post">
-            <div class="panel panel-primary">
-                <div class="panel-heading">큐 삭제하기 (/process/deleteMatch)</div>
-                <div class="panel-body">
+        <form class="ui form" action="/process/deleteMatch" method="post">
+            <div class="ui segment">
+                <div class="ui dividing header">큐 삭제하기 (/process/deleteMatch)</div>
+                <div class="field">
                     <label for="matchId">매치ID</label>
                     <input class="form-control" type="text" name="matchId" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-danger btn-lg" type="submit">큐 삭제하기</button>
+                <div class="field">
+                    <button class="ui red button " type="submit">큐 삭제하기</button>
                 </div>
             </div>
         </form>
-    </div>
 
-    <div class="container">
-        <form action="/process/checkExistingUser" method="post">
-            <div class="panel panel-primary">
-                <div class="panel-heading">아이디 존재 체크 (/process/checkExistingUser)</div>
-                <div class="panel-body">
+        <form class="ui form" action="/process/checkExistingUser" method="post">
+            <div class="ui segment">
+                <div class="ui dividing header">아이디 존재 체크 (/process/checkExistingUser)</div>
+                <div class="field">
                     <label for="id">군번 (=아이디)</label>
                     <input class="form-control" type="text" name="id" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-primary btn-lg" type="submit">아이디 존재여부 확인하기</button>
+                <div class="field">
+                    <button class="ui primary button" type="submit">아이디 존재여부 확인하기</button>
                 </div>
             </div>
         </form>
-    </div>
 
-    <div class="container">
-        <form action="/process/readProfileImage" method="post">
-            <div class="panel panel-primary">
-                <div class="panel-heading">프로필 이미지 받아보기 (/process/readProfileImage)</div>
-                <div class="panel-body">
+        <form class="ui form" action="/process/readProfileImage" method="post">
+            <div class="ui segment">
+                <div class="ui dividing header">프로필 이미지 받아보기 (/process/readProfileImage)</div>
+                <div class="field">
                     <label for="id">군번 (=아이디)</label>
                     <input class="form-control" type="text" name="id" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-primary btn-lg" type="submit">받아보기</button>
+                <div class="field">
+                    <button class="ui primary button" type="submit">받아보기</button>
                 </div>
             </div>
         </form>
-    </div>
 
-    <div class="container">
-        <form action="/process/searchUserDetails" method="post">
-            <div class="panel panel-primary">
-                <div class="panel-heading">사용자 정보 가져오기 (/process/searchUserDetails)</div>
-                <div class="panel-body">
+        <form class="ui form" action="/process/searchUserDetails" method="post">
+            <div class="ui segment">
+                <div class="ui dividing header">사용자 정보 가져오기 (/process/searchUserDetails)</div>
+                <div class="field">
                     <label for="id">군번 (=아이디)</label>
                     <input class="form-control" type="text" name="id" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-primary btn-lg" type="submit">정보 가져오기</button>
+                <div class="field">
+                    <button class="ui primary button" type="submit">정보 가져오기</button>
                 </div>
             </div>
         </form>
-    </div>
 
-    <div class="container">
-        <form action="/process/writePhoto" method="post">
-            <div class="panel panel-primary">
-                <div class="panel-heading">사용자 프로필 설정하기 (/process/writePhoto)</div>
-                <div class="panel-body">
+        <form class="ui form" action="/process/writePhoto" method="post">
+            <div class="ui segment">
+                <div class="ui dividing header">사용자 프로필 설정하기 (/process/writePhoto)</div>
+                <div class="field">
                     <label for="image">파일 선택</label>
                     <input type="file" name="image" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-primary btn-lg" type="submit">프로필 설정하기</button>
+                <div class="field">
+                    <button class="ui primary button" type="submit">프로필 설정하기</button>
                 </div>
             </div>
         </form>
-    </div>
 
-    <div class="container">
-        <form action="/process/createStadium" method="post">
-            <div class="panel panel-danger">
-                <div class="panel-heading">(디버그) 경기장 만들기 /process/createStadium</div>
-                <div class="panel-body">
+        <form class="ui form" action="/process/createStadium" method="post">
+            <div class="ui segment">
+                <div class="ui dividing header">(디버그) 경기장 만들기 /process/createStadium</div>
+                <div class="field">
                     <label for="name">경기장 이름</label>
                     <input class="form-control" type="text" name="name" id="">
                     <label for="available_type">가능한 경기 (| 구분)</label>
@@ -233,18 +214,14 @@
                     <label for="max_players">최대 사용자 수</label>
                     <input class="form-control" type="text" name="max_players" id="">
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-primary btn-lg" type="submit">경기장 추가하기</button>
-                    <button class="btn btn-success btn-lg" type="button" onclick='window.location = "/process/getStadiumList"'>모든 경기장 리스트 가져오기</button>
+                <div class="field">
+                    <button class="ui primary button" type="submit">경기장 추가하기</button>
+                    <button class="ui positive button" type="button" onclick='window.location = "/process/getStadiumList"'>모든 경기장 리스트 가져오기</button>
                 </div>
             </div>
         </form>
-    </div>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-        crossorigin="anonymous"></script>
+    </div>
 </body>
 
 </html>
