@@ -70,7 +70,7 @@ public class Proxy {
         client.get(getInfoURL, handler);
     }
 
-    /* POST getUserDetails
+    /* POST getUserDetail
      * input - "id" : user_id (String)
      * output - JSONObject with the following parameters:
      * "results" : 성공 여부 (bool, 성공시 true)
@@ -202,6 +202,12 @@ public class Proxy {
      * Stadium related funtions
      */
 
-
+    public void prepareMatchingTeamStadium(String stadium_name, JsonHttpResponseHandler handler){
+        RequestParams params = new RequestParams();
+        params.put("name", stadium_name);
+        String prepareStadiumURL = SERVER_URL + "/process/prepareMatchingTeamStadium";
+        client.setCookieStore(smgr.myCookies);
+        client.post(prepareStadiumURL, params, handler);
+    }
 
 }
