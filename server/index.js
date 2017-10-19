@@ -33,12 +33,7 @@ var http = require('http'),
 
     static = require('serve-static'),
     path = require('path'),
-    DatabaseManager = require('./lib/DatabaseManager'),
-    UserManager = require('./lib/UserManager');
-
-process.on('uncaughtException', function (err) {
-    console.log('[심각] 치명적 오류 발생: ' + err);
-});
+    DatabaseManager = require('./lib/DatabaseManager');
 
 // express 이용 HTTP 서버 설정
 var app = express();
@@ -235,7 +230,13 @@ router.route('/process/getUsersDetails').post(function (req, res) {
     var users = req.body.users;
     if (!users) { sendIllegalParameters(req, res); return; }
 
-    DatabaseManager.Model.user.getUsersDetails(users, function (result) {
+    var array;
+    if (users instanceof Array)
+        array = users;
+    else
+        array = users.split('|');
+
+    DatabaseManager.Model.user.getUsersDetails(array, function (result) {
         res.json(result);
         res.end();
     });
@@ -342,11 +343,13 @@ router.route('/process/requestMatch').post(function (req, res) {
             return;
         }
 
+        var pendingPlayers = at(result.existingUser).without(initiatorId).val();
+
         var matchInfo = {
             initiatorId: initiatorId,
             activityType: req.body.activityType,
             players: result.notFoundUser.concat(initiatorId),
-            pendingPlayers: at(result.existingUser).without(initiatorId)._data,
+            pendingPlayers: pendingPlayers,
             is_team: req.body.is_team
         };
 
@@ -519,7 +522,7 @@ app.use(function (req, res, next) {
         console.log('');
     }
 
-    if(connectionInfo.requestUrl == '/')
+    if (connectionInfo.requestUrl == '/')
         res.redirect('/public/index.html');
 
     next();
