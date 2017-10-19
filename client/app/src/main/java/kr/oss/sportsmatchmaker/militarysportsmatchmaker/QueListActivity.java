@@ -2,6 +2,7 @@ package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,6 +34,7 @@ public class QueListActivity extends AppCompatActivity {
     private SessionManager smgr;
     private Proxy proxy;
 
+    private SwipeRefreshLayout mSwipeRefresh;
     private TextView textQStatus;
     private Button quitMatchButton;
     private Button acceptMatchButton;
@@ -52,6 +54,17 @@ public class QueListActivity extends AppCompatActivity {
 
         smgr = new SessionManager(getApplicationContext());
         proxy = new Proxy(getApplicationContext());
+
+        mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
+
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override public void onRefresh() {
+                Intent intent = new Intent(QueListActivity.this, QueListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                mSwipeRefresh.setRefreshing(false);
+            }
+        });
 
         final String id = smgr.getProfile().get(SessionManager.ID);
         final String name = smgr.getProfile().get(SessionManager.NAME);

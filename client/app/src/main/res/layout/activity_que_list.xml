@@ -7,105 +7,114 @@
     android:orientation="vertical"
     tools:context="kr.oss.sportsmatchmaker.militarysportsmatchmaker.QueListActivity">
 
-
-    <TextView
-        android:id="@+id/blank10"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFD3D9FD" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFD3D9FD"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/blank12"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.05" />
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight="0.5"
-            android:gravity="center">
-
-            <TextView
-                android:id="@+id/text_status"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="4dp"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-        </android.support.design.widget.TextInputLayout>
-
-        <Button
-            android:id="@+id/quitMatch"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.2"
-            android:background="@drawable/border"
-            android:text="큐 제거" />
-
-        <TextView
-            android:id="@+id/blank11"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.05"
-            android:background="#FFD3D9FD" />
-
-        <Button
-            android:id="@+id/acceptMatch"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.14"
-            android:background="@drawable/border"
-            android:text="수락" />
-
-        <Button
-            android:id="@+id/rejectMatch"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.14"
-            android:background="@drawable/border"
-            android:text="거절" />
-
-        <TextView
-            android:id="@+id/blank9"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.05" />
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/blank13"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFD3D9FD" />
-
-    <TextView
-        android:id="@+id/blank14"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#00FF0000" />
-
-    <ScrollView
+    <android.support.v4.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:id="@+id/swipe_layout">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <ListView
-            android:id="@+id/quelist"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:divider="#00FF0000"
-            android:dividerHeight="16dp" />
-    </ScrollView>
+            android:layout_height="0dp"
+            android:layout_weight="0.7"
+            android:background="#FFD3D9FD"
+            android:gravity="bottom|center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/blank12"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.05" />
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="0.5"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/text_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="4dp"
+                    android:gravity="bottom|center"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <Button
+                android:id="@+id/quitMatch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                android:background="@drawable/border"
+                android:text="큐 제거" />
+
+            <TextView
+                android:id="@+id/blank11"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.05"
+                android:background="#FFD3D9FD" />
+
+            <Button
+                android:id="@+id/acceptMatch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.14"
+                android:background="@drawable/border"
+                android:text="수락" />
+
+            <Button
+                android:id="@+id/rejectMatch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.14"
+                android:background="@drawable/border"
+                android:text="거절" />
+
+            <TextView
+                android:id="@+id/blank9"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.05" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/blank13"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.2"
+            android:background="#FFD3D9FD" />
+
+        <TextView
+            android:id="@+id/blank14"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.2"
+            android:background="#00FF0000" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="5"
+            android:fillViewport="true">
+
+            <ListView
+                android:id="@+id/quelist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="#00FF0000"
+                android:dividerHeight="16dp" />
+        </ScrollView>
+    </LinearLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>
