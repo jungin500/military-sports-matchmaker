@@ -57,7 +57,6 @@ public class SignupActivity extends AppCompatActivity {
     // Proxy
     public Proxy proxy;
 
-
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -84,10 +83,12 @@ public class SignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
         proxy = new Proxy(getApplicationContext());
+        verifyStoragePermissions(this);
 
         initializeSpinner();
-        idFlag = true;
-        verifyStoragePermissions(this);
+        // 군번 검사를 했는지?
+        idFlag = false;
+
         // connect widgets
         idView = (EditText) findViewById(R.id.signup_id);
         pwView = (EditText) findViewById(R.id.signup_pw);
@@ -95,8 +96,6 @@ public class SignupActivity extends AppCompatActivity {
         nameView = (EditText) findViewById(R.id.signup_name);
         favView = (EditText) findViewById(R.id.signup_favorite);
         descView = (EditText) findViewById(R.id.signup_desc);
-        idCheckButton = (Button) findViewById(R.id.signup_idcheck);
-        profPic = (ImageButton) findViewById(R.id.signup_profPic);
 
         // set spinner to rank
         rankView = (Spinner) findViewById(R.id.signup_rank);
@@ -115,47 +114,60 @@ public class SignupActivity extends AppCompatActivity {
         unitView.setAdapter(adapterUnit);
         unitView.setSelection(0);
 
-
-        // check if id already exists in DB.
+        idCheckButton = (Button) findViewById(R.id.signup_idcheck);
+        // TODO: FIX SPAGHETTI
+        Log.e("TAG", "0");
         idCheckButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String id = idView.getText().toString();
+                idCheckButton.setVisibility(View.GONE);
                 proxy.idCheck(id, new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        Log.e("TAG", "1");
                         try {
-                            idFlag = ! response.getBoolean("result");
-                            if (! idFlag){
-                                Toast.makeText(getApplicationContext(), "사용 가능한 군번입니다.", Toast.LENGTH_SHORT).show();
+                            if (response.getBoolean("result")){
+                                Toast.makeText(getApplicationContext(), "이미 사용된 군번입니다.", Toast.LENGTH_SHORT).show();
                             }
                             else {
-                                Toast.makeText(getApplicationContext(), "이미 사용한 군번입니다.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "사용 가능한 군번입니다.", Toast.LENGTH_SHORT).show();
+                                idFlag = true;
                             }
-                            idFlag = false;
                         } catch (JSONException e) {
+                            Log.e("TAG", "2");
                             e.printStackTrace();
                         }
                     }
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                        Log.e("TAG", "3");
                         Toast.makeText(getApplicationContext(), "서버 접속 실패", Toast.LENGTH_SHORT).show();
-                        Log.e("TAG", "idCheckFail");
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        Log.e("TAG", "4");
+                        idCheckButton.setVisibility(View.VISIBLE);
                     }
                 });
-                Toast.makeText(getApplicationContext(), "사용 가능한 군번입니다.", Toast.LENGTH_SHORT).show();
+
+
             }
         });
 
         // profpic button adds profile picture!
+        profPic = (ImageButton) findViewById(R.id.signup_profPic);
         byteImage = null;
         profPic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.e("TAG", "5");
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
                 intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), GET_PICTURE_URI);
+                Log.e("TAG", "6");
             }
         });
 
@@ -163,6 +175,7 @@ public class SignupActivity extends AppCompatActivity {
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.e("TAG", "7");
                 final String id = idView.getText().toString();
                 final String pw = pwView.getText().toString();
                 String pw2 = pwView2.getText().toString();
@@ -179,7 +192,12 @@ public class SignupActivity extends AppCompatActivity {
                     idView.requestFocus();
                     return;
                 }
-                if (idFlag){
+                if (! id.matches("[0-9-]+")) {
+                    idView.setError("군번에는 숫자와 -만 입력해주십시오.");
+                    idView.requestFocus();
+                    return;
+                }
+                if (! idFlag){
                     idView.setError("중복검사를 해주십시오.");
                     idView.requestFocus();
                     return;
@@ -234,12 +252,13 @@ public class SignupActivity extends AppCompatActivity {
                     descView.requestFocus();
                     return;
                 }
-                //TODO: does getPath work?
+
                 proxy.signup(id, pw, name, rankid, unit, sexid, fav, desc, byteImage, new JsonHttpResponseHandler(){
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
                             boolean result = response.getBoolean("result");
+                            Log.e("TAG", "10");
                             // success in signing up -> go back to signin screen.
                             if (result){
                                 // 로그인창으로 돌아가기
@@ -257,7 +276,7 @@ public class SignupActivity extends AppCompatActivity {
                                 else if (error.equals("AlreadyExistingException")){
                                     idView.setError("이미 존재하는 군번입니다.");
                                     idView.requestFocus();
-                                    idFlag = true;
+                                    idFlag = false;
                                 }
                                 else {
                                     Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
@@ -307,6 +326,7 @@ public class SignupActivity extends AppCompatActivity {
         if (requestCode == GET_PICTURE_URI) {
             if (resultCode == Activity.RESULT_OK) {
                 try {
+                    Log.e("TAG2", "0");
                     Uri profPicUri = data.getData();
                     Bitmap bitmap = formatBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), profPicUri));
                     RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
@@ -315,8 +335,9 @@ public class SignupActivity extends AppCompatActivity {
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                     byteImage = stream.toByteArray();
+                    Log.e("TAG2","1");
                 } catch (Exception e) {
-                    Log.e("test", e.getMessage());
+                    Log.e("Compression Failed", e.getMessage());
                 }
             }
         }

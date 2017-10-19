@@ -35,13 +35,17 @@
                 android:id="@+id/homeprofile"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.1"
+                android:layout_weight="0.15"
                 app:srcCompat="@drawable/img_defaultface" />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
+                android:layout_margin="4dp"
+                android:textColor="@color/colorAccent"
+                android:textSize="16sp"
+                android:textStyle="bold"
                 android:layout_weight="0.5"
                 android:gravity="center">
 
@@ -53,7 +57,7 @@
                     android:layout_margin="4dp"
                     android:gravity="center"
                     android:textColor="@color/colorAccent"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
             </android.support.design.widget.TextInputLayout>
@@ -61,7 +65,8 @@
             <Button
                 android:id="@+id/logout"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom"
                 android:layout_margin="8dp"
                 android:layout_weight="0.25"
                 android:background="@drawable/border2"

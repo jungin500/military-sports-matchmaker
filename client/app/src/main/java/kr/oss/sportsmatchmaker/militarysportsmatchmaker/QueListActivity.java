@@ -1,20 +1,26 @@
 package kr.oss.sportsmatchmaker.militarysportsmatchmaker;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.support.v7.app.AlertDialog;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.loopj.android.http.FileAsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.ResponseHandlerInterface;
 
@@ -22,6 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -85,22 +92,16 @@ public class QueListActivity extends AppCompatActivity {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
                     final String match_status = response.getString("match_status");
-                    // if not in match and waiting for match
+                    // Case 1. 속한 매치가 없음: 매치가 있는줄 알고 버튼 눌러서 들어왔는데 그사이에 방장이 매치 삭제.
                     if (match_status.equals("ready")){
-
-                        // Dialog 띄워서
-                        // 큐가 사라졌습니다. 메인 화면으로 돌아갑니다.
-                        // 확인 버튼을 누르면
-                        // HomeActivity를 시작하고 얘를 finish()
+                        Toast.makeText(getApplicationContext(), "방장이 큐를 삭제했습니다.",Toast.LENGTH_SHORT).show();
                         smgr.changeMatchStatus(false, null);
                         smgr.changeStadiumName(null);
-
-                        textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
-                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
-                        params.weight = 0f;
-                        quitMatchButton.setLayoutParams(params);
+                        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
-                    // if match, get match and....
+                    // Case 2. 매치가 있음.
                     else {
                         proxy.getUserMatch(new JsonHttpResponseHandler(){
                             @Override
@@ -120,35 +121,46 @@ public class QueListActivity extends AppCompatActivity {
                                         else if (gameTypeEng.equals("basketball"))
                                             gameTypeKor = "농구";
 
-                                        // i am initiator <=> show quit button.
+
+                                        // Choose which buttons to show.
                                         // TODO: disable button
+
+
+                                        // Case 1. Initiator => show quitMatch button.
                                         final String initiatorId = match.getString("initiatorId");
                                         if (id.equals(initiatorId)) {
                                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
-                                            params.weight = 0.25f;
+                                            params.weight = 0.3f;
                                             quitMatchButton.setLayoutParams(params);
+                                            LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
+                                            params2.weight = 0.0f;
+                                            acceptMatchButton.setLayoutParams(params2);
+                                            LinearLayout.LayoutParams params3 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
+                                            params3.weight = 0.0f;
+                                            rejectMatchButton.setLayoutParams(params3);
                                         }
-                                        else {
+                                        else if (match_status.equals("pending")){
                                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                                             params.weight = 0.0f;
                                             quitMatchButton.setLayoutParams(params);
+                                            LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
+                                            params2.weight = 0.2f;
+                                            acceptMatchButton.setLayoutParams(params2);
+                                            LinearLayout.LayoutParams params3 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
+                                            params3.weight = 0.2f;
+                                            rejectMatchButton.setLayoutParams(params3);
                                         }
-                                        // i am pending <=> show accept/reject button.
-                                        if (match_status.equals("pending")){
-                                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
-                                            params.weight = 0.2f;
-                                            acceptMatchButton.setLayoutParams(params);
-                                            LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
-                                            params.weight = 0.2f;
-                                            rejectMatchButton.setLayoutParams(params);
-                                        }
-                                        else{
-                                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
+                                        // i accepted => show reject button.
+                                        else if (match_status.equals("matching")){
+                                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                                             params.weight = 0.0f;
-                                            acceptMatchButton.setLayoutParams(params);
-                                            LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
-                                            params.weight = 0.0f;
-                                            rejectMatchButton.setLayoutParams(params);
+                                            quitMatchButton.setLayoutParams(params);
+                                            LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
+                                            params2.weight = 0.0f;
+                                            acceptMatchButton.setLayoutParams(params2);
+                                            LinearLayout.LayoutParams params3 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
+                                            params3.weight = 0.3f;
+                                            rejectMatchButton.setLayoutParams(params3);
                                         }
                                         JSONArray acceptPlayers = match.getJSONArray("players");
                                         JSONArray pendingPlayers = match.getJSONArray("pendingPlayers");
@@ -162,7 +174,7 @@ public class QueListActivity extends AppCompatActivity {
                                         final ArrayList<String> players = new ArrayList<String>();
                                         for (int i = 0; i < accnum; i++){
                                             String player = acceptPlayers.get(i).toString();
-                                            if (player.equals("anon")) {
+                                            if (player.split("_")[0].equals("anon")) {
                                                 anoncount++;
                                             }
                                             else {
@@ -203,7 +215,7 @@ public class QueListActivity extends AppCompatActivity {
                                                         }
                                                         for (int j=0;j<finalAnoncount;j++){
                                                             String anonName = initrankname + " 의 동료";
-                                                            ListData2 listData = new ListData2(false, anonName, "anon", "수락함");
+                                                            ListData2 listData = new ListData2(false, anonName, "anon_"+initiatorId, "수락함");
                                                             QueDataArray.add(listData);
                                                         }
                                                         Collections.sort(QueDataArray, new ListData2.data2Comparator());

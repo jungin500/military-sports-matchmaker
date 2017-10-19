@@ -8,18 +8,23 @@
 
 *** (malfunction, important feature)
 stadium 관련 구현
-- prepareMatchingTeamStadium
+- prepareMatchingTeamStadium (done)
 - choose sport 들어가서 빈자리 띄워주기.
-회원가입 창의 중복확인 오작동
-queue 만들면 두번째 사람은 무조건 수락으로 뜸. -> 해결!
-새로고침 기능
-수락 후에도 큐 탈퇴 가능 (decideMatch) -> 클라이언트 구현 완료!!
-requestMatch에서 is_team flag 세워주기. (prepareMatchingTeamStadium 참조)
-매치에 유저 추가하면서 이미 매치 추가된 경우 메시지 제대로 parsing하기.
-회원수정에서 사진을 가져오면 ui 터짐.
-logout에서 세션 삭제 안됨.
 
-데이터 껐을 때 로그인화면 기다렸다가 timeout 해주기.
+
+새로고침 기능!!!
+버튼 round 기능!!
+수락 후에도 큐 탈퇴 가능 (decideMatch) -> 서버 구현 완료
+requestMatch에서 is_team flag 세워주기. (prepareMatchingTeamStadium 참조)
+MatchSettingActivity에서 추가 안되는 경우 메시지 제대로 parsing하기.
+logout했는데 세션이 살아있다??
+
+데이터 껐을 때 
+- 로그인화면 기다렸다가 timeout 해주기.
+- 앱 켜지는지 확인
+
+회원정보 수정
+- 하고 복귀시 프사업뎃
 
 ** (features to fix)
 버튼 연타시 기능 한번만 하는 설정.
@@ -28,3 +33,18 @@ logout에서 세션 삭제 안됨.
 * (features to add)
 button 누를시 highlight color
 회원정보 수정시 
+main..
+
+
+
+해결된 버그
+queue 만들면 두번째 사람은 무조건 수락으로 뜸.
+
+회원가입 창, 회원수정 창
+- 전반적으로 오작동이 많음
+- 회원수정에서 사진을 가져오면 ui 터짐.
+- 회원수정 돌리고 사진 넣으면 text 전부 없어짐.
+
+
+
+추가된 기능

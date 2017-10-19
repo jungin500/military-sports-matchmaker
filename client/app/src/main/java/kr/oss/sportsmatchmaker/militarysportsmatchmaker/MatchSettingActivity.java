@@ -55,6 +55,7 @@ public class MatchSettingActivity extends AppCompatActivity {
         final String name = smgr.getProfile().get(SessionManager.NAME);
         final String rank = smgr.getProfile().get(SessionManager.RANK);
         final String rankname = rank + " " + name;
+        final String anonName = "anon_"+id;
         // initialize widgets
         final EditText playerNumber = (EditText) findViewById(R.id.playerNumber);
         Button playerShow = (Button) findViewById(R.id.player_show);
@@ -95,7 +96,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                     ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname, id, "방장");
                     listDataArray.add(data);
                     for (int i = 1; i < num; i++){
-                        data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname + "의 동료", "anon", "선수 추가\n(선택)");
+                        data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname + "의 동료", anonName, "선수 추가\n(선택)");
                         listDataArray.add(data);
                     }
                 }
@@ -106,7 +107,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                 }
                 else {
                     for (int i = 0; i < num - numPlayer[0]; i++){
-                        ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname + "의 동료", "anon", "선수 추가\n(선택)");
+                        ListData data = new ListData(BitmapFactory.decodeResource(getResources(), R.drawable.img_defaultface), rankname + "의 동료", anonName, "선수 추가\n(선택)");
                         listDataArray.add(data);
                     }
                 }
@@ -128,7 +129,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                 // anon을 맨 뒤로 보내서 더한다.
                 for (int i = 0; i < numPlayer[0]; i++){
                     String currid = listDataArray.get(i).getId();
-                    if (currid.equals("anon")){
+                    if (currid.equals(anonName)){
                         anoncount++;
                     }
                     else {
@@ -136,7 +137,7 @@ public class MatchSettingActivity extends AppCompatActivity {
                     }
                 }
                 for (int i = 0; i < anoncount; i++){
-                    stringBuilder.append("anon|");
+                    stringBuilder.append(anonName+"|");
                 }
                 stringBuilder.setLength(stringBuilder.length() - 1);
                 requestMatch(gameType, stringBuilder.toString());
