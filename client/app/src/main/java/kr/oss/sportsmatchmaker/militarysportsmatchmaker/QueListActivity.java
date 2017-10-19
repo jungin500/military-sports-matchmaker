@@ -75,12 +75,14 @@ public class QueListActivity extends AppCompatActivity {
                     final String match_status = response.getString("match_status");
                     // if not in match and waiting for match
                     if (match_status.equals("ready")){
-                        textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
                         smgr.changeMatchStatus(false);
                         smgr.setMatchId("null");
-                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
-                        params.weight = 0f;
-                        quitMatchButton.setLayoutParams(params);
+
+
+                        // Dialog 띄워서
+                        // 큐가 사라졌습니다. 메인 화면으로 돌아갑니다.
+                        // 확인 버튼을 누르면
+                        // HomeActivity를 시작하고 얘를 finish()
                     }
                     // if match, get match and....
                     else {
