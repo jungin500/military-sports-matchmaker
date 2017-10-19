@@ -15,43 +15,67 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:orientation="vertical"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
 
             <ImageButton
                 android:id="@+id/editProfile_profPic"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.3"
                 android:background="@null"
                 app:srcCompat="@drawable/img_defaultface" />
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/blank1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:elevation="0dp" />
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3">
+
+                <EditText
+                    android:id="@+id/editProfile_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:hint="군번"
+                    android:inputType="textPersonName"
+                    android:maxLines="1" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <TextView
+                android:id="@+id/blank2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.3" />
 
-            <LinearLayout
-                android:id="@+id/editProfile_id_layout"
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.3"
-                android:orientation="horizontal"
-                android:weightSum="1">
+                android:layout_weight="0.3">
 
-
-                <TextView
-                    android:id="@+id/editProfile_id"
-                    android:layout_width="wrap_content"
+                <EditText
+                    android:id="@+id/editProfile_name"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="18sp" />
-            </LinearLayout>
+                    android:ems="10"
+                    android:hint="이름"
+                    android:inputType="textPersonName"
+                    android:maxLines="1" />
+            </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
@@ -62,9 +86,8 @@
                     android:id="@+id/editProfile_pw"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColorHint="@android:color/holo_blue_light"
                     android:ems="10"
-                    android:hint="비밀번호 (6자리 이상). 빈칸 -> 원래 비밀번호 유지."
+                    android:hint="비밀번호입력 (6자리 이상, 미입력시 변경X)"
                     android:inputType="textPassword"
                     android:maxLines="1" />
             </android.support.design.widget.TextInputLayout>
@@ -79,50 +102,49 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:hint="비밀번호 확인"
+                    android:hint="비밀번호확인"
                     android:inputType="textPassword"
                     android:maxLines="1" />
             </android.support.design.widget.TextInputLayout>
 
-            <Spinner
-                android:id="@+id/editProfile_unit"
+            <TextView
+                android:id="@+id/blank3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.3" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:background="@drawable/border3"
                 android:weightSum="1">
 
-                <android.support.design.widget.TextInputLayout
+                <Spinner
+                    android:id="@+id/editProfile_unit"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.4">
-
-                    <EditText
-                        android:id="@+id/editProfile_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:hint="이름"
-                        android:inputType="textPersonName"
-                        android:maxLines="1" />
-                </android.support.design.widget.TextInputLayout>
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.333" />
 
                 <Spinner
                     android:id="@+id/editProfile_rank"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="0.3" />
+                    android:layout_weight="0.333" />
 
                 <Spinner
                     android:id="@+id/editProfile_sex"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="0.3" />
+                    android:layout_weight="0.333" />
+
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/blank4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3" />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"

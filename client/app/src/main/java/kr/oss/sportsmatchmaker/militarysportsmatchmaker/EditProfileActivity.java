@@ -102,7 +102,7 @@ public class EditProfileActivity extends AppCompatActivity {
         idFlag = true;
 
         // connect widgets
-        idView = (TextView) findViewById(R.id.editProfile_id);
+        idView = (EditText) findViewById(R.id.editProfile_id);
         pwView = (EditText) findViewById(R.id.editProfile_pw);
         pwView2 = (EditText) findViewById(R.id.editProfile_pw2);
         nameView = (EditText) findViewById(R.id.editProfile_name);
@@ -125,7 +125,8 @@ public class EditProfileActivity extends AppCompatActivity {
         unitView.setAdapter(adapterUnits);
 
         final String id = smgr.getProfile().get(smgr.ID);
-        idView.setText("군번: " + id + " (수정 불가)");
+        idView.setText(id);
+        idView.setEnabled(false);
 
         // profpic button adds profile picture!
         byteImage = null;
@@ -180,8 +181,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 }
             }
         });
-
-
 
         submitButton = (Button) findViewById(R.id.editProfile_submit);
         submitButton.setOnClickListener(new View.OnClickListener() {
