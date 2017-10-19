@@ -47,6 +47,8 @@ public class MatchCompleteActivity extends AppCompatActivity{
     ArrayList<ListData2> rightTeamUsers;
 
 
+    TextView gameType;
+
     // flag
     boolean numdiff;
 
@@ -66,6 +68,7 @@ public class MatchCompleteActivity extends AppCompatActivity{
         final TextView teamProfile1 = (TextView) findViewById(R.id.teamprofile1);
         final TextView teamName2 = (TextView) findViewById(R.id.teamname2);
         final TextView teamProfile2 = (TextView) findViewById(R.id.teamprofile2);
+        gameType = (TextView) findViewById(R.id.game_type);
 
         buttonTeam1 = (ImageView) findViewById(R.id.team1);
         buttonTeam2 = (ImageView) findViewById(R.id.team2);

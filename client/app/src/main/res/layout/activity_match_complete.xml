@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -98,9 +98,9 @@
             android:layout_weight="1">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1">
+                android:layout_gravity="center">
 
                 <ImageView
                     android:id="@+id/team1"
@@ -154,9 +154,8 @@
             android:layout_weight="1">
 
             <LinearLayout
-                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:gravity="center">
 
                 <ImageView
@@ -211,7 +210,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="3"
-        android:weightSum="1"
         android:orientation="horizontal"
         android:background="@drawable/border">
 
@@ -222,7 +220,6 @@
             android:background="@drawable/border">
                 <ListView
                     android:id="@+id/team1_list"
-                    android:layout_weight="1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/border"
@@ -238,7 +235,6 @@
 
             <ListView
                 android:id="@+id/team2_list"
-                android:layout_weight="1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/border"
@@ -247,5 +243,5 @@
 
 
     </LinearLayout>
-    -->
+
 </LinearLayout>

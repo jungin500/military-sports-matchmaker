@@ -170,13 +170,6 @@ public class QueListActivity extends AppCompatActivity {
                                             LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
                                             params2.weight = 0.2f;
                                             acceptMatchButton.setLayoutParams(params2);
-                                            acceptMatchButton.setOnClickListener(new OnClickListener() {
-                                                @Override
-                                                public void onClick(View v) {
-                                                    onClickAccept(v);
-                                                    customAdapter.notifyDataSetChanged();
-                                                }
-                                            });
 
                                             LinearLayout.LayoutParams params3 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
                                             params3.weight = 0.2f;
@@ -324,8 +317,29 @@ public class QueListActivity extends AppCompatActivity {
         acceptMatchButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickAccept(v);
-                customAdapter.notifyDataSetChanged();
+                proxy.decideMatch("true", new JsonHttpResponseHandler(){
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        String id = smgr.getProfile().get(SessionManager.ID);
+                        for (ListData2 i : QueDataArray){
+                            if (id.equals(i.getId())){
+                                i.setButton("수락함");
+                            }
+                        }
+                        // sort dataset.
+                        Collections.sort(QueDataArray, new ListData2.data2Comparator());
+
+
+                        // remove 수락/거절 버튼
+                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) acceptMatchButton.getLayoutParams();
+                        params.weight = 0f;
+                        acceptMatchButton.setLayoutParams(params);
+                        LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams) rejectMatchButton.getLayoutParams();
+                        params.weight = 0f;
+                        rejectMatchButton.setLayoutParams(params);
+                        customAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
 
