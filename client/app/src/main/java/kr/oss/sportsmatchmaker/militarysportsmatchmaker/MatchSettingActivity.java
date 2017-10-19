@@ -153,7 +153,6 @@ public class MatchSettingActivity extends AppCompatActivity {
                     boolean success = response.getBoolean("result");
                     if (success) {
                         Toast.makeText(getApplicationContext(), "큐 진입 성공!", Toast.LENGTH_SHORT).show();
-                        smgr.changeMatchStatus(true);
                         Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                         startActivity(intent);
                         finish();

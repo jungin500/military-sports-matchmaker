@@ -68,16 +68,16 @@ public class QueListActivity extends AppCompatActivity {
         final CustomAdapter2 customAdapter = new CustomAdapter2(this, R.layout.list_btn_sty, QueDataArray);
         listview.setAdapter(customAdapter);
 
-        //TODO: get stuff in QueList
         proxy.getUserInfo(new JsonHttpResponseHandler(){
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
                     final String match_status = response.getString("match_status");
                     // if not in match and waiting for match
                     if (match_status.equals("ready")){
+                        smgr.changeMatchStatus(false, null);
+                        smgr.changeStadiumName(null);
+
                         textQStatus.setText("현재 대기중인 시합이 없습니다. 찾아보세요!");
-                        smgr.changeMatchStatus(false);
-                        smgr.setMatchId("null");
                         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
                         params.weight = 0f;
                         quitMatchButton.setLayoutParams(params);
@@ -92,8 +92,9 @@ public class QueListActivity extends AppCompatActivity {
                                     if (success) {
                                         JSONObject match = response.getJSONObject("match");
                                         // set match status and match id on session manager.
-                                        smgr.changeMatchStatus(true);
-                                        smgr.setMatchId(match.getString("matchId"));
+                                        smgr.changeMatchStatus(true, match.getString("matchId"));
+                                        smgr.changeStadiumName(match.getString("stadium"));
+
                                         String gameTypeEng = match.getString("activityType");
                                         String gameTypeKor = "족구";
                                         if (gameTypeEng.equals("football"))
@@ -102,6 +103,7 @@ public class QueListActivity extends AppCompatActivity {
                                             gameTypeKor = "농구";
 
                                         // i am initiator <=> show quit button.
+                                        // TODO: disable button
                                         final String initiatorId = match.getString("initiatorId");
                                         if (id.equals(initiatorId)) {
                                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quitMatchButton.getLayoutParams();
@@ -138,7 +140,6 @@ public class QueListActivity extends AppCompatActivity {
                                         final int rejnum = rejectedPlayers.length();
                                         textQStatus.setText("현재 큐 정보입니다.");
 
-                                        //do i want.. TODO: set profile pic for each player
                                         int anoncount = 0;
                                         final ArrayList<String> players = new ArrayList<String>();
                                         for (int i = 0; i < accnum; i++){
@@ -241,8 +242,8 @@ public class QueListActivity extends AppCompatActivity {
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
                             if(response.getBoolean("result")){
-                                smgr.changeMatchStatus(false);
-                                smgr.setMatchId("null");
+                                smgr.changeMatchStatus(false, null);
+                                smgr.changeStadiumName(null);
                                 Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                                 startActivity(intent);
                                 finish();
@@ -315,9 +316,8 @@ public class QueListActivity extends AppCompatActivity {
                             }
                         }
                         customAdapter.notifyDataSetChanged();
-
-                        smgr.setMatchId("null");
-                        smgr.changeMatchStatus(false);
+                        smgr.changeMatchStatus(false, null);
+                        smgr.changeStadiumName(null);
                         Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                         startActivity(intent);
                         finish();
