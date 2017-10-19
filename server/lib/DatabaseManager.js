@@ -35,12 +35,12 @@ var Model = {
 var connectDB = function (app) {
     // var databaseUrl = 'mongodb://military-sports-matchmaker:622dfe4f39c220a76ec78eabd75e609b@ds125335.mlab.com:25335/heroku_w2n7bnmn';
     var databaseUrl = 'mongodb://localhost:27017/matching';
-   
+
     mongoose.Promise = global.Promise;
     mongoose.connect(databaseUrl, { useMongoClient: true });
     database = mongoose.connection;
 
-    database.on('unhandledException', function() { console.log('123a'); });
+    database.on('unhandledException', function () { console.log('123a'); });
     database.on('error', console.error.bind(console, '[심각] MongoDB 연결 오류'));
     database.on('open', function () {
         console.log('[정보] MongoDB 연결 성공');
@@ -577,7 +577,7 @@ var createSchema = function () {
     };
 
     var decideMatch = function (userInfo, isParticipating, callback) {
-        this.findOne({ pendingPlayers: userInfo.id }, function (err, result) {
+        this.findOne({ $or: [{ pendingPlayers: userInfo.id }, { players: userInfo.id }] }, function (err, result) {
             if (!mongoErrorCallbackCheck(err, callback)) return;
             else if (!result) {
                 callback({
@@ -602,7 +602,10 @@ var createSchema = function () {
 
                     // 매치 정보 업데이트 (matching)
                     var updateAddPlayer = { $push: { players: userInfo.id } };
-                    var updateAddRejectedPlayer = { $push: { rejectedPlayers: userInfo.id } };
+                    var updateAddRejectedPlayer = {
+                        $pull: { players: userInfo.id, pendingPlayers: userInfo.id }, // 각각 Matching상태 or Pending 상태일 때
+                        $push: { rejectedPlayers: userInfo.id }
+                    };
 
                     // 사용자 정보 업데이트 (user)
                     var updateMatchingPlayerStatus = { match_status: 'matching' };
@@ -695,7 +698,7 @@ var createSchema = function () {
         });
     };
 
-    var prepareMatchingTeamStadium = function (stadiumInfo, callback) {
+    var prepareMatchingTeamStadium = function (cacheStorage, stadiumInfo, callback) {
         this.findOne({ name: stadiumInfo.name }, function (err, result) {
             if (!mongoErrorCallbackCheck(err, callback)) return;
 
@@ -716,7 +719,7 @@ var createSchema = function () {
                 // 꽉 찼는지 확인
                 // 가져온 모든 매치에 대해 sum 수행.
                 var pendingPlayers = 0;
-                for(var key in result)
+                for (var key in result)
                     pendingPlayers += result[key]._doc.pendingPlayers.length;
 
                 if (stadium.max_players > stadium.in_players - pendingPlayers) {
@@ -749,14 +752,18 @@ var createSchema = function () {
 
                 // 가져온 사용자들을 팀으로 나눈다.
                 var teams = checkArrayMatchup(users);
-                callback({
+                var resultCallback = {
                     result: true,
                     leftTeam: teams.left,
                     rightTeam: teams.right
+                };
+                cacheStorage.set(stadiumInfo.name, resultCallback, function(err) {
+                    if(!mongoErrorCallbackCheck(err, callback)) return;
+
+                    // 앞에서 만들어둔 resultCallback
+                    callback(resultCallback);
                 });
             })
-
-
         });
     };
 
@@ -780,8 +787,8 @@ var createSchema = function () {
 var createUser = function (userInfo, callback) {
     var User = new Model.user(userInfo);
     User.save(function (err) {
-        if(!mongoErrorCallbackCheck(err, callback)) return;
-        
+        if (!mongoErrorCallbackCheck(err, callback)) return;
+
         callback({
             result: true
         });
