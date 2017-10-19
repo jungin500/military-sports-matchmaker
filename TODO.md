@@ -9,7 +9,9 @@
 ### 점심 (~14:00)
 1. [O] 사용자가 requestMatch 할때, players + pendingPlayers 수만큼 stadium의 현재원 수를 늘림
 2. [O] decideMatch할 경우 stadium의 현재원을 해당 플레이어의 결정에 따라 늘리거나 줄임.
-3. [ ] stadium이 모두 채워졌을 경우, requestMatch의 result parameter로, and 다른 사람의 경우엔 요청시 result parameter로 전달 (및 PUSH로 해당 결과 전송 - 추후 구현)
+3. [O] stadium이 모두 채워졌을 경우, requestMatch의 result parameter로,
+       and 다른 사람의 경우엔 요청시(/process/prepareMatchingTeamStadium)
+       result parameter로 전달 (및 PUSH로 해당 결과 전송 - 추후 구현)
 
 ### 오후 (~16:00)
 1. [ ] 디버깅 작업
@@ -22,3 +24,10 @@
 1. 문서 제출 준비
 - github.com/osam2017/{ProjectName}_{Name1}[,_{Name2}, ...]
 - 내일 10시까지 제출
+
+
+### 작년도 문서 분석
+- 기능, 작동 여부 외 어플리케이션 활용 가치와 등장 계기
+- README.md에 제출해도 되고 text로 제출해도 됨
+- 아무도 하지 않았기 때문에?
+- "API를 이용해서 만들었기 때문에"?

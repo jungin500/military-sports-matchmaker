@@ -17,18 +17,18 @@
 - requestMatch POST의 param에 stadium id를 넣으면, 
 	새로 생성한 match를 그 경기장에 넣음. √
 
-- getStadium POST (user가 자기 소속부대 안에 있는 운동장 찾는 것)
-	input param: userid, activityType 
+- getUserStadium POST (user가 자기 소속부대 안에 있는 운동장 찾는 것) √
+	input param: (session) 
 	output:
 			result : Boolean
 			if success
-				StadiumList: Array of Stadiums 
-			    userid의 부대에 있는 param activityType의 모든 운동장 
+				stadium: Array of Stadiums 
+			    userid의 부대에 있는 user의 activityType의 모든 운동장 
 			if fail
 				reason : String
 
-- getMatch POST (user가 현재 소속인 match 찾는 것)
-	input param: userid
+- getUserMatch POST (user가 현재 소속인 match 찾는 것) √
+	input param: (session)
 	output:
 			result : boolean
 			if success
@@ -38,7 +38,7 @@
 				reason : string
 
 - quitMatch POST (user가 현재 소속인 match 취소하는 것) √
-	input param: userid
+	input param: (session)
 	output:
 			result: boolean
 			if success nothing

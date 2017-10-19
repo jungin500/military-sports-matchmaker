@@ -701,25 +701,31 @@ var createSchema = function () {
             if (!result) {
                 callback({
                     result: false,
-                    return: 'NoSuchStadiumException'
+                    reason: 'NoSuchStadiumException'
                 });
                 return;
             }
 
             var stadium = result._doc;
 
-            // 꽉 찼는지 확인
-            if (stadium.max_players > stadium.in_players) {
-                callback({
-                    result: false,
-                    reason: 'PreparingNotReadyException'
-                });
-                return;
-            }
-
             Model.matching.find({ matchId: { $in: stadium.matchings } }, function (err, result) {
                 if (!mongoErrorCallbackCheck(err, callback)) return;
                 // console.dir(result);
+
+                // 꽉 찼는지 확인
+                // 가져온 모든 매치에 대해 sum 수행.
+                var pendingPlayers = 0;
+                for(var key in result)
+                    pendingPlayers += result[key]._doc.pendingPlayers.length;
+
+                if (stadium.max_players > stadium.in_players - pendingPlayers) {
+                    callback({
+                        result: false,
+                        reason: 'PreparingNotReadyException'
+                    });
+                    return;
+                }
+
 
                 // 사용자를 모두 가져온다.
                 var users = [];
