@@ -48,7 +48,7 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
     private TextView textQStatus;
     private Button matching;
     private Button reserve;
-    private Button note;
+    private Button viewGame;
     private Button edit;
     private ImageView homepro;
 
@@ -72,6 +72,7 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
 
         smgr = new SessionManager(getApplicationContext());
         proxy = new Proxy(getApplicationContext());
+        smgr.checkSession();
 
         // define widgets
         logoutButton = (Button) findViewById(R.id.logout);
@@ -83,8 +84,8 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         reserve = (Button) findViewById(R.id.reserveplace);
         reserve.setOnClickListener(this);
 
-        note = (Button) findViewById(R.id.notepad);
-        note.setOnClickListener(this);
+        viewGame = (Button) findViewById(R.id.viewGame);
+        viewGame.setOnClickListener(this);
 
         edit = (Button) findViewById(R.id.profileedit);
         edit.setOnClickListener(this);
@@ -93,9 +94,10 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
         homepro = (ImageView) findViewById(R.id.homeprofile);
         homepro.setImageResource(R.drawable.img_defaultface);
 
-        // get image and set it. if no image, set default image.
+        // update welcome text, profile pic, and display message status.
         updateTextWelcome();
         updateProfileImage();
+        displayMatchStatus();
 
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,9 +106,6 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                 finish();
             }
         });
-
-        // queue status message
-        displayMatchStatus();
     }
 
     @Override
@@ -135,10 +134,11 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                 startActivity(intent3);
                 break;
             //장소 고르기
-            case R.id.notepad:
-                Toast.makeText(getApplicationContext(), "임시..", Toast.LENGTH_SHORT).show();
-                Intent intent5 = new Intent(getApplicationContext(), MatchCompleteActivity.class);
-                startActivity(intent5);
+            case R.id.viewGame:
+                if (viewGame.getText().equals("경기 정보")){
+                    Intent intent5 = new Intent(getApplicationContext(), MatchCompleteActivity.class);
+                    startActivity(intent5);
+                }
                 break;
             default:
                 break;//임시 사진 선택
@@ -147,6 +147,8 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
 
     // 매치 상태를 보고 UI를 바꿔준다.
     private void displayMatchStatus(){
+        viewGame.setBackgroundColor(getColor(android.R.color.darker_gray));
+        viewGame.setText("경기 찾는 중...");
         textQStatus = (TextView) findViewById(R.id.home_qstatus);
         final String id = smgr.getProfile().get(SessionManager.ID);
 
@@ -206,6 +208,8 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                                                     // Case 3. 경기를 찾았다!!!
                                                     if (result) {
                                                         textQStatus.setText("경기를 찾았습니다!\n경기 정보를 확인하세요.");
+                                                        viewGame.setBackgroundColor(getColor(android.R.color.holo_blue_dark));
+                                                        viewGame.setText("경기 정보");
                                                     }
                                                 } catch (JSONException e) {
                                                     e.printStackTrace();

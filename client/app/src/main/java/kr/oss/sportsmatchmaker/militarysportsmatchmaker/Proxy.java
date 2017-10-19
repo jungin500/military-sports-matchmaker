@@ -6,7 +6,7 @@ import com.loopj.android.http.*;
 import java.io.ByteArrayInputStream;
 
 public class Proxy {
-    public static final String SERVER_URL = "http://10.53.128.122:14402";
+    public static final String SERVER_URL = "http://10.53.128.122:14403";
 
     private static AsyncHttpClient client = new AsyncHttpClient();
     private Context context;
@@ -144,7 +144,7 @@ public class Proxy {
     }
 
     /*
-     * GET getUserMatch. TODO: get or post?
+     * GET getUserMatch.
      * grabs current session and returns user's match information.
      * output parameters
      * "result": 결과 (true/false)

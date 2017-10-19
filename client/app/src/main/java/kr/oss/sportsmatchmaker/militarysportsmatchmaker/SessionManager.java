@@ -21,9 +21,7 @@ import java.util.HashMap;
 import cz.msebera.android.httpclient.Header;
 
 /**
- * Session Managing methods using SharedPreferences
- * SharedPreferences also caches current match data upon POST to getUserMatch
- * and deletes data upon POST to deleteMatch.
+ * Session Managing / caching using SharedPreferences
  */
 
 public class SessionManager {
@@ -36,7 +34,6 @@ public class SessionManager {
     private static final String PREF_NAME = "pref_session";
 
     // Keys
-    public static final String IS_LOGGEDIN = "IsLoggedIn";
     public static final String ID = "id";
     public static final String NAME = "name";
     public static final String RANK = "rank";
@@ -54,24 +51,14 @@ public class SessionManager {
 
     // Create new session using id, name if valid.
     public void createSession(String id, String name, String rank) {
-        editor.putBoolean(IS_LOGGEDIN, true);
         editor.putString(ID, id);
         editor.putString(NAME, name);
         editor.putString(RANK, rank);
         editor.apply();
     }
 
-    // get login status
-    // TODO: CHECK WITH SERVER
-    public boolean isLoggedIn(){
-        return pref.getBoolean(IS_LOGGEDIN, false);
-    }
-
     // get current user info: id, name, rank.
     public HashMap<String, String> getProfile(){
-        if (!isLoggedIn()){
-            return null;
-        }
         HashMap<String, String> prof = new HashMap<String, String>();
         prof.put(ID, pref.getString(ID, null));
         prof.put(NAME, pref.getString(NAME, null));
@@ -129,16 +116,6 @@ public class SessionManager {
     public String getMatchId() { return pref.getString(MATCH_ID, null); }
     public String getStadiumName() { return pref.getString(STADIUM_NAME, null); }
 
-
-
-    // from time to time, check login status and if not logged in, clear editor and logout.
-    public void checkLogin(){
-        checkSession();
-        if (!isLoggedIn()){
-            logout();
-        }
-    }
-
     // check whether session is live, kill everything if session offline.
     public void checkSession(){
         AsyncHttpClient client = new AsyncHttpClient();
@@ -151,19 +128,11 @@ public class SessionManager {
                     boolean result = response.getBoolean("result");
                     if (!result){
                         Toast.makeText(context.getApplicationContext(), "세션 만료로 로그인 창으로 돌아갑니다.", Toast.LENGTH_SHORT).show();
-                        clearSession();
-                        Intent intent = new Intent(context, MainActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        context.startActivity(intent);
+                        logout();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
             }
         });
     }

@@ -37,6 +37,12 @@ public class ListData2 {
         return button;
     }
 
+
+    private static int getRank(String id, String name){
+        if (id.split("_")[0].equals("anon")) return -1;
+        return RankHelper.rankToInt(name.split("")[0]);
+    }
+
     static class data2Comparator implements Comparator<ListData2> {
         @Override
         public int compare(ListData2 o1, ListData2 o2) {
@@ -51,11 +57,14 @@ public class ListData2 {
             if (str.equals("거절함")) return 0;
             return 4;
         }
+    }
 
-        private int getRank(String id, String rankname){
-            if (id.split("_")[0].equals("anon")) return -1;
-            return RankHelper.rankToInt(rankname.split("")[0]);
-        };
+    static class data2RankComparator implements Comparator<ListData2> {
+
+        @Override
+        public int compare(ListData2 o1, ListData2 o2) {
+            return getRank(o2.getId(), o2.getName()) - getRank(o1.getId(), o1.getName());
+        }
     }
 
 }

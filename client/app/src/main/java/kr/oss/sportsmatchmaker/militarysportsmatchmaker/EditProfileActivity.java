@@ -41,10 +41,10 @@ import cz.msebera.android.httpclient.Header;
 
 public class EditProfileActivity extends AppCompatActivity {
 
-    public final int GET_PICTURE_URI = 1;
-    public ArrayList<String> ranks;
-    public ArrayList<String> sexes;
-    public ArrayList<String> units;
+    private final int GET_PICTURE_URI = 1;
+    private ArrayList<String> ranks;
+    private ArrayList<String> sexes;
+    private ArrayList<String> units;
     // widgets
     private TextView idView;
     private EditText pwView;
@@ -72,7 +72,7 @@ public class EditProfileActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
-    public static void verifyStoragePermissions(Activity activity) {
+    private static void verifyStoragePermissions(Activity activity) {
         // Check if we have write permission
         int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
@@ -124,7 +124,7 @@ public class EditProfileActivity extends AppCompatActivity {
         ArrayAdapter<String> adapterUnits = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, units);
         unitView.setAdapter(adapterUnits);
 
-        final String id = smgr.getProfile().get(smgr.ID);
+        final String id = smgr.getProfile().get(SessionManager.ID);
         idView.setText(id);
         idView.setEnabled(false);
 
@@ -300,7 +300,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     // crop bitmap to square then resize to 240*240 pixel.
     // Source: https://stackoverflow.com/questions/26263660/crop-image-to-square-android
-    public static Bitmap formatBitmap(Bitmap bitmap){
+    private static Bitmap formatBitmap(Bitmap bitmap){
         int width  = bitmap.getWidth();
         int height = bitmap.getHeight();
         int newWidth = (height > width) ? width : height;

@@ -92,10 +92,6 @@
         android:layout_height="wrap_content"
         android:background="#00FF0000" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
 
         <ListView
             android:id="@+id/listview1"
@@ -103,7 +99,7 @@
             android:layout_height="wrap_content"
             android:dividerHeight="16dp"
             android:divider="#00FF0000"
-            android:layout_gravity="center" />
-    </ScrollView>
+            android:layout_gravity="center"
+            android:fillViewport="true"/>
 
 </LinearLayout>

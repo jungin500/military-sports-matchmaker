@@ -154,6 +154,24 @@
                     android:layout_weight="0.2" />
 
                 <Button
+                    android:id="@+id/viewGame"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1.8"
+                    android:background="@android:color/darker_gray"
+                    android:text="경기 찾는 중..."
+                    android:textColor="#FFFFFF"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/blank1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.2" />
+
+
+                <Button
                     android:id="@+id/reserveplace"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -163,24 +181,6 @@
                     android:textColor="#FFFFFF"
                     android:textSize="23sp"
                     android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/blank1"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.2" />
-
-                <Button
-                    android:id="@+id/notepad"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1.8"
-                    android:background="@android:color/holo_blue_light"
-                    android:text="임시 버튼"
-                    android:textColor="#FFFFFF"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
-
                 <TextView
                     android:id="@+id/blank2"
                     android:layout_width="match_parent"

@@ -206,7 +206,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean isPasswordValid(String password) {
         return true;
-        //TODO: replace with return password.length() >= 6;
     }
 
     /**

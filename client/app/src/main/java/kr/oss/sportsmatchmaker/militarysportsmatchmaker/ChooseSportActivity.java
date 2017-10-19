@@ -24,9 +24,9 @@ public class ChooseSportActivity extends AppCompatActivity implements OnClickLis
     public static final String EXTRA_PNUM = "EXTRA_PNUM";
     public static final String EXTRA_SPORTTYPE = "EXTRA_SPORTTYPE";
 
-    public static final int PNUM_FOOTBALL = 11;
-    public static final int PNUM_BASKETBALL = 5;
-    public static final int PNUM_JOKGU = 5;
+    private static final int PNUM_FOOTBALL = 11;
+    private static final int PNUM_BASKETBALL = 5;
+    private static final int PNUM_JOKGU = 5;
 
     private Proxy proxy;
 
