@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "node index.js",
-    "start": "node index.js"
+    "start": "pm2 start index.js --name  military-sports-matchmaker",
+    "stop": "pm2 stop military-sports-matchmaker"
   },
   "repository": {
     "type": "git",
