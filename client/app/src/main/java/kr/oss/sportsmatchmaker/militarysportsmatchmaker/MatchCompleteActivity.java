@@ -93,7 +93,20 @@ public class MatchCompleteActivity extends AppCompatActivity{
                     // 꽉 차서 매칭 성공
                     if (result) {
                         stadium.setText("장소: " + smgr.getStadiumName() + ", 시간: 2017년 10월 20일 16시 00분");
-
+                        if (smgr.getSportType() == null){
+                            gameType.setText("운동");
+                        }
+                        if (smgr.getSportType().equals("football")) {
+                            gameType.setText("축구");
+                        }
+                        else if (smgr.getSportType().equals("basketball")){
+                            gameType.setText("농구");
+                        }
+                        else if (smgr.getSportType().equals("jokgu")){
+                            gameType.setText("족구");
+                        }
+                        else
+                            gameType.setText("운동");
                         JSONArray leftTeam = response.getJSONArray("leftTeam");
                         JSONArray rightTeam = response.getJSONArray("rightTeam");
 

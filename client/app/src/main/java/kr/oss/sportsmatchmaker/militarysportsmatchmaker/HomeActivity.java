@@ -177,7 +177,7 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                     // Case 1: 매치=큐가 없다=대기중이지 않다.
                     if (match_status.equals("ready")){
                         textQStatus.setText("현재 대기중인 시합이 없습니다. \n큐에 들어가보세요!");
-                        smgr.changeMatchStatus(false, null);
+                        smgr.changeMatchStatus(false, null, null);
                         smgr.changeStadiumName(null);
                         matching.setText("전투체육 같이 할 사람 찾기");
                         matching.setBackgroundColor(getColor(android.R.color.holo_blue_light));
@@ -195,7 +195,7 @@ public class HomeActivity extends AppCompatActivity implements OnClickListener {
                                     if (success) {
                                         JSONObject match = response.getJSONObject("match");
                                         // set match status and match id on session manager.
-                                        smgr.changeMatchStatus(true, match.getString("matchId"));
+                                        smgr.changeMatchStatus(true, match.getString("matchId"), match.getString("activityType"));
                                         JSONObject stadium = match.getJSONObject("stadium");
                                         String stadium_name = stadium.getString("name");
                                         smgr.changeStadiumName(stadium_name);

@@ -10,7 +10,6 @@
 
 
 새로고침 기능!!!
-MatchSettingActivity에서 추가 안되는 경우 메시지 제대로 parsing하기.
 logout했는데 세션이 살아있다??
 
 데이터 껐을 때 
@@ -43,6 +42,7 @@ queue 만들면 두번째 사람은 무조건 수락으로 뜸.
 추가된 기능
 수락 후에도 큐 탈퇴 가능 (decideMatch) -> 서버 구현 완료
 requestMatch에서 is_team flag 세워주기. (prepareMatchingTeamStadium 참조)
+MatchSettingActivity에서 추가 안되는 경우 메시지 제대로 parsing하기.
 
 stadium 관련 구현
 - prepareMatchingTeamStadium (done)

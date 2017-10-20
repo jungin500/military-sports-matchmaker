@@ -7,6 +7,12 @@ import java.io.ByteArrayInputStream;
 
 public class Proxy {
     public static final String SERVER_URL = "http://ec2-52-79-99-39.ap-northeast-2.compute.amazonaws.com:5012";
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> 088013893d5516c627bb3302647c99f837663425
 
     private static AsyncHttpClient client = new AsyncHttpClient();
     private Context context;

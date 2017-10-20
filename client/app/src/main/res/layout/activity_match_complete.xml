@@ -71,7 +71,7 @@
         android:background="@drawable/border"
         android:gravity="center"
         android:text="족구 경기"
-        android:textSize="24sp" />
+        android:textSize="30sp" />
 
     <TextView
         android:id="@+id/stadium"

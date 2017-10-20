@@ -95,7 +95,7 @@ public class QueListActivity extends AppCompatActivity {
                     // Case 1. 속한 매치가 없음: 매치가 있는줄 알고 버튼 눌러서 들어왔는데 그사이에 방장이 매치 삭제.
                     if (match_status.equals("ready")){
                         Toast.makeText(getApplicationContext(), "방장이 큐를 삭제했습니다.",Toast.LENGTH_SHORT).show();
-                        smgr.changeMatchStatus(false, null);
+                        smgr.changeMatchStatus(false, null, null);
                         smgr.changeStadiumName(null);
                         Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                         startActivity(intent);
@@ -111,7 +111,7 @@ public class QueListActivity extends AppCompatActivity {
                                     if (success) {
                                         JSONObject match = response.getJSONObject("match");
                                         // set match status and match id on session manager.
-                                        smgr.changeMatchStatus(true, match.getString("matchId"));
+                                        smgr.changeMatchStatus(true, match.getString("matchId"), match.getString("activityType"));
                                         smgr.changeStadiumName(match.getString("stadium"));
 
                                         String gameTypeEng = match.getString("activityType");
@@ -370,7 +370,7 @@ public class QueListActivity extends AppCompatActivity {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
                     if(response.getBoolean("result")){
-                        smgr.changeMatchStatus(false, null);
+                        smgr.changeMatchStatus(false, null, null);
                         smgr.changeStadiumName(null);
                         Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                         startActivity(intent);
@@ -430,7 +430,7 @@ public class QueListActivity extends AppCompatActivity {
         proxy.decideMatch("", new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                smgr.changeMatchStatus(false, null);
+                smgr.changeMatchStatus(false, null, null);
                 smgr.changeStadiumName(null);
                 Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                 startActivity(intent);
