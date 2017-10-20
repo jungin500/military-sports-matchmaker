@@ -38,7 +38,7 @@ var http = require('http'),
 
 // express 이용 HTTP 서버 설정
 var app = express();
-app.set('port', process.env.PORT || 14402);
+app.set('port', process.env.PORT || 5012);
 app.set('mongoose-reconnect-max', 5);
 
 // express Router 이용 Request routing
