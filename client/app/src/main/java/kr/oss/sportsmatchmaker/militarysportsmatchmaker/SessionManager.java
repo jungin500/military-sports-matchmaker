@@ -39,6 +39,7 @@ public class SessionManager {
     public static final String RANK = "rank";
     public static final String IN_MATCH = "inMatch";
     public static final String MATCH_ID = "matchId";
+    public static final String SPORT_TYPE = "sportType";
     public static final String STADIUM_NAME = "stadium";
 
     // Session manager constructor. get application context as input.
@@ -99,9 +100,10 @@ public class SessionManager {
         }
     }
 
-    public void changeMatchStatus(boolean inMatch, String id){
+    public void changeMatchStatus(boolean inMatch, String id, String sportType) {
         editor.putBoolean(IN_MATCH, inMatch);
         editor.putString(MATCH_ID, id);
+        editor.putString(SPORT_TYPE, sportType);
         editor.apply();
     }
 
@@ -115,6 +117,7 @@ public class SessionManager {
     }
     public String getMatchId() { return pref.getString(MATCH_ID, null); }
     public String getStadiumName() { return pref.getString(STADIUM_NAME, null); }
+    public String getSportType() { return pref.getString(SPORT_TYPE, null); }
 
     // check whether session is live, kill everything if session offline.
     public void checkSession(){
