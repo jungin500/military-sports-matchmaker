@@ -48,7 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
-import id.zelory.compressor.Compressor;
 
 import static android.Manifest.permission.READ_CONTACTS;
 

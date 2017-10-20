@@ -12,7 +12,7 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="418dp"
         android:scaleType="center"
         app:layout_constraintHorizontal_bias="0.503"

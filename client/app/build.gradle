@@ -30,7 +30,6 @@ dependencies {
     compile files('libs/android-async-http-1.4.9.jar')
     compile files('libs/httpclient-4.4.1.1.jar')
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'id.zelory:compressor:2.1.0'
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha7'
     compile 'com.android.support:design:26.+'
