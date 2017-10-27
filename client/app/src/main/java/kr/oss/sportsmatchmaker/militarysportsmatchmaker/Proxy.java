@@ -6,7 +6,7 @@ import com.loopj.android.http.*;
 import java.io.ByteArrayInputStream;
 
 public class Proxy {
-    public static final String SERVER_URL = "http://ec2-52-79-99-39.ap-northeast-2.compute.amazonaws.com:5012";
+    public static final String SERVER_URL = "http://ec2-13-124-178-10.ap-northeast-2.compute.amazonaws.com:5012";
 
     private static AsyncHttpClient client = new AsyncHttpClient();
     private Context context;

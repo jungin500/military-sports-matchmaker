@@ -34,7 +34,7 @@ var Model = {
 */
 var connectDB = function (app) {
     // var databaseUrl = 'mongodb://military-sports-matchmaker:622dfe4f39c220a76ec78eabd75e609b@ds125335.mlab.com:25335/heroku_w2n7bnmn';
-    var databaseUrl = 'mongodb://localhost:27017/matching';
+    var databaseUrl = process.env.DB? process.env.DB : 'mongodb://localhost:27017/matching';
 
     mongoose.Promise = global.Promise;
     mongoose.connect(databaseUrl, { useMongoClient: true });
@@ -43,7 +43,7 @@ var connectDB = function (app) {
     database.on('unhandledException', function () { console.log('123a'); });
     database.on('error', console.error.bind(console, '[심각] MongoDB 연결 오류'));
     database.on('open', function () {
-        console.log('[정보] MongoDB 연결 성공');
+        console.log('[정보] MongoDB 연결 성공 (%s)', databaseUrl);
         createSchema();
 
         database.on('disconnected', function () {
