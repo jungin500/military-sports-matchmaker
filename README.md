@@ -33,6 +33,10 @@
 
 ## 사용 방법
 ### 서버 (Node.js 및 MongoDB 연동 방법)
+1. node를 설정한다. (/server 폴더에서)
+
+		npm install
+
 2. 서버의 필수 프로그램들을 설치한다. 다음 패키지들을 npm을 이용하여 설치한다.
 
 		npm install -g gulp pm2 nodemon
