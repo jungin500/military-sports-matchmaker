@@ -1,4 +1,5 @@
 # 전투적인 매치메이커 (전투체육 매칭 어플리케이션)
+[![military-sports-matchmaker](https://img.youtube.com/vi/lZ-a35NXur4/0.jpg)](https://www.youtube.com/watch?v=lZ-a35NXur4)
 
 ## 개요
 	군 전투체육 시간에, 같은 운동을 하고 싶은 사람들을 맺어주는 매칭 어플리케이션
