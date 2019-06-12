@@ -37,10 +37,10 @@ var connectDB = function (app) {
     var databaseUrl = 'mongodb://localhost:27017/matching';
 
     mongoose.Promise = global.Promise;
-    mongoose.connect(databaseUrl, { useMongoClient: true });
+    mongoose.connect(databaseUrl, { useNewUrlParser: true });
     database = mongoose.connection;
 
-    database.on('unhandledException', function () { console.log('123a'); });
+    database.on('unhandledException', function () { console.log('[심각] 예상치 못한 오류 발생!'); });
     database.on('error', console.error.bind(console, '[심각] MongoDB 연결 오류'));
     database.on('open', function () {
         console.log('[정보] MongoDB 연결 성공');
