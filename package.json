@@ -39,7 +39,7 @@
     "express-session": "^1.17.0",
     "formidable": "^1.2.1",
     "gulp": "^4.0.2",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
     "mongoose": "^5.7.5",
